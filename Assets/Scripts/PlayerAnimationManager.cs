@@ -1,27 +1,30 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAnimationManager : MonoBehaviour
 {
     [SerializeField] private Animator playerAnimator;
-    private SPUM_Prefabs _spumUnit;
+    [SerializeField] private List<String> idleList = new List<String>();
+    [SerializeField] private List<String> walkList = new List<String>();
+
+    private GunType _currentWeapon = GunType.Pistol;
     
-    private bool _isPlaying = false;
-    
+    public bool IsWalk { get; set; }
+
     private void Awake()
     {
-        _spumUnit = GetComponent<SPUM_Prefabs>();
+        
     }
 
     private void Update()
     {
-        if (!_isPlaying)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                playerAnimator.SetBool("LongSpear_idle", true);
-                _isPlaying = true;
-            }
-            
-        }
+        playerAnimator.SetBool("isMove", IsWalk);
     }
+
+    private void ChangeAnimation(string animName)
+    {
+        
+    }
+    
 }
