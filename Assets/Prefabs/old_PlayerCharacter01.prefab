@@ -746,9 +746,9 @@ GameObject:
   - component: {fileID: 1172814942611428268}
   - component: {fileID: 547610217224232425}
   - component: {fileID: 8935725864218766795}
-  m_Layer: 5
-  m_Name: PlayerCharacter01
-  m_TagString: Untagged
+  m_Layer: 0
+  m_Name: old_PlayerCharacter01
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -786,6 +786,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerAnimator: {fileID: 3186479335831383291}
+  unarmedAnimator: {fileID: 22100000, guid: c99445c733c8adc44bbbda173f370d22, type: 2}
+  pistolAnimator: {fileID: 22100000, guid: e99be92049273b649a6e3598d2ae4989, type: 2}
 --- !u!114 &3520077941459485697
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -800,6 +802,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   playerSprite: {fileID: 7917961015110730949}
+  rightArm: {fileID: 3869221766790949063}
+  leftArm: {fileID: 2515809901961816113}
 --- !u!114 &1172814942611428268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2320,7 +2324,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7358162245803187639}
