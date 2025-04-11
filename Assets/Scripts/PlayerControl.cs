@@ -8,6 +8,14 @@ public class PlayerControl : MonoBehaviour
    [SerializeField] private GameObject playerSprite;
    [SerializeField] private GameObject rightArm;
    [SerializeField] private GameObject leftArm;
+   [SerializeField] private float jumpSpeed = 5f;
+   //임시?
+   [SerializeField] private GameObject weapon;
+   [SerializeField] private float bulletSpeed = 10f;
+   [SerializeField] private float fireRate = 0.5f;
+   private float _shootAngle;
+   [SerializeField] private GameObject bullet;
+   
    
    private Camera _mainCamera;
    private Rigidbody2D _rigidbody;
@@ -30,6 +38,16 @@ public class PlayerControl : MonoBehaviour
 
    private void LateUpdate() //애니메이션 적용이후라 팔 움직임... -> AvatarMask로?
    {
+      RotateArm();
+   }
+
+   private void FixedUpdate()
+   {
+      PlayerMovement();
+   }
+
+   private void RotateArm()
+   {
       Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
       mousePos.z = 0;
       
@@ -38,7 +56,7 @@ public class PlayerControl : MonoBehaviour
       
       float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-      if (_isFlipped)
+      if (_isFlipped) //좌측
       {
          if (angle > 0)
          {
@@ -50,15 +68,12 @@ public class PlayerControl : MonoBehaviour
          }
       }
       angle = Mathf.Clamp(angle, -60f, 60f);
+      
+      _shootAngle = angle;
       rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);
-      //avatar mask, flip적용(좌측도)
+      //avatar mask?
    }
-
-   private void FixedUpdate()
-   {
-      PlayerMovement();
-   }
-
+   
    private void PlayerMovement()
    {
       _rigidbody.linearVelocityX = _playerInput.x * moveSpeed;
@@ -82,6 +97,48 @@ public class PlayerControl : MonoBehaviour
       playerSprite.transform.localScale = playerScale;
       OnPlayerMove?.Invoke(true);
    }
-    
+
+   private void OnShoot(InputValue value)
+   {
+      if (value.isPressed)
+      {
+         //bullet Rotation 조정, ShootDirection 수정
+         Transform muzzleTransform = weapon.GetComponentInChildren<PlayerWeapon>().MuzzleTransform;
+         
+         GameObject bulletPrefab = Instantiate(bullet, muzzleTransform.transform.position, Quaternion.identity);
+         Rigidbody2D bulletRB = bulletPrefab.GetComponent<Rigidbody2D>();
+         if (_isFlipped)
+         {
+            //Flip이면 x반대방향으로
+            Vector2 direction = 
+               new Vector2(-Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
+            bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, 180 - _shootAngle);
+            bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
+         }
+         else
+         {
+            Vector2 direction = 
+               new Vector2(Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
+            bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, _shootAngle);
+            bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
+         }
+        
+      }
+   }
+
+   private void OnJump(InputValue value)
+   {
+      if (value.isPressed)
+      {
+         _rigidbody.AddForce(new Vector2(0f, jumpSpeed), ForceMode2D.Impulse);
+      }
+      //점프 개선
+      // 벽 충돌 개선
+   }
+
+   private void OnReload(InputValue value)
+   {
+      
+   }
     
 }

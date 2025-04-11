@@ -2,15 +2,7 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [SerializeField] private int playerHealth = 100; //추후 SO에서 받아오게 수정 예정
+    
+    
 }
