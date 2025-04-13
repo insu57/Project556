@@ -6,8 +6,10 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private Transform muzzleTransform;
     [SerializeField] private WeaponData weaponData;
 
-    private int _currentMagazineAmmo;
+    
     public Transform MuzzleTransform => muzzleTransform;
     public WeaponData WeaponData => weaponData;
 
+    
+   
 }

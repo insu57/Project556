@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Colt M1911A1
   m_EditorClassIdentifier: 
   gunType: 0
-  ammoType: 0
-  defaultMagazineSize: 0
-  damage: 0
+  ammoType: 3
+  defaultMagazineSize: 7
+  damage: 20
+  isAutomatic: 0
+  fireRate: 0.3

@@ -5,16 +5,17 @@ using UnityEngine.InputSystem;
 public class PlayerControl : MonoBehaviour
 {
    [SerializeField] private float moveSpeed = 5f;
-   [SerializeField] private GameObject playerSprite;
+   [SerializeField] private float jumpSpeed = 5f;
+   
    [SerializeField] private GameObject rightArm;
    [SerializeField] private GameObject leftArm;
-   [SerializeField] private float jumpSpeed = 5f;
+   private float _shootAngle;
+   
    //임시?
-   [SerializeField] private GameObject weapon;
    [SerializeField] private float bulletSpeed = 10f;
    [SerializeField] private float fireRate = 0.5f;
-   private float _shootAngle;
-   [SerializeField] private GameObject bullet; //탄종별로 바꾸기
+  
+   [SerializeField] private GameObject bullet; //탄종별로 바꾸기, 추후 수정
    
    private PlayerManager _playerManager;
    private Camera _mainCamera;
@@ -41,12 +42,9 @@ public class PlayerControl : MonoBehaviour
    
    private void Update()
    {
-      _isGrounded = Physics2D.OverlapCircle(transform.position, 0.2f, LayerMask.GetMask("Ground"));
-      Debug.DrawRay(transform.position, Vector2.down * 0.2f, Color.blue);
-      Debug.DrawRay(transform.position, Vector2.left * 0.2f, Color.blue);
-      Debug.DrawRay(transform.position, Vector2.right * 0.2f, Color.blue);
+      GroundCheck();
    }
-   
+
    private void LateUpdate() 
    {
       //애니메이션 이후 처리
@@ -59,6 +57,16 @@ public class PlayerControl : MonoBehaviour
       PlayerMovement();
    }
 
+   private void GroundCheck()
+   {
+      float groundCheckDistance = 0.15f;
+      _isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, LayerMask.GetMask("Ground"));
+      Debug.DrawRay(transform.position, Vector2.down * groundCheckDistance, Color.blue);
+      Debug.DrawRay(transform.position, Vector2.left * groundCheckDistance, Color.blue);
+      Debug.DrawRay(transform.position, Vector2.right * groundCheckDistance, Color.blue);
+   }
+   
+   
    private void RotateArm()
    {
       //장전 등 몇몇 행동에서는 안움직여야한다.
@@ -98,7 +106,7 @@ public class PlayerControl : MonoBehaviour
    {
       _playerInput = value.Get<Vector2>();
       
-      Vector3 playerScale = playerSprite.transform.localScale;
+      Vector3 playerScale = transform.localScale;
 
       if (_playerInput.x == 0)
       {
@@ -109,36 +117,40 @@ public class PlayerControl : MonoBehaviour
       if(_playerInput.y != 0) return;
       playerScale.x = Mathf.Abs(playerScale.x) * _playerInput.x;
       _isFlipped = _playerInput.x < 0; //왼쪽입력 시 Flip
-      playerSprite.transform.localScale = playerScale;
+      transform.localScale = playerScale;
       OnPlayerMove?.Invoke(true);
    }
 
    private void OnShoot(InputValue value)
    {
+      //FireRate 구현필요.
       if (value.isPressed)
       {
          //bullet Rotation 조정, ShootDirection 수정
-         Transform muzzleTransform = _playerManager.CurrentWeapon.MuzzleTransform;
-            
+         Transform muzzleTransform = _playerManager.MuzzleTransform;
+         if(!muzzleTransform) return; //Weapon이 없으면 return
+
+         if(!_playerManager.Shoot()) return; //잔탄이 없으면 return
+         
          GameObject bulletPrefab = Instantiate(bullet, muzzleTransform.transform.position, Quaternion.identity);
          Destroy(bulletPrefab, 2f); //임시 -> ObjectPooling으로
          Rigidbody2D bulletRB = bulletPrefab.GetComponent<Rigidbody2D>();
+        
+         Vector2 direction;
          if (_isFlipped)
          {
             //Flip이면 x반대방향으로
-            Vector2 direction = 
+            direction = 
                new Vector2(-Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
             bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, 180 - _shootAngle);
-            bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
          }
          else
          {
-            Vector2 direction = 
+            direction = 
                new Vector2(Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
             bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, _shootAngle);
-            bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
          }
-        
+         bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
       }
    }
 
@@ -153,6 +165,8 @@ public class PlayerControl : MonoBehaviour
    private void OnReload(InputValue value)
    {
       //Reload
+      _playerManager.Reload();
+      //장전 애니메이션 추가 
    }
     
 }
