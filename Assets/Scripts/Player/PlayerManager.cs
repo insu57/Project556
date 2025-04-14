@@ -12,6 +12,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private TMP_Text currentMagazineAmmoText;
     
     public Transform MuzzleTransform => currentWeapon?.MuzzleTransform;
+    public float FireRate => currentWeapon?.WeaponData.FireRate ?? 0.3f;
     
     private void Awake()
     {
@@ -36,5 +37,10 @@ public class PlayerManager : MonoBehaviour
     {
         _currentMagazineAmmo = currentWeapon.WeaponData.DefaultMagazineSize;
         currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+    }
+
+    private void WeaponChange(PlayerWeapon newWeapon)
+    {
+        currentWeapon = newWeapon;
     }
 }

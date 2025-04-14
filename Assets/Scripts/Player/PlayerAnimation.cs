@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class PlayerAnimation : MonoBehaviour
 {
+    private static readonly int Idle = Animator.StringToHash("IDLE");
     private static readonly int IsMove = Animator.StringToHash("isMove");
+    private static readonly int Reload = Animator.StringToHash("Reload");
     public const string Walk = "Walk";
     public const string Run = "Run";
     public const string Climb = "Climb";
@@ -26,17 +28,18 @@ public class PlayerAnimation : MonoBehaviour
     private void Start()
     {
         _playerControl.OnPlayerMove += HandlePlayerMove;
+        _playerControl.OnPlayerReload += HandlePlayerReload;
         ChangeWeapon(GunType.Pistol);//
     }
-
-    private void Update()
-    {
-        
-    }
-
+    
     private void HandlePlayerMove(bool isMove)
     {
         playerAnimator.SetBool(IsMove, isMove);
+    }
+
+    private void HandlePlayerReload()
+    {
+        playerAnimator.SetTrigger(Reload);
     }
 
     private void ChangeWeapon(GunType newGunType)

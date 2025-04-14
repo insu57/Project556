@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,7 +15,7 @@ public class PlayerControl : MonoBehaviour
    
    //임시?
    [SerializeField] private float bulletSpeed = 10f;
-   [SerializeField] private float fireRate = 0.5f;
+   //[SerializeField] private float fireRate = 0.5f;
   
    [SerializeField] private GameObject bullet; //탄종별로 바꾸기, 추후 수정
    
@@ -21,13 +23,15 @@ public class PlayerControl : MonoBehaviour
    private Camera _mainCamera;
    private Rigidbody2D _rigidbody;
    private Vector2 _playerInput;
+   private bool _inShooting = false;
+   private bool _canShoot = true;
    private bool _isFlipped = false;
    private bool _isGrounded = false;
    private bool _canRotateArm = true;
    
    public event Action<bool> OnPlayerMove;
-   public event Action<bool> OnPlayerShot;
-   public event Action<bool> OnPlayerReload;
+   public event Action<bool> OnPlayerShoot;
+   public event Action OnPlayerReload;
    
    private void Awake()
    {
@@ -43,6 +47,7 @@ public class PlayerControl : MonoBehaviour
    private void Update()
    {
       GroundCheck();
+      Shoot();
    }
 
    private void LateUpdate() 
@@ -123,35 +128,51 @@ public class PlayerControl : MonoBehaviour
 
    private void OnShoot(InputValue value)
    {
-      //FireRate 구현필요.
-      if (value.isPressed)
-      {
-         //bullet Rotation 조정, ShootDirection 수정
-         Transform muzzleTransform = _playerManager.MuzzleTransform;
-         if(!muzzleTransform) return; //Weapon이 없으면 return
+      //Automatic 구현 필요... PlayerManager를 너무 많이 참조 -> 아예 PlayerManager에서????
+      //현재 누르면 계속 나감...(toggle 설정 필요)
+      //WeaponData를 어떤식으로 연결???
+      //isAutomatic에 따라 OnShoot메서드 or Update 내부에서...
+      _inShooting = value.isPressed;
+   }
 
-         if(!_playerManager.Shoot()) return; //잔탄이 없으면 return
-         
-         GameObject bulletPrefab = Instantiate(bullet, muzzleTransform.transform.position, Quaternion.identity);
-         Destroy(bulletPrefab, 2f); //임시 -> ObjectPooling으로
-         Rigidbody2D bulletRB = bulletPrefab.GetComponent<Rigidbody2D>();
+   private void Shoot()
+   {
+      if(!_inShooting) return;
+      if(!_canShoot) return;
+      
+      StartCoroutine(ShootCoroutine(_playerManager.FireRate)); //fireRate
         
-         Vector2 direction;
-         if (_isFlipped)
-         {
-            //Flip이면 x반대방향으로
-            direction = 
-               new Vector2(-Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
-            bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, 180 - _shootAngle);
-         }
-         else
-         {
-            direction = 
-               new Vector2(Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
-            bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, _shootAngle);
-         }
-         bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
+      Transform muzzleTransform = _playerManager.MuzzleTransform;
+      if(!muzzleTransform) return; //Weapon이 없으면 return
+
+      if(!_playerManager.Shoot()) return; //잔탄이 없으면 return
+         
+      GameObject bulletPrefab = Instantiate(bullet, muzzleTransform.transform.position, Quaternion.identity);
+      Destroy(bulletPrefab, 2f); //임시 -> ObjectPooling으로
+      Rigidbody2D bulletRB = bulletPrefab.GetComponent<Rigidbody2D>();
+        
+      Vector2 direction;
+      if (_isFlipped)
+      {
+         //Flip이면 x반대방향으로
+         direction = 
+            new Vector2(-Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
+         bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, 180 - _shootAngle);
       }
+      else
+      {
+         direction = 
+            new Vector2(Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
+         bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, _shootAngle);
+      }
+      bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
+   }
+   
+   private IEnumerator ShootCoroutine(float fireRateSec)
+   {
+      _canShoot = false;
+      yield return new WaitForSeconds(fireRateSec);
+      _canShoot = true;
    }
 
    private void OnJump(InputValue value)
@@ -164,9 +185,19 @@ public class PlayerControl : MonoBehaviour
 
    private void OnReload(InputValue value)
    {
-      //Reload
+      _canRotateArm = false;
+      OnPlayerReload?.Invoke();
+   }
+
+   public void OnReloadEnd()
+   {
+      _canRotateArm = true;
       _playerManager.Reload();
-      //장전 애니메이션 추가 
+   }
+   
+   public void CanRotateArm()
+   {
+      _canRotateArm = true;
    }
     
 }
