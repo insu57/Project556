@@ -133,48 +133,19 @@ public class PlayerControl : MonoBehaviour
       //WeaponData를 어떤식으로 연결???
       //isAutomatic에 따라 OnShoot메서드 or Update 내부에서...
       _inShooting = value.isPressed;
+      if (!_playerManager.CheckIsAutomatic())
+      {
+         _playerManager.Shoot(_isFlipped, _shootAngle);
+      }
    }
 
    private void Shoot()
    {
+      if(!_playerManager.CheckIsAutomatic()) return;
       if(!_inShooting) return;
-      if(!_canShoot) return;
-      
-      StartCoroutine(ShootCoroutine(_playerManager.FireRate)); //fireRate
-        
-      Transform muzzleTransform = _playerManager.MuzzleTransform;
-      if(!muzzleTransform) return; //Weapon이 없으면 return
-
-      if(!_playerManager.Shoot()) return; //잔탄이 없으면 return
-         
-      GameObject bulletPrefab = Instantiate(bullet, muzzleTransform.transform.position, Quaternion.identity);
-      Destroy(bulletPrefab, 2f); //임시 -> ObjectPooling으로
-      Rigidbody2D bulletRB = bulletPrefab.GetComponent<Rigidbody2D>();
-        
-      Vector2 direction;
-      if (_isFlipped)
-      {
-         //Flip이면 x반대방향으로
-         direction = 
-            new Vector2(-Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
-         bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, 180 - _shootAngle);
-      }
-      else
-      {
-         direction = 
-            new Vector2(Mathf.Cos(_shootAngle*Mathf.Deg2Rad), Mathf.Sin(_shootAngle*Mathf.Deg2Rad));
-         bulletPrefab.transform.localRotation = Quaternion.Euler(0, 0, _shootAngle);
-      }
-      bulletRB.AddForce(direction * bulletSpeed, ForceMode2D.Impulse);
+      _playerManager.Shoot(_isFlipped, _shootAngle);
    }
    
-   private IEnumerator ShootCoroutine(float fireRateSec)
-   {
-      _canShoot = false;
-      yield return new WaitForSeconds(fireRateSec);
-      _canShoot = true;
-   }
-
    private void OnJump(InputValue value)
    {
       if (value.isPressed && _isGrounded)

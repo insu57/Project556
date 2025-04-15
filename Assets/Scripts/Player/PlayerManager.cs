@@ -8,11 +8,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private PlayerWeapon currentWeapon;
     
     private int _currentHealth;
-    private int _currentMagazineAmmo;
-    [SerializeField] private TMP_Text currentMagazineAmmoText;
     
-    public Transform MuzzleTransform => currentWeapon?.MuzzleTransform;
-    public float FireRate => currentWeapon?.WeaponData.FireRate ?? 0.3f;
     
     private void Awake()
     {
@@ -21,22 +17,22 @@ public class PlayerManager : MonoBehaviour
 
     private void Start()
     {
-        _currentMagazineAmmo = currentWeapon.WeaponData.DefaultMagazineSize;
-        currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        
     }
 
-    public bool Shoot()
+    public bool CheckIsAutomatic()
     {
-        if(_currentMagazineAmmo <= 0) return false;
-        _currentMagazineAmmo--;
-        currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
-        return true;
+        return currentWeapon.WeaponData.IsAutomatic;
+    }
+    
+    public void Shoot(bool isFlipped, float shootAngle)
+    {
+        currentWeapon.Shoot(isFlipped, shootAngle);
     }
 
     public void Reload()
     {
-        _currentMagazineAmmo = currentWeapon.WeaponData.DefaultMagazineSize;
-        currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        currentWeapon.Reload();
     }
 
     private void WeaponChange(PlayerWeapon newWeapon)
