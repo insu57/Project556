@@ -128,10 +128,7 @@ public class PlayerControl : MonoBehaviour
 
    private void OnShoot(InputValue value)
    {
-      //Automatic 구현 필요... PlayerManager를 너무 많이 참조 -> 아예 PlayerManager에서????
-      //현재 누르면 계속 나감...(toggle 설정 필요)
       //WeaponData를 어떤식으로 연결???
-      //isAutomatic에 따라 OnShoot메서드 or Update 내부에서...
       _inShooting = value.isPressed;
       if (!_playerManager.CheckIsAutomatic())
       {

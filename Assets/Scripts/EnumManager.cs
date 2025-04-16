@@ -1,12 +1,14 @@
 using UnityEngine;
 
-public enum GunType
+public enum WeaponType
 {
     Pistol = 0,
     Shotgun,
     SMG,
     AR,
-    SR
+    SR,
+    Melee,
+    Unarmed,
 }
 
 public enum AmmoType

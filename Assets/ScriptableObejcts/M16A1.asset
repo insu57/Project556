@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: M16A1
   m_EditorClassIdentifier: 
   weaponName: M16A1
-  gunType: 3
+  weaponType: 3
   ammoType: 0
   defaultMagazineSize: 20
   damage: 40
   isAutomatic: 1
   fireRate: 0.1
-  bulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 269435753263975175, guid: ae9c5340b68c5ee4d854654b51a55132, type: 3}
   bulletSpeed: 15

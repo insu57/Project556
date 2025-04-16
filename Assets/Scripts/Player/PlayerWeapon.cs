@@ -8,8 +8,7 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField] private Transform muzzleTransform;
     [SerializeField] private WeaponData weaponData;
     
-    [SerializeField] private TMP_Text currentMagazineAmmoText;
-    
+    //[SerializeField] private TMP_Text currentMagazineAmmoText;
     public Transform MuzzleTransform => muzzleTransform;
     public WeaponData WeaponData => weaponData;
     
@@ -17,20 +16,25 @@ public class PlayerWeapon : MonoBehaviour
     
     private bool _canShoot = true;
     public bool CanShoot => _canShoot;
+    private Collider2D _collider2D;
+    private UIManager _uiManager;
+
     private void Awake()
     {
-        
+        _uiManager = FindFirstObjectByType<UIManager>();
     }
-
+    
     private void Start()
     {
-        _currentMagazineAmmo = weaponData.DefaultMagazineSize;
-        currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        _collider2D = GetComponent<Collider2D>();
     }
-
-    private void Update()
+    
+    public void Init()
     {
-        
+        _currentMagazineAmmo = weaponData.DefaultMagazineSize;
+        //currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        _uiManager.UpdateAmmoText(_currentMagazineAmmo);
+        _collider2D.enabled = false;
     }
     
     public void Shoot(bool isFlipped, float shootAngle)
@@ -42,7 +46,8 @@ public class PlayerWeapon : MonoBehaviour
         if(_currentMagazineAmmo <= 0) return; //잔탄이 없으면 return
        
         _currentMagazineAmmo--;
-        currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        //currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        _uiManager.UpdateAmmoText(_currentMagazineAmmo);
         
         GameObject bulletPrefab = Instantiate(weaponData.BulletPrefab, muzzleTransform.transform.position, Quaternion.identity);
         Destroy(bulletPrefab, 2f); //임시 -> ObjectPooling으로
@@ -68,7 +73,8 @@ public class PlayerWeapon : MonoBehaviour
     public void Reload()
     {
         _currentMagazineAmmo = weaponData.DefaultMagazineSize;
-        currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        //currentMagazineAmmoText.text = _currentMagazineAmmo.ToString();
+        _uiManager.UpdateAmmoText(_currentMagazineAmmo);
     }
     
     private IEnumerator ShootCoroutine()

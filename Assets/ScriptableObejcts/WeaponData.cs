@@ -1,11 +1,12 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Scriptable Objects/WeaponData")]
 public class WeaponData : ScriptableObject
 {
     [SerializeField] private string weaponName;
-    [SerializeField] private GunType gunType;
+    [FormerlySerializedAs("gunType")] [SerializeField] private WeaponType weaponType;
     [SerializeField] private AmmoType ammoType;
     [SerializeField] private int defaultMagazineSize;
     [SerializeField] private int damage;
@@ -15,7 +16,7 @@ public class WeaponData : ScriptableObject
     [SerializeField] private float bulletSpeed; //Bullet에 따로?
 
     public string WeaponName => weaponName;
-    public GunType GunType => gunType;
+    public WeaponType WeaponType => weaponType;
     public AmmoType AmmoType => ammoType;
     public int DefaultMagazineSize => defaultMagazineSize;
     public int Damage => damage;
