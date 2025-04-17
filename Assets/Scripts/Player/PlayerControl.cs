@@ -30,7 +30,7 @@ public class PlayerControl : MonoBehaviour
    private bool _canRotateArm = true;
    
    public event Action<bool> OnPlayerMove;
-   public event Action<bool> OnPlayerShoot;
+   //public event Action<bool> OnPlayerShoot;
    public event Action OnPlayerReload;
    
    private void Awake()
@@ -70,18 +70,31 @@ public class PlayerControl : MonoBehaviour
       Debug.DrawRay(transform.position, Vector2.left * groundCheckDistance, Color.blue);
       Debug.DrawRay(transform.position, Vector2.right * groundCheckDistance, Color.blue);
    }
-   
-   
+
    private void RotateArm()
    {
       //장전 등 몇몇 행동에서는 안움직여야한다.
-      if(!_canRotateArm) return;
-      
+      //한손 - 두손 따라 수정...
+      if (!_canRotateArm) return;
+
+      bool isOneHanded = _playerManager.CheckIsOneHanded();
+
       Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
       mousePos.z = 0;
-      
-      Vector2 direction = mousePos - rightArm.transform.position;
-      Debug.DrawRay(rightArm.transform.position, direction, Color.red);
+
+      Vector2 direction;
+
+      if (isOneHanded)
+      {
+         direction = mousePos - rightArm.transform.position;
+         Debug.DrawRay(rightArm.transform.position, direction, Color.red);
+      }
+      else
+      {
+         direction = mousePos - leftArm.transform.position;
+         Debug.DrawRay(leftArm.transform.position, direction, Color.red);
+      }
+ 
       
       float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
@@ -96,10 +109,23 @@ public class PlayerControl : MonoBehaviour
             angle = -180 - angle;
          }
       }
-      angle = Mathf.Clamp(angle, -60f, 60f);
+
+      if (isOneHanded)
+      {
+         angle = Mathf.Clamp(angle, -60f, 60f);
       
-      _shootAngle = angle;
-      rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+         _shootAngle = angle;
+         rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+      }
+      else
+      {
+         Debug.Log(angle);
+         angle = Mathf.Clamp(angle, -60f, 60f); //85f center
+         _shootAngle = angle;
+         rightArm.transform.localRotation = Quaternion.Euler(0, 0, -(angle-45f)); //이게 문제임
+         leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+      }
+      
    }
    
    private void PlayerMovement()

@@ -5,12 +5,12 @@ using UnityEngine.Serialization;
 public class PlayerManager : MonoBehaviour
 {
     [SerializeField] private int playerHealth = 100; //추후 SO에서 받아오게 수정 예정
-
-    //[SerializeField] private GameObject currentWeaponGO;
+    
     [SerializeField] PlayerWeapon _currentWeapon;
     [SerializeField] private Transform oneHandWeaponTransform;
     [SerializeField] private Transform twoHandWeaponTransform;
     
+    private UIManager _uiManager;
     private PlayerAnimation _playerAnimation;
     
     private int _currentHealth;
@@ -18,17 +18,23 @@ public class PlayerManager : MonoBehaviour
     
     private void Awake()
     {
+        _uiManager = FindFirstObjectByType<UIManager>();
         _playerAnimation = GetComponent<PlayerAnimation>();
     }
 
     private void Start()
     {
-        _currentWeapon.Init();
+        _currentWeapon.Init(_uiManager);
     }
 
     public bool CheckIsAutomatic()
     {
         return _currentWeapon.WeaponData.IsAutomatic;
+    }
+
+    public bool CheckIsOneHanded()
+    {
+        return _currentWeapon.WeaponData.IsOneHanded;
     }
     
     public void Shoot(bool isFlipped, float shootAngle)
@@ -41,35 +47,38 @@ public class PlayerManager : MonoBehaviour
         _currentWeapon.Reload();
     }
 
-    private void WeaponChange(PlayerWeapon newWeapon)
+    private void WeaponChange(GameObject newWeaponGO)
     {
         if (_currentWeapon)
         {
             Destroy(_currentWeapon.gameObject);
         }
-        
-        _currentWeapon = newWeapon;
-        GameObject currentWeaponGO = newWeapon.gameObject;
-        _currentWeapon.Init();
 
-        WeaponType newWeaponType = newWeapon.WeaponData.WeaponType;
-        currentWeaponGO.transform.SetParent(newWeaponType == WeaponType.Pistol
-            ? oneHandWeaponTransform : twoHandWeaponTransform); //맵에 있는 무기와 실제로 들고있을 무기 별개로 두고 Instantiate
-        _playerAnimation.ChangeWeapon(newWeaponType);
-       
-        currentWeaponGO.transform.localPosition = Vector3.zero;
-        currentWeaponGO.transform.localRotation = Quaternion.identity;
+        PlayerWeapon newWeaponPrefab = newWeaponGO.GetComponent<PlayerWeapon>(); 
+        WeaponType weaponType = newWeaponPrefab.WeaponData.WeaponType;
+        Transform parent = weaponType == WeaponType.Pistol
+            ? oneHandWeaponTransform : twoHandWeaponTransform;
+      
+        PlayerWeapon newWeapon = Instantiate(newWeaponPrefab, parent);
+      
+        _currentWeapon = newWeapon;
+        _currentWeapon.Init(_uiManager);
+        
+        _playerAnimation.ChangeWeapon(weaponType);
+        
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Item"))
         {
-            PlayerWeapon newWeapon = other.GetComponent<PlayerWeapon>();
-            if (newWeapon)
+            ItemPickUp newItem = other.GetComponent<ItemPickUp>();
+            if (newItem)
             {
-                WeaponChange(newWeapon);
+                GameObject newItemGO = newItem.ItemPrefab;
+                WeaponChange(newItemGO);
             }
+            Destroy(other.gameObject);
         }
     }
 }

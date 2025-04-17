@@ -29,7 +29,7 @@ public class PlayerAnimation : MonoBehaviour
     private void Start()
     {
         _playerControl.OnPlayerMove += HandlePlayerMove;
-        _playerControl.OnPlayerReload += HandlePlayerReload;
+        _playerControl.OnPlayerReload += HandlePlayerReload; //Reload 시 걸을 때 설정...
         ChangeWeapon(WeaponType.Pistol);//
     }
     
