@@ -11,13 +11,8 @@ public class PlayerControl : MonoBehaviour
    
    [SerializeField] private GameObject rightArm;
    [SerializeField] private GameObject leftArm;
+   private Vector3 _baseRArmPosition;
    private float _shootAngle;
-   
-   //임시?
-   [SerializeField] private float bulletSpeed = 10f;
-   //[SerializeField] private float fireRate = 0.5f;
-  
-   [SerializeField] private GameObject bullet; //탄종별로 바꾸기, 추후 수정
    
    private PlayerManager _playerManager;
    private Camera _mainCamera;
@@ -42,6 +37,7 @@ public class PlayerControl : MonoBehaviour
    private void Start()
    {
       _mainCamera = Camera.main;
+      _baseRArmPosition = rightArm.transform.localPosition;
    }
    
    private void Update()
@@ -83,13 +79,12 @@ public class PlayerControl : MonoBehaviour
       mousePos.z = 0;
 
       Vector2 direction;
-
       if (isOneHanded)
       {
          direction = mousePos - rightArm.transform.position;
-         Debug.DrawRay(rightArm.transform.position, direction, Color.red);
+         Debug.DrawRay(rightArm.transform.position, direction, Color.red); //조준선
       }
-      else
+      else //TwoHanded
       {
          direction = mousePos - leftArm.transform.position;
          Debug.DrawRay(leftArm.transform.position, direction, Color.red);
@@ -117,13 +112,31 @@ public class PlayerControl : MonoBehaviour
          _shootAngle = angle;
          rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);
       }
-      else
+      else //TwoHanded
       {
-         Debug.Log(angle);
-         angle = Mathf.Clamp(angle, -60f, 60f); //85f center
+         angle = Mathf.Clamp(angle, -40f, 40f); //85f center -125~-45
          _shootAngle = angle;
-         rightArm.transform.localRotation = Quaternion.Euler(0, 0, -(angle-45f)); //이게 문제임
-         leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+         
+         float t = Mathf.InverseLerp(-40f, 40f, -angle);
+         float targetAngle = Mathf.Lerp(-90, 70, t); //RightArm 회전보간
+
+         float positionThreshold = 37f;
+         
+         if (targetAngle > positionThreshold)
+         {
+            float pt = Mathf.InverseLerp(positionThreshold, 70, targetAngle );
+            rightArm.transform.localPosition = Vector3.Lerp(_baseRArmPosition, new Vector3(-0.272f, -0.072f, 0f), pt);
+         }
+         else
+         {
+            rightArm.transform.localPosition = _baseRArmPosition;
+         }
+         
+         //기본 -0.161(x), 0.037 -> -0.2~-0.25 -> -0.272 -0.072 //무기마다 세부설정 -> Animation Curve? sturct로 저장해서 불러오기
+         rightArm.transform.localRotation = Quaternion.Euler(0, 0, targetAngle); //가중치 필요...  0~-80, 0~70 //35부터
+         leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle - 85f);   //-70부터...
+         //SPUM캐릭터에서 scale.-x로 Flip시킨 것을 디폴트로 만듦. -> 그래서 캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준
+         //조작하는 방향대로 설정과 기존 캐릭터를 기준으로...
       }
       
    }

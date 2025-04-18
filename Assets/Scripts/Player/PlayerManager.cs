@@ -25,6 +25,7 @@ public class PlayerManager : MonoBehaviour
     private void Start()
     {
         _currentWeapon.Init(_uiManager);
+        _playerAnimation.ChangeWeapon(_currentWeapon.WeaponData.WeaponType);
     }
 
     public bool CheckIsAutomatic()
