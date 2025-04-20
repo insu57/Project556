@@ -6,12 +6,13 @@ public enum WeaponType
     Shotgun,
     SMG,
     AR,
+    DMR,
     SR,
     Melee,
     Unarmed,
 }
 
-public enum AmmoType
+public enum AmmoCaliber
 {
     _556x45mm = 0,
     _762x51mm,
@@ -27,17 +28,33 @@ public enum AmmoType
         
 }
 
+public enum AmmoCategory
+{
+    Pistol,
+    Rifle,
+    Buckshot,
+}
+
 public class EnumManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static AmmoCategory GetAmmoCategory(AmmoCaliber caliber)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        switch (caliber)
+        {
+            case AmmoCaliber._556x45mm:
+            case AmmoCaliber._762x51mm:
+            case AmmoCaliber._545x39mm:
+            case AmmoCaliber._762x39mm:
+                return AmmoCategory.Rifle;
+            case AmmoCaliber._9x19mm:
+            case AmmoCaliber._45Acp:
+            case AmmoCaliber._46x30mm:
+            case AmmoCaliber._57x28mm:
+                return AmmoCategory.Pistol;
+            case AmmoCaliber._12Gauge:
+                return AmmoCategory.Buckshot;
+            default:
+                return AmmoCategory.Rifle;
+        }
     }
 }

@@ -70,7 +70,6 @@ public class PlayerControl : MonoBehaviour
    private void RotateArm()
    {
       //장전 등 몇몇 행동에서는 안움직여야한다.
-      //한손 - 두손 따라 수정...
       if (!_canRotateArm) return;
 
       bool isOneHanded = _playerManager.CheckIsOneHanded();
