@@ -3812,9 +3812,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upperAnimator: {fileID: 6411596332340496012}
   lowerAnimator: {fileID: 5517906110973613965}
-  unarmedAnimator: {fileID: 22100000, guid: c99445c733c8adc44bbbda173f370d22, type: 2}
-  pistolAnimator: {fileID: 22100000, guid: e99be92049273b649a6e3598d2ae4989, type: 2}
-  rifleAnimator: {fileID: 22100000, guid: d5c0f5a4e919d9440bf464307bae4e55, type: 2}
+  test: 0
+  unarmedController:
+    upperController: {fileID: 22100000, guid: 60fd4ae07fde67347987619b9e4e26cd, type: 2}
+    lowerController: {fileID: 22100000, guid: c99445c733c8adc44bbbda173f370d22, type: 2}
+  pistolAnimator:
+    upperController: {fileID: 22100000, guid: 04075ecf9f4c96b4ca5127e4726743d1, type: 2}
+    lowerController: {fileID: 22100000, guid: e99be92049273b649a6e3598d2ae4989, type: 2}
+  rifleAnimator:
+    upperController: {fileID: 22100000, guid: 3a22e57af32bd1147969eb3c0f1c9b23, type: 2}
+    lowerController: {fileID: 22100000, guid: d5c0f5a4e919d9440bf464307bae4e55, type: 2}
 --- !u!114 &7789147893518112731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3828,7 +3835,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 3
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:

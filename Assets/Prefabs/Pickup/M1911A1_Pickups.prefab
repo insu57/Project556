@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3325899211316545390, guid: c0eea6650d2a3a349b9ef0dcdcf4bdb5, type: 3}
+      propertyPath: itemPrefab
+      value: 
+      objectReference: {fileID: 6980448158620638401, guid: 347f9e02087eacb41aed5f886e3bbfb0, type: 3}
     - target: {fileID: 5676131501134908271, guid: c0eea6650d2a3a349b9ef0dcdcf4bdb5, type: 3}
       propertyPath: m_Name
       value: M1911A1_Pickups

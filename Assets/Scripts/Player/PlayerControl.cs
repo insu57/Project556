@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,15 +15,29 @@ public class PlayerControl : MonoBehaviour
    private Vector3 _baseRArmPosition;
    private float _shootAngle;
    
+   //private InputSystem_Actions _inputActions;
+   private PlayerInput _playerInput;
+   private InputAction _moveAction;
+   private InputAction _jumpAction;
+   private InputAction _shootAction;
+   private InputAction _reloadAction;
+   
    private PlayerManager _playerManager;
    private Camera _mainCamera;
    private Rigidbody2D _rigidbody;
-   private Vector2 _playerInput;
+   private Collider2D[] _colliders;
+   
+   private LayerMask _groundMask;
+   private LayerMask _climbMask;
+   
+   private Vector2 _playerMoveVector;
    private bool _inShooting = false;
    private bool _canShoot = true;
    private bool _isFlipped = false;
    private bool _isGrounded = false;
+   private bool _canClimb = false;
    private bool _canRotateArm = true;
+   
    
    public event Action<bool> OnPlayerMove;
    //public event Action<bool> OnPlayerShoot;
@@ -32,17 +47,55 @@ public class PlayerControl : MonoBehaviour
    {
       _playerManager = GetComponent<PlayerManager>();
       _rigidbody = GetComponent<Rigidbody2D>();
+      _playerInput = GetComponent<PlayerInput>();
+      var map = _playerInput.actions.FindActionMap("Player");
+      _moveAction = map.FindAction("Move");
+      _jumpAction = map.FindAction("Jump");
+      _shootAction = map.FindAction("Shoot");
+      _reloadAction = map.FindAction("Reload");
    }
 
    private void Start()
    {
       _mainCamera = Camera.main;
       _baseRArmPosition = rightArm.transform.localPosition;
+      _colliders = GetComponents<Collider2D>();
+      _groundMask = LayerMask.GetMask("Ground");
+      _climbMask = LayerMask.GetMask("Climbing");//선언과 함께?
    }
-   
+
+   private void OnEnable()
+   {
+      _moveAction.performed += OnMove;
+      _moveAction.canceled += OnMove;
+      _jumpAction.performed += OnJump;
+      _shootAction.started += OnShoot;
+      _shootAction.canceled += OnShoot;
+      _reloadAction.performed += OnReload;
+      
+      _moveAction.Enable();
+      _jumpAction.Enable();
+      _shootAction.Enable();
+      _reloadAction.Enable();
+   }
+
+   private void OnDisable()
+   {
+      _moveAction.performed -= OnMove;
+      _moveAction.canceled -= OnMove;
+      _jumpAction.performed -= OnJump;
+      _shootAction.started -= OnShoot;
+      _shootAction.canceled -= OnShoot;
+      _reloadAction.performed -= OnReload;
+      
+      _moveAction.Disable();
+      _jumpAction.Disable();
+      _shootAction.Disable();
+      _reloadAction.Disable();
+   }
+
    private void Update()
    {
-      GroundCheck();
       Shoot();
    }
 
@@ -56,15 +109,17 @@ public class PlayerControl : MonoBehaviour
    {
       //물리 기반 처리
       PlayerMovement();
+      ColliderCheck();
    }
 
-   private void GroundCheck()
+   private void ColliderCheck() //FixedUpdate가 아니라 다른곳에서?
    {
       float groundCheckDistance = 0.15f;
-      _isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, LayerMask.GetMask("Ground"));
+      _isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, _groundMask);
       Debug.DrawRay(transform.position, Vector2.down * groundCheckDistance, Color.blue);
       Debug.DrawRay(transform.position, Vector2.left * groundCheckDistance, Color.blue);
       Debug.DrawRay(transform.position, Vector2.right * groundCheckDistance, Color.blue);
+      _canClimb = _colliders.Any(col => col.IsTouchingLayers(_climbMask));
    }
 
    private void RotateArm()
@@ -142,35 +197,63 @@ public class PlayerControl : MonoBehaviour
    
    private void PlayerMovement()
    {
-      _rigidbody.linearVelocityX = _playerInput.x * moveSpeed;
+      _rigidbody.linearVelocityX = _playerMoveVector.x * moveSpeed;
+      if (_canClimb)
+      {
+         _rigidbody.linearVelocityY = _playerMoveVector.y * moveSpeed; 
+         //개선필요. -> 사다리 맨위에서 튀어나감. -> 어떤 식으로?
+         _rigidbody.gravityScale = 0;
+      }
+      else
+      {
+         _rigidbody.gravityScale = 1;
+      }
    }
    
-   private void OnMove(InputValue value)
+   private void OnMove(InputAction.CallbackContext context)
    {
-      _playerInput = value.Get<Vector2>();
+      _playerMoveVector = context.ReadValue<Vector2>();
       
       Vector3 playerScale = transform.localScale;
-
-      if (_playerInput.x == 0)
+      
+      if (_canClimb)
       {
-         OnPlayerMove?.Invoke(false);
-         return;
+         Debug.Log("Climbing..." + _playerMoveVector.y);
       }
       
-      if(_playerInput.y != 0) return;
-      playerScale.x = Mathf.Abs(playerScale.x) * _playerInput.x;
-      _isFlipped = _playerInput.x < 0; //왼쪽입력 시 Flip
-      transform.localScale = playerScale;
-      OnPlayerMove?.Invoke(true);
+      if (_playerMoveVector.x == 0 )
+      {
+         OnPlayerMove?.Invoke(false);
+      }
+      else
+      {
+         playerScale.x = Mathf.Abs(playerScale.x) * Mathf.Sign(_playerMoveVector.x);
+         _isFlipped = _playerMoveVector.x < 0; //왼쪽입력 시 Flip
+         transform.localScale = playerScale;
+         OnPlayerMove?.Invoke(true);
+      }
    }
 
-   private void OnShoot(InputValue value)
+   private void OnShoot(InputAction.CallbackContext ctx)
    {
-      //WeaponData를 어떤식으로 연결???
-      _inShooting = value.isPressed;
+      if(!_canShoot) return;
       if (!_playerManager.CheckIsAutomatic())
       {
-         _playerManager.Shoot(_isFlipped, _shootAngle);
+         if (ctx.started)
+         {
+            _playerManager.Shoot(_isFlipped, _shootAngle);
+         }
+      }
+      else
+      {
+         if (ctx.started)
+         {
+            _inShooting = true;
+         }
+         else if (ctx.canceled)
+         {
+            _inShooting = false;
+         }
       }
    }
 
@@ -181,29 +264,26 @@ public class PlayerControl : MonoBehaviour
       _playerManager.Shoot(_isFlipped, _shootAngle);
    }
    
-   private void OnJump(InputValue value)
+   private void OnJump(InputAction.CallbackContext ctx)
    {
-      if (value.isPressed && _isGrounded)
+      if (ctx.performed && _isGrounded)
       {
          _rigidbody.AddForce(new Vector2(0f, jumpSpeed), ForceMode2D.Impulse);
       }
    }
 
-   private void OnReload(InputValue value)
+   private void OnReload(InputAction.CallbackContext ctx)
    {
       _canRotateArm = false;
+      _canShoot = false;
       OnPlayerReload?.Invoke();
    }
 
    public void OnReloadEnd()
    {
       _canRotateArm = true;
+      _canShoot = true;
       _playerManager.Reload();
    }
    
-   public void CanRotateArm()
-   {
-      _canRotateArm = true;
-   }
-    
 }

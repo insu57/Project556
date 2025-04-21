@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - Bullet
   - Item
+  - Climbing
   layers:
   - Default
   - TransparentFX
@@ -16,8 +17,8 @@ TagManager:
   - Water
   - UI
   - Ground
+  - Climbing
   - Bullet
-  - 
   - 
   - 
   - 
@@ -50,6 +51,9 @@ TagManager:
     locked: 0
   - name: Platform
     uniqueID: 2531217447
+    locked: 0
+  - name: Climbing
+    uniqueID: 3583427827
     locked: 0
   - name: Character
     uniqueID: 3624751437
