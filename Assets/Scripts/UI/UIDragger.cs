@@ -43,5 +43,4 @@ public class UIDragger : MonoBehaviour, IPointerDownHandler, IDragHandler
         _rectTransform.anchoredPosition = newPosition;
     }
     
-    //anchor 관련 수정 필요
 }

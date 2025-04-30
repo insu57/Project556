@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Inventory : MonoBehaviour, IPointerDownHandler ,IDragHandler
+public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     //8x8 test... 
     [SerializeField] private GameObject inventoryGrid;
@@ -49,26 +49,13 @@ public class Inventory : MonoBehaviour, IPointerDownHandler ,IDragHandler
         //_itemRectTransform.anchoredPosition = vector2;
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("Item Anchored Position: "+_itemRectTransform.anchoredPosition);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            _itemRectTransform, eventData.position, eventData.pressEventCamera, out _pointerOffset);
-        Debug.Log("Pointer Offset: "+_pointerOffset);
-
+        
     }
 
-   
-    public void OnDrag(PointerEventData eventData)
+    public void OnPointerExit(PointerEventData eventData)
     {
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _rootCanvas.transform as RectTransform, eventData.position, eventData.pressEventCamera,
-                out var localPoint))
-        {
-            Debug.Log("Drag LocalPoint: "+localPoint);
-            Vector2 newPos = localPoint - _pointerOffset;
-            //_itemRectTransform.anchoredPosition = localPoint;
-        }
         
     }
 }
