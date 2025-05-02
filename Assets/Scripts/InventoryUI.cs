@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
-
 public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     //8x8 test... 
@@ -14,12 +13,16 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private int inventoryYSize;
     public RectTransform InventoryGridRT { get; private set; }
 
-    private List<SlotData> _slotDataList = new List<SlotData>();
-    //List or Array 고민... (인벤토리 생성 초기 이후 크기가 변하지 않을 수 있음...)
+    //private List<SlotData> _slotDataList = new List<SlotData>();
+    private SlotData[] _slotDataArray;
+    //Array로 수정(크기가 거의 안변함.) 변할 일이 많아지면 List + Span?(2021+)
+    
+    private List<ItemData> _itemDataList;
+    
     
     [SerializeField] private GameObject item;
-    private Canvas _rootCanvas;
-    private RectTransform _itemRectTransform;
+    [SerializeField] private GameObject itemPistol;
+    
     private Vector2 _pointerOffset;
     private static readonly Vector2 StartMinPos = new Vector2(0, 0);
     private static readonly Vector2 StartMaxPos = new Vector2(100, -100);
@@ -28,23 +31,24 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     private struct SlotData
     {
         public bool IsEmpty;
-        public Vector2 MinPosition;
-        public Vector2 MaxPosition;
-        public Vector2 ImagePosition;
-
-        public SlotData(bool isEmpty, Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition)
+        public readonly Vector2 MinPosition;
+        public readonly Vector2 MaxPosition;
+        public readonly Vector2 ImagePosition;
+        public int ItemIdx;
+        
+        public SlotData( Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition)
         {
-            IsEmpty = isEmpty;
+            IsEmpty = true;
             MinPosition = minPosition;
             MaxPosition = maxPosition;
             ImagePosition = imagePosition;
+            ItemIdx = -1;
         }
         //
     }
         
     private void Awake()
     {
-        _rootCanvas = GetComponentInParent<Canvas>();
         InventoryGridRT = inventoryGrid.GetComponent<RectTransform>();
     }
     
@@ -59,10 +63,10 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     
         //Index 0 (pivot 0.5, 0.5) -> 50, -50
         // (0, 0) ~ (100, -100) Slot RectTransform 범위...
+        _slotDataArray = new SlotData[inventoryXSize*inventoryYSize];
         
         Vector2 cellOffset = new Vector2(100, -100);
         
-        //
         for (int y = 0; y < inventoryYSize; y++)
         {
             for (int x = 0; x < inventoryXSize; x++)
@@ -74,29 +78,34 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 Vector2 maxPos = StartMaxPos + offset;
                 Vector2 imagePos = StartImagePos + offset;
                 
-                _slotDataList.Add(
-                    new SlotData( true, minPos, maxPos, imagePos));
+                SlotData slotData = new SlotData(minPos, maxPos, imagePos);
+                
+                _slotDataArray[x + y * inventoryYSize] = slotData;
             } 
         }
-        _itemRectTransform = item.GetComponent<RectTransform>();
+        
+        //아이템 테스트
+        RectTransform itemRectTransform = item.GetComponent<RectTransform>();
+        RectTransform itemPistolRT = itemPistol.GetComponent<RectTransform>();
         //0~N*M
-        const int index = 23;
-        int a = index % inventoryXSize;
-        int b = index / inventoryXSize;
-        var temp = _slotDataList[index];
+        int index = 23;
+        
+
+        ref var temp = ref _slotDataArray[index];
         temp.IsEmpty = false;
-        _slotDataList[index] = temp;
-        _itemRectTransform.anchoredPosition = _slotDataList[index].ImagePosition;
-        Debug.Log(_slotDataList[index].IsEmpty);
+        itemRectTransform.anchoredPosition = _slotDataArray[index].ImagePosition;
+        
+        // 슬롯의 인덱스(위치)를 알면 아이템도 알고 아이템을 알면 슬롯도 ???? 단방향으로만 설계?
+        
+        temp = ref _slotDataArray[1];
+        temp.IsEmpty = false;
+        temp = ref _slotDataArray[2];
+        temp.IsEmpty = false;
+        itemPistolRT.anchoredPosition = (_slotDataArray[1].MinPosition + _slotDataArray[2].MaxPosition) / 2;
+        //anchor?
+        
         //NxM 인벤토리(N*M만큼 Cell생성), AxB크기 아이템, 드래그 이동(마우스 입력처리), 칸 점유 정보
         //i, j -> 100, -100
-
-        //int x = index % inventoryXSize;
-        //int y = index / inventoryYSize;
-
-        //Vector2 zeroPos = new Vector2(50, -50);
-        //_itemRectTransform.anchoredPosition = zeroPos + new Vector2(x * 100, y * -100);
-
     }
 
     private int GetSlotIndex(Vector2 pos)
@@ -115,25 +124,23 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             return false;
         }
         
-        bool isEmpty = _slotDataList[idx].IsEmpty;
+        bool isEmpty = _slotDataArray[idx].IsEmpty;
         
         return isEmpty;
     }
 
     public Vector2 ItemMove(Vector2 startPos, Vector2 endPos)
     {
-        int startIdx = GetSlotIndex(startPos);
+        int startIdx = GetSlotIndex(startPos); //아이템 정보..
         int endIdx = GetSlotIndex(endPos);
         
-        var temp = _slotDataList[startIdx];
+        ref var temp = ref _slotDataArray[startIdx];
         temp.IsEmpty = true;
-        _slotDataList[startIdx] = temp;
         
-        temp = _slotDataList[endIdx];
+        temp = ref _slotDataArray[endIdx];
         temp.IsEmpty = false;
-        _slotDataList[endIdx] = temp;
         
-        return _slotDataList[endIdx].ImagePosition;
+        return _slotDataArray[endIdx].ImagePosition;
     }
     
     
