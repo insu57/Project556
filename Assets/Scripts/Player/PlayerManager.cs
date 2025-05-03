@@ -30,7 +30,7 @@ public class PlayerManager : MonoBehaviour
 
     public bool CheckIsAutomatic()
     {
-        return _currentWeapon.WeaponData.IsAutomatic;
+        return _currentWeapon.WeaponData.CanFullAuto;
     }
 
     public bool CheckIsOneHanded()

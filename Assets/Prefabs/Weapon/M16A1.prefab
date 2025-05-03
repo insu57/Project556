@@ -107,9 +107,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 665260857
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 5
-  m_Sprite: {fileID: 21300000, guid: 8588fd8cb30c4564fbf6a00044bf4491, type: 3}
+  m_Sprite: {fileID: 552750388532680738, guid: 736d194ce29a29a4ea5a579844881654, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 1
   m_FlipY: 0
@@ -134,3 +134,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   muzzleTransform: {fileID: 8416067286025815814}
   weaponData: {fileID: 11400000, guid: 53960c62b9c69a14f8c913e94fe1e107, type: 2}
+  speed: 5

@@ -5,8 +5,6 @@ using UnityEngine.Serialization;
 
 public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    //8x8 test... 
-    
     [SerializeField] private GameObject inventoryGrid;
     [SerializeField] private GameObject inventorySlotPrefab;
     [SerializeField] private int inventoryXSize;
@@ -15,9 +13,9 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     //private List<SlotData> _slotDataList = new List<SlotData>();
     private SlotData[] _slotDataArray;
-    //Array로 수정(크기가 거의 안변함.) 변할 일이 많아지면 List + Span?(2021+)
+    //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
     
-    private List<ItemData> _itemDataList;
+    //,private List<ItemData> _itemDataList;
     
     
     [SerializeField] private GameObject item;

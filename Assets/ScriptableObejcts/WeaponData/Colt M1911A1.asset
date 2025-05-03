@@ -17,8 +17,14 @@ MonoBehaviour:
   ammoCaliber: 3
   defaultMagazineSize: 7
   damage: 20
-  isAutomatic: 0
+  canFullAuto: 0
   isOneHanded: 1
   fireRate: 0.2
   accuracy: 70
   bulletSpeed: 10
+  itemSprite: {fileID: 3612897601756222204, guid: 007f4cb0b2211ac4088450706eb81205, type: 3}
+  pickUpColliderOffset: {x: 0, y: 0}
+  pickUpColliderSize: {x: 0.5, y: 0.4}
+  itemWidth: 0
+  itemHeight: 0
+  itemPrefab: {fileID: 6980448158620638401, guid: 347f9e02087eacb41aed5f886e3bbfb0, type: 3}
