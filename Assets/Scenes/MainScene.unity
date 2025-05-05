@@ -5594,7 +5594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4886838393056702428, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6710,6 +6710,10 @@ PrefabInstance:
       propertyPath: currentWeaponGO
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 8680173139404657581, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
+      propertyPath: currentWeaponData
+      value: 
+      objectReference: {fileID: 11400000, guid: 53960c62b9c69a14f8c913e94fe1e107, type: 2}
     - target: {fileID: 8709636801107877158, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
       propertyPath: currentMagazineAmmoText
       value: 
@@ -6719,7 +6723,7 @@ PrefabInstance:
     - {fileID: 1423628361775257347, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 6675477042620622441, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
-      insertIndex: -1
+      insertIndex: 0
       addedObject: {fileID: 1500500674}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}

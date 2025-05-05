@@ -5,12 +5,14 @@ using UnityEngine.Serialization;
 public class PlayerManager : MonoBehaviour
 {
     [SerializeField] private int playerHealth = 100; //추후 SO에서 받아오게 수정 예정
-    
-    [SerializeField] PlayerWeapon _currentWeapon;
-    [SerializeField] private Transform oneHandWeaponTransform;
-    [SerializeField] private Transform twoHandWeaponTransform;
+    [SerializeField] private WeaponData currentWeaponData;//현재 직렬화(추후 인벤토리에서)
+    [SerializeField] private SpriteRenderer oneHandSprite;
+    [SerializeField] private Transform oneHandMuzzleTransform;
+    [SerializeField] private SpriteRenderer twoHandSprite;
+    [SerializeField] private Transform twoHandMuzzleTransform;
     
     private UIManager _uiManager;
+    private PlayerWeapon _playerWeapon;
     private PlayerAnimation _playerAnimation;
     
     private int _currentHealth;
@@ -20,51 +22,57 @@ public class PlayerManager : MonoBehaviour
     {
         _uiManager = FindFirstObjectByType<UIManager>();
         _playerAnimation = GetComponent<PlayerAnimation>();
+        _playerWeapon = GetComponent<PlayerWeapon>();
     }
 
     private void Start()
     {
-        _currentWeapon.Init(_uiManager);
-        _playerAnimation.ChangeWeapon(_currentWeapon.WeaponData.WeaponType);
+        WeaponChange(currentWeaponData);
     }
 
     public bool CheckIsAutomatic()
     {
-        return _currentWeapon.WeaponData.CanFullAuto;
+        return currentWeaponData.CanFullAuto;
     }
 
     public bool CheckIsOneHanded()
     {
-        return _currentWeapon.WeaponData.IsOneHanded;
+        return currentWeaponData.IsOneHanded;
     }
     
     public void Shoot(bool isFlipped, float shootAngle)
     {
-        _currentWeapon.Shoot(isFlipped, shootAngle);
+        _playerWeapon.Shoot(isFlipped, shootAngle);
     }
 
     public void Reload()
     {
-        _currentWeapon.Reload();
+        _playerWeapon.Reload();
     }
 
-    private void WeaponChange(GameObject newWeaponGO)
+    private void WeaponChange(WeaponData newWeaponData)
     {
-        if (_currentWeapon)
+        WeaponType weaponType = newWeaponData.WeaponType;
+       
+        if (weaponType == WeaponType.Pistol)
         {
-            Destroy(_currentWeapon.gameObject);
+            oneHandSprite.sprite = newWeaponData.ItemSprite;
+            oneHandSprite.enabled = true;
+            twoHandSprite.enabled = false;
+            oneHandMuzzleTransform.localPosition = newWeaponData.MuzzlePosition;
+            _playerWeapon.SetMuzzleTransform(oneHandMuzzleTransform);
         }
-
-        PlayerWeapon newWeaponPrefab = newWeaponGO.GetComponent<PlayerWeapon>(); 
-        WeaponType weaponType = newWeaponPrefab.WeaponData.WeaponType;
-        Transform parent = weaponType == WeaponType.Pistol
-            ? oneHandWeaponTransform : twoHandWeaponTransform;
-      
-        PlayerWeapon newWeapon = Instantiate(newWeaponPrefab, parent);
-      
-        _currentWeapon = newWeapon;
-        _currentWeapon.Init(_uiManager);
+        else
+        {
+            twoHandSprite.sprite = newWeaponData.ItemSprite;
+            twoHandSprite.enabled = true;
+            oneHandSprite.enabled = false;
+            twoHandMuzzleTransform.localPosition = newWeaponData.MuzzlePosition;
+            _playerWeapon.SetMuzzleTransform(twoHandMuzzleTransform);
+        }
         
+        currentWeaponData = newWeaponData;
+        _playerWeapon.Init(_uiManager, currentWeaponData);
         _playerAnimation.ChangeWeapon(weaponType);
         
     }
@@ -76,8 +84,11 @@ public class PlayerManager : MonoBehaviour
             ItemPickUp newItem = other.GetComponent<ItemPickUp>();
             if (newItem)
             {
-                GameObject newItemGO = newItem.ItemPrefab;
-                WeaponChange(newItemGO);
+                IItemData newItemData = newItem.GetItemData();
+                if (newItemData is WeaponData weaponData)
+                {
+                    WeaponChange(weaponData);
+                }
             }
             Destroy(other.gameObject);
         }

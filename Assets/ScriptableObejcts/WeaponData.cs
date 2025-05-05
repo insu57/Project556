@@ -21,6 +21,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
     [SerializeField] private GameObject itemPrefab;//임시
+    [SerializeField] private Vector3 muzzlePosition;
     
     public string WeaponName => weaponName;
     public WeaponType WeaponType => weaponType;
@@ -40,4 +41,5 @@ public class WeaponData : BaseItemDataSO
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GameObject ItemPrefab => itemPrefab;//임시
+    public Vector3 MuzzlePosition => muzzlePosition;
 }

@@ -28,3 +28,4 @@ MonoBehaviour:
   itemWidth: 0
   itemHeight: 0
   itemPrefab: {fileID: 4886838393056702428, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
+  muzzlePosition: {x: -0.4472, y: 0.0395, z: 0}

@@ -260,6 +260,7 @@ public class PlayerControl : MonoBehaviour
    private void Shoot()
    {
       if(!_playerManager.CheckIsAutomatic()) return;
+      if(!_canShoot) return;
       if(!_inShooting) return;
       _playerManager.Shoot(_isFlipped, _shootAngle);
    }
@@ -276,6 +277,7 @@ public class PlayerControl : MonoBehaviour
    {
       _canRotateArm = false;
       _canShoot = false;
+      _inShooting = false;
       OnPlayerReload?.Invoke();
    }
 
