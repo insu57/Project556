@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler
+public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     private RectTransform _itemRT;
     private RectTransform _inventoryRT;
@@ -11,6 +12,10 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private CanvasGroup _canvasGroup;
     
     private InventoryUI _inventoryUI;
+    private int _widthSize;
+    private int _heightSize;
+    [SerializeField] private Image outline;
+    [SerializeField] private Image highlight;
     
     //anchor min 0.5, 0.5 max 0.5, 0.5 pivot 0.5, 0.5  
     private void Awake()
@@ -21,6 +26,22 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         
         _inventoryUI = GetComponentInParent<InventoryUI>();
         _inventoryRT = _inventoryUI.GetComponent<RectTransform>();
+    }
+
+    public void Init(int width, int height)
+    {
+        _widthSize = width;
+        _heightSize = height;
+    }
+    
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        highlight.enabled = true;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        highlight.enabled = false;
     }
     
     public void OnPointerDown(PointerEventData eventData)
@@ -45,7 +66,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
                 _inventoryUI.InventoryGridRT, eventData.position, eventData.pressEventCamera, out var localPoint
             )) return;
 
-        if (!_inventoryUI.SlotEmptyCheck(localPoint)) //Empty가 아니거나 인벤토리 밖
+        if (!_inventoryUI.SlotEmptyCheck(localPoint)) //Empty가 아니거나 인벤토리 밖  //아이템 사이즈 전부 확인...
         {
             _itemRT.anchoredPosition = _pointerDownPos;
         }
@@ -56,5 +77,6 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
         _canvasGroup.blocksRaycasts = true;
     }
+
     
 }

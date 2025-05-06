@@ -175,20 +175,22 @@ public class PlayerControl : MonoBehaviour
          float targetAngle = Mathf.Lerp(-90, 70, t); //RightArm 회전보간
 
          float positionThreshold = 37f;
-         
+         //해당 각도보다 크면 팔 위치 변경         
          if (targetAngle > positionThreshold)
          {
-            float pt = Mathf.InverseLerp(positionThreshold, 70, targetAngle );
+            float pt = Mathf.InverseLerp(positionThreshold, 70, targetAngle ); //보간
             rightArm.transform.localPosition = Vector3.Lerp(_baseRArmPosition, new Vector3(-0.272f, -0.072f, 0f), pt);
+         //기본 -0.161(x), 0.037 -> -0.2~-0.25 -> -0.272 -0.072
+         //무기마다 세부설정 -> Animation Curve? struct로 저장해서 불러오기
          }
          else
          {
             rightArm.transform.localPosition = _baseRArmPosition;
          }
          
-         //기본 -0.161(x), 0.037 -> -0.2~-0.25 -> -0.272 -0.072 //무기마다 세부설정 -> Animation Curve? sturct로 저장해서 불러오기
-         rightArm.transform.localRotation = Quaternion.Euler(0, 0, targetAngle); //가중치 필요...  0~-80, 0~70 //35부터
-         leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle - 85f);   //-70부터...
+         
+         rightArm.transform.localRotation = Quaternion.Euler(0, 0, targetAngle); 
+         leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle - 85f);   
          //SPUM캐릭터에서 scale.-x로 Flip시킨 것을 디폴트로 만듦. -> 그래서 캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준
          //조작하는 방향대로 설정과 기존 캐릭터를 기준으로...
       }
@@ -215,11 +217,6 @@ public class PlayerControl : MonoBehaviour
       _playerMoveVector = context.ReadValue<Vector2>();
       
       Vector3 playerScale = transform.localScale;
-      
-      if (_canClimb)
-      {
-         Debug.Log("Climbing..." + _playerMoveVector.y);
-      }
       
       if (_playerMoveVector.x == 0 )
       {

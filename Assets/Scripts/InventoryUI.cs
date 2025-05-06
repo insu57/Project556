@@ -14,8 +14,8 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     //private List<SlotData> _slotDataList = new List<SlotData>();
     private SlotData[] _slotDataArray;
     //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
-    
-    //,private List<ItemData> _itemDataList;
+    private List<IItemData> _itemDataList; //아이템의 위치(슬롯) 정보는 어디서?(IItemData -> 아이템의 크기 정보는 가지고있음)
+    //별개의 클래스? 다른 방법??? 슬롯에서 기억하기?(리스트의 인덱스 정보? Dictionary?)
     
     
     [SerializeField] private GameObject item;

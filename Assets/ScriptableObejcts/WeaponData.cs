@@ -6,15 +6,20 @@ using UnityEngine.Serialization;
 public class WeaponData : BaseItemDataSO
 {
     [SerializeField] private string weaponName;
+    
     [SerializeField] private WeaponType weaponType;
     [SerializeField] private AmmoCaliber ammoCaliber;
     [SerializeField] private int defaultMagazineSize;
     [SerializeField] private int damage;
+    
     [SerializeField] private bool canFullAuto = false;
     [SerializeField] private bool isOneHanded = false;
+    
     [SerializeField] private float fireRate;
     [SerializeField] private float accuracy;
+    
     [SerializeField] private float bulletSpeed; //Bullet에 따로?
+    
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private Vector2 pickUpColliderOffset;
     [SerializeField] private Vector2 pickUpColliderSize;
@@ -22,6 +27,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private int itemHeight;
     [SerializeField] private GameObject itemPrefab;//임시
     [SerializeField] private Vector3 muzzlePosition;
+    //[SerializeField] private Vector2 itemSize;
     
     public string WeaponName => weaponName;
     public WeaponType WeaponType => weaponType;
@@ -40,6 +46,7 @@ public class WeaponData : BaseItemDataSO
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
-    public override GameObject ItemPrefab => itemPrefab;//임시
+    //public override GameObject ItemPrefab => itemPrefab;//임시
     public Vector3 MuzzlePosition => muzzlePosition;
+    //public override Vector2 ItemSize => itemSize;
 }
