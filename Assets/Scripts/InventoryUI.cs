@@ -1,7 +1,29 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+
+public class InventoryItem
+{
+    //guid로 아이템 구분
+    private string _id;
+    private IItemData _itemData;
+    private List<int> _slotIndex;//슬롯 정보
+    
+    public InventoryItem(IItemData itemData)
+    {
+        this._itemData = itemData;
+        _slotIndex = new List<int>();
+        _id = Guid.NewGuid().ToString();
+    }
+
+    public void MoveItem(int firstIdx, int lastIdx)
+    {
+        //슬롯 위치 변경
+        //좌상단 -> 우하단
+    }
+}
 
 public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -10,22 +32,25 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private int inventoryXSize;
     [SerializeField] private int inventoryYSize;
     public RectTransform InventoryGridRT { get; private set; }
-
-    //private List<SlotData> _slotDataList = new List<SlotData>();
+    
     private SlotData[] _slotDataArray;
     //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
-    private List<IItemData> _itemDataList; //아이템의 위치(슬롯) 정보는 어디서?(IItemData -> 아이템의 크기 정보는 가지고있음)
-    //별개의 클래스? 다른 방법??? 슬롯에서 기억하기?(리스트의 인덱스 정보? Dictionary?)
+    private List<InventoryItem> _itemDataList = new List<InventoryItem>(); //IItemData, Guid, Slot정보
     
+    //TEMP Test
+    [SerializeField] private ItemDragger item;
+    [SerializeField] private ItemDragger itemPistol;
+    [SerializeField] private BaseItemDataSO bandageData;
+    [SerializeField] private BaseItemDataSO m1911a1Data;
     
-    [SerializeField] private GameObject item;
-    [SerializeField] private GameObject itemPistol;
     
     private Vector2 _pointerOffset;
     private static readonly Vector2 StartMinPos = new Vector2(0, 0);
     private static readonly Vector2 StartMaxPos = new Vector2(100, -100);
     private static readonly Vector2 StartImagePos = new Vector2(50, -50);
 
+    
+    
     private struct SlotData
     {
         public bool IsEmpty;
@@ -84,10 +109,16 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         
         //아이템 테스트
         RectTransform itemRectTransform = item.GetComponent<RectTransform>();
+        item.Init(bandageData);
+        _itemDataList.Add(new InventoryItem(bandageData));
+        
+        // Class InventoryItem_슬롯 정보, Guid(아이템 구분) -> (필드, 상자 등 -> 플레이어, Guid를 복사해서 구분?)
         RectTransform itemPistolRT = itemPistol.GetComponent<RectTransform>();
+        itemPistol.Init(m1911a1Data);
+        _itemDataList.Add(new InventoryItem(m1911a1Data));
+        
         //0~N*M
         int index = 23;
-        
 
         ref var temp = ref _slotDataArray[index];
         temp.IsEmpty = false;
@@ -115,7 +146,9 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public bool SlotEmptyCheck(Vector2 pos)
     {
+        //Empty Check...현재 아이템의 정보도 필요...(크기)
         int idx = GetSlotIndex(pos);
+        //슬롯에 아이템 정보? 어떤 아이템이 있는가? Idx?
         
         if (idx < 0 || idx >= inventoryXSize * inventoryYSize)
         {

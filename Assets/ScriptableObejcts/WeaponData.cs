@@ -25,7 +25,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private Vector2 pickUpColliderSize;
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
-    [SerializeField] private GameObject itemPrefab;//임시
+    //[SerializeField] private GameObject itemPrefab;//임시
     [SerializeField] private Vector3 muzzlePosition;
     //[SerializeField] private Vector2 itemSize;
     

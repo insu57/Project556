@@ -12,6 +12,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private CanvasGroup _canvasGroup;
     
     private InventoryUI _inventoryUI;
+    private IItemData _itemData;
     private int _widthSize;
     private int _heightSize;
     [SerializeField] private Image outline;
@@ -28,10 +29,11 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _inventoryRT = _inventoryUI.GetComponent<RectTransform>();
     }
 
-    public void Init(int width, int height)
+    public void Init(IItemData itemData)
     {
-        _widthSize = width;
-        _heightSize = height;
+        _itemData = itemData;
+        _widthSize = itemData.ItemWidth;
+        _heightSize = itemData.ItemHeight;
     }
     
     public void OnPointerEnter(PointerEventData eventData)
@@ -61,7 +63,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //check position
+        //check position...
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _inventoryUI.InventoryGridRT, eventData.position, eventData.pressEventCamera, out var localPoint
             )) return;

@@ -10,6 +10,8 @@ public class ItemPickUp : MonoBehaviour
     public void Init(BaseItemDataSO itemData) //추후 사용(MapManager?(맵 초기화), 아이템 드랍 등 -> Init)
     {
         this.itemData = itemData;
+        
+        //Guid 관련
     }
     
     private void Awake()

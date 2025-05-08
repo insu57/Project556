@@ -502,16 +502,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &219595515 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5930975178880390204, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
-  m_PrefabInstance: {fileID: 1544289696576165800}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &219595516 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
   m_PrefabInstance: {fileID: 1544289696576165800}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &219595519 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7716092572404661750, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
+  m_PrefabInstance: {fileID: 1544289696576165800}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2c9a01411108c40810a80d9ce3efc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &221437994
 GameObject:
   m_ObjectHideFlags: 0
@@ -4980,16 +4986,22 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6675477042620622441, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
   m_PrefabInstance: {fileID: 35690069355884480}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1082844598 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5930975178880390204, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
-  m_PrefabInstance: {fileID: 892726916}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1082844599 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
   m_PrefabInstance: {fileID: 892726916}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1082844602 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7716092572404661750, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
+  m_PrefabInstance: {fileID: 892726916}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2c9a01411108c40810a80d9ce3efc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1176781515
 GameObject:
   m_ObjectHideFlags: 0
@@ -5220,8 +5232,10 @@ MonoBehaviour:
   inventorySlotPrefab: {fileID: 3160109038165805043, guid: d6fd9c259bbeb9641b44dcc2a8a271f4, type: 3}
   inventoryXSize: 6
   inventoryYSize: 6
-  item: {fileID: 219595515}
-  itemPistol: {fileID: 1082844598}
+  item: {fileID: 219595519}
+  itemPistol: {fileID: 1082844602}
+  bandageData: {fileID: 11400000, guid: 8c6fe2c91f209fa4295d05fdda3568c8, type: 2}
+  m1911a1Data: {fileID: 11400000, guid: 4edd6477f6f6ec343beb8a5c1db1d5ed, type: 2}
 --- !u!1 &1280273299
 GameObject:
   m_ObjectHideFlags: 0
