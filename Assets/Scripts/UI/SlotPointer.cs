@@ -10,7 +10,7 @@ public class SlotPointer : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     
     private InventoryUI _inventoryUI;
 
-    public bool IsEmpty = true;
+    //public bool IsEmpty = true;
     
     private void Awake()
     {
@@ -30,6 +30,18 @@ public class SlotPointer : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     public void OnPointerDown(PointerEventData eventData)
     {
         
+    }
+
+    public void SlotAvailable(bool isAvailable)
+    {
+        if (isAvailable)
+        {
+            _slotImage.color = Color.green;
+        }
+        else
+        {
+            _slotImage.color = Color.red;
+        }
     }
     
     //슬롯 위치 Check..?

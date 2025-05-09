@@ -25,7 +25,6 @@ MonoBehaviour:
   itemSprite: {fileID: 21300000, guid: 8588fd8cb30c4564fbf6a00044bf4491, type: 3}
   pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0.95, y: 0.44}
-  itemWidth: 0
-  itemHeight: 0
-  itemPrefab: {fileID: 4886838393056702428, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
+  itemWidth: 2
+  itemHeight: 4
   muzzlePosition: {x: -0.4472, y: 0.0395, z: 0}

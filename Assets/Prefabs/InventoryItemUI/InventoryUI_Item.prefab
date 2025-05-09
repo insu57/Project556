@@ -136,7 +136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2c9a01411108c40810a80d9ce3efc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  outline: {fileID: 7286491913915390130}
   highlight: {fileID: 8871443052328100409}
 --- !u!225 &5205590070267574599
 CanvasGroup:
@@ -170,7 +169,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f92d162190d5d644cad84ed3378ca43c, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c67d0d58cfcf4a443a3f43732bd9c912, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

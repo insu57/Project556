@@ -11,7 +11,8 @@ public class ItemPickUp : MonoBehaviour
     {
         this.itemData = itemData;
         
-        //Guid 관련
+        //Guid 생성? (필드 아이템)
+        //필드 생성, 플레이어 드랍 등 처리가 다름...
     }
     
     private void Awake()

@@ -85,7 +85,7 @@ public class PlayerManager : MonoBehaviour
             if (newItem)
             {
                 IItemData newItemData = newItem.GetItemData();
-                if (newItemData is WeaponData weaponData)
+                if (newItemData is WeaponData weaponData) //임시 - 무기 교체. -> 인벤토리 추가로 변경
                 {
                     WeaponChange(weaponData);
                 }

@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class InventoryItem
 {
-    //guid로 아이템 구분
-    private string _id;
     private IItemData _itemData;
-    private List<int> _slotIndex;//슬롯 정보
     
+    private int _firstIdx;
+    private int _lastIdx;
+
+    public Guid Id { get; }
+    public Vector2 Size => new(_itemData.ItemWidth, _itemData.ItemHeight);
+
     public InventoryItem(IItemData itemData)
     {
         this._itemData = itemData;
-        _slotIndex = new List<int>();
-        _id = Guid.NewGuid().ToString();
+        Id = Guid.NewGuid();
     }
 
     public void MoveItem(int firstIdx, int lastIdx)
@@ -27,15 +30,19 @@ public class InventoryItem
 
 public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    //없으면 생성 및 초기화, 있으면 활성/비활성?
     [SerializeField] private GameObject inventoryGrid;
     [SerializeField] private GameObject inventorySlotPrefab;
     [SerializeField] private int inventoryXSize;
     [SerializeField] private int inventoryYSize;
+    [SerializeField] private Image slotAvailable;
+    
     public RectTransform InventoryGridRT { get; private set; }
     
     private SlotData[] _slotDataArray;
     //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
     private List<InventoryItem> _itemDataList = new List<InventoryItem>(); //IItemData, Guid, Slot정보
+    private Dictionary<Guid, InventoryItem> _itemDataDictionary = new Dictionary<Guid, InventoryItem>(); 
     
     //TEMP Test
     [SerializeField] private ItemDragger item;
@@ -86,7 +93,7 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     
         //Index 0 (pivot 0.5, 0.5) -> 50, -50
         // (0, 0) ~ (100, -100) Slot RectTransform 범위...
-        _slotDataArray = new SlotData[inventoryXSize*inventoryYSize];
+        _slotDataArray = new SlotData[inventoryXSize * inventoryYSize];
         
         Vector2 cellOffset = new Vector2(100, -100);
         
@@ -109,13 +116,20 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         
         //아이템 테스트
         RectTransform itemRectTransform = item.GetComponent<RectTransform>();
-        item.Init(bandageData);
-        _itemDataList.Add(new InventoryItem(bandageData));
+        InventoryItem bandageItem = new InventoryItem(bandageData);
+        bandageItem.MoveItem(23, 23);
+        item.Init(bandageData, bandageItem.Id);
+        _itemDataList.Add(bandageItem);
+        _itemDataDictionary.Add(bandageItem.Id, bandageItem);
         
         // Class InventoryItem_슬롯 정보, Guid(아이템 구분) -> (필드, 상자 등 -> 플레이어, Guid를 복사해서 구분?)
         RectTransform itemPistolRT = itemPistol.GetComponent<RectTransform>();
-        itemPistol.Init(m1911a1Data);
-        _itemDataList.Add(new InventoryItem(m1911a1Data));
+        
+        InventoryItem pistolItem = new InventoryItem(m1911a1Data);
+        pistolItem.MoveItem(1, 2);
+        itemPistol.Init(m1911a1Data, pistolItem.Id);
+        _itemDataList.Add(pistolItem);
+        _itemDataDictionary.Add(pistolItem.Id, pistolItem);
         
         //0~N*M
         int index = 23;
@@ -173,7 +187,23 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         
         return _slotDataArray[endIdx].ImagePosition;
     }
-    
+
+    public void CheckSlotAvailable(Vector2 mousePos, Guid id)
+    {
+        //기준을 어디에서????
+        //mousePos -> 커서 위치(아이템의 중심 pivot 0.5 0.5)
+        //좌상단 가장 작은 인덱스 기준?
+        int idx = GetSlotIndex(mousePos);
+        if (idx < 0 || idx >= inventoryXSize * inventoryYSize)
+        {
+            return;
+        }
+        Debug.Log("SlotCheck: " + idx);
+        slotAvailable.rectTransform.anchoredPosition = _slotDataArray[idx].MinPosition;
+        Debug.Log(_slotDataArray[idx].ImagePosition);
+        slotAvailable.rectTransform.sizeDelta = _itemDataDictionary[id].Size * 100;
+        
+    }
     
     public void OnPointerEnter(PointerEventData eventData)
     {
