@@ -83,7 +83,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
             //_inventoryUI
             Debug.Log(GetFirstSlotPos(localPos).Item1);
             
-            _inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos).Item1, GetFirstSlotPos(localPos).Item2);
+            _inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos));
         }
     }
 
@@ -94,15 +94,9 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
                 _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPoint
             )) return;
 
-        if (!_inventoryUI.SlotEmptyCheck(localPoint)) //Empty가 아니거나 인벤토리 밖  //아이템 사이즈 전부 확인...
-        {
-            _itemRT.anchoredPosition = _pointerDownPos;
-        }
-        else
-        {
-           _itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, localPoint);
-        }
-
+        _itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, localPoint, _id);
+        
+        _inventoryUI.DisableSlotAvailable();
         _canvasGroup.blocksRaycasts = true;
     }
 

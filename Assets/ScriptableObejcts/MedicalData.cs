@@ -16,7 +16,7 @@ public class MedicalData : BaseItemDataSO
     
     public string ItemName => itemName;
     public int HealAmount => healAmount;
-    
+    //
     public override Sprite ItemSprite => itemSprite;
     public override Vector2 PickUpColliderOffset => pickUpColliderOffset;
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
