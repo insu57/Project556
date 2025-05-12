@@ -22,6 +22,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     //[SerializeField] private Image outline;
     private Image _itemImage;
     [SerializeField] private Image highlight;
+
+    private float _slotSize;
     
     //anchor min 0.5, 0.5 max 0.5, 0.5 pivot 0.5, 0.5  
     private void Awake()
@@ -35,11 +37,12 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     public void Init(IItemData itemData, Guid id)
     {
         _inventoryUI = GetComponentInParent<InventoryUI>();
+        _slotSize = _inventoryUI.SlotSize;
         _inventoryRT = _inventoryUI.InventoryGridRT;
         
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
-        Vector2 imageSize = new Vector2(_widthSize * 100, _heightSize * 100);
+        Vector2 imageSize = new Vector2(_widthSize * _slotSize, _heightSize * _slotSize);
         _itemRT.sizeDelta = imageSize;
         _itemImage.sprite = itemData.ItemSprite;
 
@@ -48,8 +51,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
     private (Vector2, Guid) GetFirstSlotPos(Vector2 mousePos)
     {
-        float x = mousePos.x - 100 * _widthSize / 2f + 50;
-        float y = mousePos.y - (-100 * _heightSize / 2f + 50) ;//
+        float x = mousePos.x + (-_slotSize * _widthSize + _slotSize) / 2f;
+        float y = mousePos.y - (-_slotSize * _heightSize + _slotSize) / 2f;//
         return (new Vector2(x, y), _id);
     }
     
@@ -91,10 +94,10 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     {
         //check position...
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPoint
+                _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos
             )) return;
-
-        _itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, localPoint, _id);
+        var firstSlot = GetFirstSlotPos(localPos);
+        _itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id);
         
         _inventoryUI.DisableSlotAvailable();
         _canvasGroup.blocksRaycasts = true;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor.Localization.Plugins.XLIFF.V20;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -21,9 +20,8 @@ public class InventoryItem
     public InventoryItem(IItemData itemData)
     {
         this._itemData = itemData;
-        Id = Guid.NewGuid();
+        Id = Guid.NewGuid(); //초기화따로...?
     }
-
     public void MoveItem(int idx)
     {
         //슬롯 위치 변경
@@ -31,15 +29,17 @@ public class InventoryItem
     }
 }
 
-public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class InventoryUI : MonoBehaviour
 {
     //없으면 생성 및 초기화, 있으면 활성/비활성?
     [SerializeField] private GameObject inventoryGrid;
     [SerializeField] private GameObject inventorySlotPrefab;
     [SerializeField] private int inventoryXSize;
     [SerializeField] private int inventoryYSize;
+    [SerializeField] private float slotSize = 50;
     [SerializeField] private Image slotAvailable; //SlotAvailable Indicator
-    
+    private GridLayoutGroup _gridLayout;
+    public float SlotSize => slotSize;
     public RectTransform InventoryGridRT { get; private set; }
     
     private SlotData[] _slotDataArray;
@@ -52,13 +52,10 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private BaseItemDataSO bandageData;
     [SerializeField] private BaseItemDataSO m1911a1Data;
     
-    
     private Vector2 _pointerOffset;
-    private static readonly Vector2 StartMinPos = new Vector2(0, 0);
-    private static readonly Vector2 StartMaxPos = new Vector2(100, -100);
-    private static readonly Vector2 StartImagePos = new Vector2(50, -50);
-
-    
+    //private static readonly Vector2 StartMinPos = new Vector2(0, 0);
+    //private static readonly Vector2 StartMaxPos = new Vector2(100, -100);
+    //private static readonly Vector2 StartImagePos = new Vector2(50, -50);
     
     private struct SlotData
     {
@@ -66,7 +63,6 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         public readonly Vector2 MinPosition;
         public readonly Vector2 MaxPosition;
         public readonly Vector2 ImagePosition;
-        //public int ItemIdx;
         public Guid Id;
         
         public SlotData( Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition)
@@ -77,28 +73,33 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             ImagePosition = imagePosition;
             Id = Guid.Empty;
         }
-        //
     }
         
     private void Awake()
     {
         InventoryGridRT = inventoryGrid.GetComponent<RectTransform>();
+        _gridLayout = inventoryGrid.GetComponent<GridLayoutGroup>();
     }
     
     private void Start()
     {
         
-        //한칸 당 100, 인벤토리 크기에 따라 inventoryGrid크기 조절
-        var gridRect = inventoryGrid.GetComponent<RectTransform>();
-        
-        gridRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, inventoryXSize*100);
-        gridRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, inventoryYSize*100);
-    
+        //인벤토리 크기에 따라 inventoryGrid크기 조절
+        //var gridRect = inventoryGrid.GetComponent<RectTransform>();
+
+        InventoryGridRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, inventoryXSize * slotSize);
+        InventoryGridRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, inventoryYSize * slotSize);
+        _gridLayout.cellSize = new Vector2(slotSize, slotSize);
         //Index 0 (pivot 0.5, 0.5) -> 50, -50
         // (0, 0) ~ (100, -100) Slot RectTransform 범위...
         _slotDataArray = new SlotData[inventoryXSize * inventoryYSize];
         
-        Vector2 cellOffset = new Vector2(100, -100);
+        //Vector2 cellOffset = new Vector2(100, -100);
+        //가변 가능한 슬롯 크기로 변경(기존 100 고정)
+        Vector2 cellOffset = new Vector2(slotSize, -slotSize);
+        Vector2 startMaxPos = new Vector2(slotSize, -slotSize);
+        Vector2 startMinPos = new Vector2(0, 0);
+        Vector2 startImagePos = new Vector2(slotSize / 2f, -slotSize / 2f);
         
         for (int y = 0; y < inventoryYSize; y++)
         {
@@ -107,9 +108,9 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 Instantiate(inventorySlotPrefab, inventoryGrid.transform);
                 
                 Vector2 offset = new Vector2(x, y) * cellOffset;
-                Vector2 minPos = StartMinPos + offset;
-                Vector2 maxPos = StartMaxPos + offset;
-                Vector2 imagePos = StartImagePos + offset;
+                Vector2 minPos = startMinPos + offset;
+                Vector2 maxPos = startMaxPos + offset;
+                Vector2 imagePos = startImagePos + offset;
                 
                 SlotData slotData = new SlotData(minPos, maxPos, imagePos);
                 
@@ -153,8 +154,8 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private int GetSlotIndex(Vector2 pos)
     {
-        int x = (int)(pos.x / 100);
-        int y = -(int)(pos.y / 100);
+        int x = (int)(pos.x / slotSize);
+        int y = -(int)(pos.y / slotSize);
         if (x < 0 || x >= inventoryXSize || y < 0 || y >= inventoryYSize) //범위 밖(인벤토리 밖)은 예외처리
         {
             return -1;
@@ -169,22 +170,6 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         slotData.Id = isEmpty ? Guid.Empty : id;
     }
     
-    public bool SlotEmptyCheck(Vector2 pos)
-    {
-        //Empty Check...현재 아이템의 정보도 필요...(크기)
-        int idx = GetSlotIndex(pos);
-        //슬롯에 아이템 정보? 어떤 아이템이 있는가? Idx?
-        
-        if (idx < 0)
-        {
-            return false;
-        }
-        
-        bool isEmpty = _slotDataArray[idx].IsEmpty;
-        
-        return isEmpty;
-    }
-
     public Vector2 ItemMove(Vector2 originPos, Vector2 targetPos, Guid id)
     {
         slotAvailable.enabled = false;
@@ -222,6 +207,7 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             Vector2 maxPos = _slotDataArray[targetEndIdx].MaxPosition;
             dragItem.MoveItem(targetFirstIdx);
             return (minPos + maxPos) / 2;
+            //return minPos;
         }
         return originPos;
     }
@@ -248,20 +234,18 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             for (int w = 0; w < dragItem.Width; w++)
             {
                 //
-                Vector2 pos = _slotDataArray[firstIdx].ImagePosition + new Vector2(w * 100, h * -100);
-                
+                Vector2 pos = _slotDataArray[firstIdx].ImagePosition + new Vector2(w * slotSize, h * -slotSize);
+                //아이템크기만큼 슬롯 체크
                 int slotIdx = GetSlotIndex(pos);
                 
                 if (slotIdx < 0 || (!_slotDataArray[slotIdx].IsEmpty && _slotDataArray[slotIdx].Id != dragItem.Id ))
                 {
-                    //slotAvailable.color = new Color32(255, 0, 0, 60); //Red 불투명 -> 추후 Global Data에서?
-                    //isAvailable = false;
+                    
                     Debug.Log("unavailable! - Index: " + slotIdx);
                     ShowSlotAvailable(_slotDataArray[firstIdx].MinPosition, dragItem.SizeVector, false);
                     return false;
                 }
             }
-            //if(!isAvailable) break;
         }
         ShowSlotAvailable(_slotDataArray[firstIdx].MinPosition, dragItem.SizeVector, true);
         
@@ -280,21 +264,11 @@ public class InventoryUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             slotAvailable.color = new Color32(255, 0, 0, 60);
         }
-        slotAvailable.rectTransform.sizeDelta = size * 100;
+        slotAvailable.rectTransform.sizeDelta = size * slotSize;
     }
     
     public void DisableSlotAvailable()
     {
         slotAvailable.enabled = false;
-    }
-    
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        
     }
 }

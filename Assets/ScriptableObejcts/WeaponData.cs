@@ -29,7 +29,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private Vector3 muzzlePosition;
     //[SerializeField] private Vector2 itemSize;
     
-    public string WeaponName => weaponName;
+    public override string ItemName => weaponName;
     public WeaponType WeaponType => weaponType;
     public AmmoCaliber AmmoCaliber => ammoCaliber;
     public int DefaultMagazineSize => defaultMagazineSize;

@@ -31,21 +31,4 @@ public class SlotPointer : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     {
         
     }
-
-    public void SlotAvailable(bool isAvailable)
-    {
-        if (isAvailable)
-        {
-            _slotImage.color = Color.green;
-        }
-        else
-        {
-            _slotImage.color = Color.red;
-        }
-    }
-    
-    //슬롯 위치 Check..?
-    //다른 코드 참조!!!
-    //슬롯마다? 부모 인벤토리 클래스에서? 어디서 관리하나?
-    //슬롯의 상태...IsEmpty?
 }

@@ -35,6 +35,16 @@ public enum AmmoCategory
     Buckshot,
 }
 
+public enum GearType
+{
+    Backpack,
+    ArmorVest,
+    ArmoredRig,
+    UnarmoredRig,
+    HeadWear,
+    EyeWear,
+}
+
 public class EnumManager : MonoBehaviour
 {
     public static AmmoCategory GetAmmoCategory(AmmoCaliber caliber)
