@@ -163,7 +163,7 @@ public class InventoryUI : MonoBehaviour
         return x + y * inventoryXSize;
     }
 
-    private void SetSlot(int idx , bool isEmpty, Guid id)
+    private void SetSlot(int idx , bool isEmpty, Guid id) //아이템 이동 시 슬롯 설정
     {
         ref var slotData = ref _slotDataArray[idx];
         slotData.IsEmpty = isEmpty;
