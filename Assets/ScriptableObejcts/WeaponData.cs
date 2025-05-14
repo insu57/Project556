@@ -5,6 +5,7 @@ using UnityEngine.Serialization;
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Scriptable Objects/WeaponData")]
 public class WeaponData : BaseItemDataSO
 {
+    [SerializeField] private string itemID;
     [SerializeField] private string weaponName;
     
     [SerializeField] private WeaponType weaponType;
@@ -29,6 +30,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private Vector3 muzzlePosition;
     //[SerializeField] private Vector2 itemSize;
     
+    public override string ItemID => itemID;
     public override string ItemName => weaponName;
     public WeaponType WeaponType => weaponType;
     public AmmoCaliber AmmoCaliber => ammoCaliber;

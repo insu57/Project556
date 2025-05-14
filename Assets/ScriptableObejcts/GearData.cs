@@ -3,6 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GearData", menuName = "Scriptable Objects/GearData")]
 public class GearData : BaseItemDataSO
 {
+    [SerializeField] private string itemID;
     [SerializeField]  private string itemName;
     [SerializeField] private GearType gearType;
     
@@ -15,7 +16,7 @@ public class GearData : BaseItemDataSO
     [SerializeField] private int slotWidth;
     [SerializeField] private int slotHeight;
     
-    
+    public override string ItemID => itemID;
     public override string ItemName => itemName;
     public GearType GearType => gearType;
     public override Sprite ItemSprite => itemSprite;

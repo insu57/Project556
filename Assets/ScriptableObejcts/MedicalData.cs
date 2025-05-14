@@ -3,6 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "MedicalData", menuName = "Scriptable Objects/MedicalData")]
 public class MedicalData : BaseItemDataSO
 {
+    [SerializeField] private string itemID;
     [SerializeField] private string itemName;
     
     [SerializeField] private int healAmount;
@@ -14,6 +15,7 @@ public class MedicalData : BaseItemDataSO
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
     
+    public override string ItemID => itemID;
     public override string ItemName => itemName;
     public int HealAmount => healAmount;
     //
