@@ -21,6 +21,8 @@ public class PlayerControl : MonoBehaviour
    private InputAction _jumpAction;
    private InputAction _shootAction;
    private InputAction _reloadAction;
+   private InputAction _openUIAction;
+   private InputAction _openSettingAction;
    
    private PlayerManager _playerManager;
    private Camera _mainCamera;
@@ -38,6 +40,8 @@ public class PlayerControl : MonoBehaviour
    private bool _canClimb = false;
    private bool _canRotateArm = true;
    
+   //private UIManager _uiManager;
+   private UIControl _uiControl;
    
    public event Action<bool> OnPlayerMove;
    //public event Action<bool> OnPlayerShoot;
@@ -47,12 +51,18 @@ public class PlayerControl : MonoBehaviour
    {
       _playerManager = GetComponent<PlayerManager>();
       _rigidbody = GetComponent<Rigidbody2D>();
+      
       _playerInput = GetComponent<PlayerInput>();
       var map = _playerInput.actions.FindActionMap("Player");
       _moveAction = map.FindAction("Move");
       _jumpAction = map.FindAction("Jump");
       _shootAction = map.FindAction("Shoot");
       _reloadAction = map.FindAction("Reload");
+      _openUIAction = map.FindAction("OpenUI");
+      _openSettingAction = map.FindAction("OpenSetting");
+      
+      _uiControl = FindAnyObjectByType<UIControl>();
+      _uiControl.Init(this);
    }
 
    private void Start()
@@ -72,11 +82,15 @@ public class PlayerControl : MonoBehaviour
       _shootAction.started += OnShoot;
       _shootAction.canceled += OnShoot;
       _reloadAction.performed += OnReload;
+      _openUIAction.performed += OnOpenUI;
+      _openSettingAction.performed += OnOpenSetting;
       
       _moveAction.Enable();
       _jumpAction.Enable();
       _shootAction.Enable();
       _reloadAction.Enable();
+      _openUIAction.Enable();
+      _openSettingAction.Enable();
    }
 
    private void OnDisable()
@@ -87,11 +101,15 @@ public class PlayerControl : MonoBehaviour
       _shootAction.started -= OnShoot;
       _shootAction.canceled -= OnShoot;
       _reloadAction.performed -= OnReload;
+      _openUIAction.performed -= OnOpenUI;
+      _openSettingAction.performed -= OnOpenSetting;
       
       _moveAction.Disable();
       _jumpAction.Disable();
       _shootAction.Disable();
       _reloadAction.Disable();
+      _openUIAction.Disable();
+      _openSettingAction.Disable();
    }
 
    private void Update()
@@ -111,7 +129,9 @@ public class PlayerControl : MonoBehaviour
       PlayerMovement();
       ColliderCheck();
    }
-
+   
+   
+   
    private void ColliderCheck() //FixedUpdate가 아니라 다른곳에서?
    {
       float groundCheckDistance = 0.15f;
@@ -210,6 +230,30 @@ public class PlayerControl : MonoBehaviour
       {
          _rigidbody.gravityScale = 1;
       }
+   }
+
+   public void BlockControl(bool isBlock)
+   {
+      _canRotateArm = !isBlock;
+      if (isBlock)
+      {
+         _playerInput.SwitchCurrentActionMap("UI");
+      }
+      else
+      {
+         _playerInput.SwitchCurrentActionMap("Player");
+      }
+   }
+   
+   private void OnOpenUI(InputAction.CallbackContext context)
+   {
+      BlockControl(true);
+      _uiControl.OnOpenUI();
+   }
+
+   private void OnOpenSetting(InputAction.CallbackContext context)
+   {
+      Debug.Log("OnOpenSetting- ESC");
    }
    
    private void OnMove(InputAction.CallbackContext context)
