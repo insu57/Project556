@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,6 +24,7 @@ public class PlayerControl : MonoBehaviour
    private InputAction _reloadAction;
    private InputAction _openUIAction;
    private InputAction _openSettingAction;
+   private InputAction _scrollWheelAction;
    
    private PlayerManager _playerManager;
    private Camera _mainCamera;
@@ -60,6 +62,7 @@ public class PlayerControl : MonoBehaviour
       _reloadAction = map.FindAction("Reload");
       _openUIAction = map.FindAction("OpenUI");
       _openSettingAction = map.FindAction("OpenSetting");
+      _scrollWheelAction = map.FindAction("ScrollWheel");
       
       _uiControl = FindAnyObjectByType<UIControl>();
       _uiControl.Init(this);
@@ -84,6 +87,7 @@ public class PlayerControl : MonoBehaviour
       _reloadAction.performed += OnReload;
       _openUIAction.performed += OnOpenUI;
       _openSettingAction.performed += OnOpenSetting;
+      _scrollWheelAction.performed += OnScrollWheel;
       
       _moveAction.Enable();
       _jumpAction.Enable();
@@ -91,6 +95,7 @@ public class PlayerControl : MonoBehaviour
       _reloadAction.Enable();
       _openUIAction.Enable();
       _openSettingAction.Enable();
+      _scrollWheelAction.Enable();
    }
 
    private void OnDisable()
@@ -103,6 +108,7 @@ public class PlayerControl : MonoBehaviour
       _reloadAction.performed -= OnReload;
       _openUIAction.performed -= OnOpenUI;
       _openSettingAction.performed -= OnOpenSetting;
+      _scrollWheelAction.performed -= OnScrollWheel;
       
       _moveAction.Disable();
       _jumpAction.Disable();
@@ -110,6 +116,7 @@ public class PlayerControl : MonoBehaviour
       _reloadAction.Disable();
       _openUIAction.Disable();
       _openSettingAction.Disable();
+      _scrollWheelAction.Disable();
    }
 
    private void Update()
@@ -223,7 +230,6 @@ public class PlayerControl : MonoBehaviour
       if (_canClimb)
       {
          _rigidbody.linearVelocityY = _playerMoveVector.y * moveSpeed; 
-         //개선필요. -> 사다리 맨위에서 튀어나감. -> 어떤 식으로?
          _rigidbody.gravityScale = 0;
       }
       else
@@ -234,8 +240,8 @@ public class PlayerControl : MonoBehaviour
 
    public void BlockControl(bool isBlock)
    {
-      _canRotateArm = !isBlock;
-      if (isBlock)
+      _canRotateArm = !isBlock; //팔 회전 - block상태면 false
+      if (isBlock) //ActionMap 교체로 캐릭터 컨트롤 제한
       {
          _playerInput.SwitchCurrentActionMap("UI");
       }
@@ -245,30 +251,41 @@ public class PlayerControl : MonoBehaviour
       }
    }
    
-   private void OnOpenUI(InputAction.CallbackContext context)
+   private void OnOpenUI(InputAction.CallbackContext context) //플레이어 정보(인벤토리 창)
    {
-      BlockControl(true);
+      BlockControl(true); //컨트롤 입력 제한
       _uiControl.OnOpenUI();
    }
 
    private void OnOpenSetting(InputAction.CallbackContext context)
    {
-      Debug.Log("OnOpenSetting- ESC");
+      Debug.Log("OnOpenSetting- ESC"); //설정창
+   }
+
+   private void OnScrollWheel(InputAction.CallbackContext context)
+   {
+      Vector2 delta = context.ReadValue<Vector2>(); //마우스 휠 스크롤
+
+      if (_playerManager.CanItemInteract)
+      {
+         _playerManager.ScrollItemPickup(delta.y);
+      }
    }
    
-   private void OnMove(InputAction.CallbackContext context)
+   private void OnMove(InputAction.CallbackContext context) //플레이어 이동 입력
    {
-      _playerMoveVector = context.ReadValue<Vector2>();
+      _playerMoveVector = context.ReadValue<Vector2>();//Vector2 wasd 
       
       Vector3 playerScale = transform.localScale;
       
-      if (_playerMoveVector.x == 0 )
+      if (_playerMoveVector.x == 0 ) //x축 이동입력이 없을 때
       {
          OnPlayerMove?.Invoke(false);
       }
       else
       {
          playerScale.x = Mathf.Abs(playerScale.x) * Mathf.Sign(_playerMoveVector.x);
+         //입력에 따라 flip결정
          _isFlipped = _playerMoveVector.x < 0; //왼쪽입력 시 Flip
          transform.localScale = playerScale;
          OnPlayerMove?.Invoke(true);
@@ -287,7 +304,7 @@ public class PlayerControl : MonoBehaviour
       }
       else
       {
-         if (ctx.started)
+         if (ctx.started) //좌클릭 홀드일 때 연사, 때면 사격종료
          {
             _inShooting = true;
          }
@@ -298,35 +315,35 @@ public class PlayerControl : MonoBehaviour
       }
    }
 
-   private void Shoot()
+   private void Shoot() //사격(연사) 메서드
    {
-      if(!_playerManager.CheckIsAutomatic()) return;
-      if(!_canShoot) return;
-      if(!_inShooting) return;
+      if(!_playerManager.CheckIsAutomatic()) return;  //단발인 경우 return
+      if(!_canShoot) return; //사격 불가 시 return
+      if(!_inShooting) return; //사격 중 인지 check
       _playerManager.Shoot(_isFlipped, _shootAngle);
    }
    
-   private void OnJump(InputAction.CallbackContext ctx)
+   private void OnJump(InputAction.CallbackContext ctx) //점프입력 Space키
    {
-      if (ctx.performed && _isGrounded)
+      if (ctx.performed && _isGrounded) //땅에 있을 때
       {
          _rigidbody.AddForce(new Vector2(0f, jumpSpeed), ForceMode2D.Impulse);
       }
    }
 
-   private void OnReload(InputAction.CallbackContext ctx)
+   private void OnReload(InputAction.CallbackContext ctx) //재장전 입력 R키
    {
-      _canRotateArm = false;
-      _canShoot = false;
-      _inShooting = false;
-      OnPlayerReload?.Invoke();
+      _canRotateArm = false; //팔회전 불가
+      _canShoot = false; //사격 불가
+      _inShooting = false; //사격 중인 경우 중단
+      OnPlayerReload?.Invoke();//장전 이벤트 전달
    }
 
-   public void OnReloadEnd()
+   public void OnReloadEnd()//장전 종료시 호출
    {
       _canRotateArm = true;
       _canShoot = true;
-      _playerManager.Reload();
+      _playerManager.Reload(); //장전 애니메이션 종료시 장전 매커니즘 작동
    }
    
 }

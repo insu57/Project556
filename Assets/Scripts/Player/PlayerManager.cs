@@ -16,7 +16,7 @@ public class PlayerManager : MonoBehaviour
     private PlayerAnimation _playerAnimation;
     
     private int _currentHealth;
-    
+    public bool CanItemInteract { get; private set; }
     
     private void Awake()
     {
@@ -40,7 +40,7 @@ public class PlayerManager : MonoBehaviour
         return currentWeaponData.IsOneHanded;
     }
     
-    public void Shoot(bool isFlipped, float shootAngle)
+    public void Shoot(bool isFlipped, float shootAngle) //사격
     {
         _playerWeapon.Shoot(isFlipped, shootAngle);
     }
@@ -50,19 +50,19 @@ public class PlayerManager : MonoBehaviour
         _playerWeapon.Reload();
     }
 
-    private void WeaponChange(WeaponData newWeaponData)
+    private void WeaponChange(WeaponData newWeaponData) //무기 교체
     {
-        WeaponType weaponType = newWeaponData.WeaponType;
+        WeaponType weaponType = newWeaponData.WeaponType; //무기 타입
        
-        if (weaponType == WeaponType.Pistol)
+        if (weaponType == WeaponType.Pistol) //한손무기
         {
-            oneHandSprite.sprite = newWeaponData.ItemSprite;
+            oneHandSprite.sprite = newWeaponData.ItemSprite; //스프라이트 위치
             oneHandSprite.enabled = true;
             twoHandSprite.enabled = false;
             oneHandMuzzleTransform.localPosition = newWeaponData.MuzzlePosition;
-            _playerWeapon.SetMuzzleTransform(oneHandMuzzleTransform);
+            _playerWeapon.SetMuzzleTransform(oneHandMuzzleTransform); //총구위치 설정
         }
-        else
+        else //양손무기
         {
             twoHandSprite.sprite = newWeaponData.ItemSprite;
             twoHandSprite.enabled = true;
@@ -71,16 +71,28 @@ public class PlayerManager : MonoBehaviour
             _playerWeapon.SetMuzzleTransform(twoHandMuzzleTransform);
         }
         
-        currentWeaponData = newWeaponData;
-        _playerWeapon.Init(_uiManager, currentWeaponData);
-        _playerAnimation.ChangeWeapon(weaponType);
+        currentWeaponData = newWeaponData; //현재 무기데이터 
+        _playerWeapon.Init(_uiManager, currentWeaponData); //초기화
+        _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
         
     }
 
+    public void ScrollItemPickup(float y)
+    {
+        _uiManager.ScrollItemPickup(y);//ItemPickup UI 스크롤(획득/장착 등...)
+    }
+    
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Item"))
         {
+            //pick up ui
+            CanItemInteract = true;
+            Vector2 pos = Camera.main.WorldToScreenPoint(other.transform.position);
+            
+            _uiManager.ShowItemPickup(true, pos);
+            
+            return;//임시 -> 인벤토리(가방)에 넣기(상호작용 키 누르면)
             ItemPickUp newItem = other.GetComponent<ItemPickUp>();
             if (newItem)
             {
@@ -91,6 +103,15 @@ public class PlayerManager : MonoBehaviour
                 }
             }
             Destroy(other.gameObject);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Item"))
+        {
+            CanItemInteract = false;
+            _uiManager.ShowItemPickup(false, Vector2.zero);
         }
     }
 }

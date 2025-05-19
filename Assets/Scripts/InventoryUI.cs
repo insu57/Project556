@@ -5,30 +5,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class InventoryItem
-{
-    private IItemData _itemData;
-
-    private int _idx;
-
-    public Guid Id { get; }
-    public int Width => _itemData.ItemWidth;
-    public int Height => _itemData.ItemHeight;
-    public Vector2 SizeVector => new(_itemData.ItemWidth, _itemData.ItemHeight);
-    public int Idx => _idx;
-    
-    public InventoryItem(IItemData itemData)
-    {
-        this._itemData = itemData;
-        Id = Guid.NewGuid(); //초기화따로...?
-    }
-    public void MoveItem(int idx)
-    {
-        //슬롯 위치 변경
-        _idx = idx;
-    }
-}
-
 public class InventoryUI : MonoBehaviour
 {
     //없으면 생성 및 초기화, 있으면 활성/비활성?

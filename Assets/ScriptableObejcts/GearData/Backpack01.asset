@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6081b0486af0a9c43af90081dd4bab44, type: 3}
+  m_Name: Backpack01
+  m_EditorClassIdentifier: 
+  itemID: 
+  itemName: "\uAD70\uC6A9\uBC30\uB0AD01"
+  gearType: 0
+  itemSprite: {fileID: 6013620646928456158, guid: e955b58657ea4aa4ba01f05402d3666e, type: 3}
+  pickUpColliderOffset: {x: 0, y: 0}
+  pickUpColliderSize: {x: 0, y: 0}
+  itemWidth: 4
+  itemHeight: 3
+  slotWidth: 4
+  slotHeight: 4

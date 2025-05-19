@@ -66,6 +66,8 @@ public class UIControl : MonoBehaviour
     private void OnCloseUI(InputAction.CallbackContext context) //Tab key
     {
         //
+        _uiManager.OpenPlayerUI(false);
     }
+
     
 }
