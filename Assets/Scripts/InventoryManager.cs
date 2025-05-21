@@ -3,8 +3,23 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    private  List<Inventory> inventoryList = new List<Inventory>();
+    private InventoryItem _headGear;
+    private InventoryItem _bodyArmor;
+    private InventoryItem _chestRig;
+    private InventoryItem _primaryWeapon;
+    private InventoryItem _secondaryWeapon;
+    private InventoryItem _backpack;
     
+    private UIManager _uiManager;
+
+
+    public void Init(UIManager uiManager)
+    {
+        _uiManager = uiManager;
+    }
     
-    
+    private void Awake()
+    {
+        
+    }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class InventoryItem
 {
     private IItemData _itemData;
-
+    
     private int _idx;
 
     public Guid Id { get; }
@@ -18,6 +18,7 @@ public class InventoryItem
         this._itemData = itemData;
         Id = Guid.NewGuid(); 
         //초기화따로...? pickUp 아이템 따로?
+        
     }
     public void MoveItem(int idx)
     {

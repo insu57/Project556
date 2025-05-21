@@ -32,24 +32,6 @@ public class InventoryUI : MonoBehaviour
     //private static readonly Vector2 StartMinPos = new Vector2(0, 0);
     //private static readonly Vector2 StartMaxPos = new Vector2(100, -100);
     //private static readonly Vector2 StartImagePos = new Vector2(50, -50);
-    
-    private struct SlotData
-    {
-        public bool IsEmpty;
-        public readonly Vector2 MinPosition;
-        public readonly Vector2 MaxPosition;
-        public readonly Vector2 ImagePosition;
-        public Guid Id;
-        
-        public SlotData( Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition)
-        {
-            IsEmpty = true;
-            MinPosition = minPosition;
-            MaxPosition = maxPosition;
-            ImagePosition = imagePosition;
-            Id = Guid.Empty;
-        }
-    }
         
     private void Awake()
     {

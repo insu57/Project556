@@ -14,6 +14,7 @@ public class PlayerManager : MonoBehaviour
     private UIManager _uiManager;
     private PlayerWeapon _playerWeapon;
     private PlayerAnimation _playerAnimation;
+    private InventoryManager _inventoryManager;
     
     private int _currentHealth;
     public bool CanItemInteract { get; private set; }
@@ -23,6 +24,8 @@ public class PlayerManager : MonoBehaviour
         _uiManager = FindFirstObjectByType<UIManager>();
         _playerAnimation = GetComponent<PlayerAnimation>();
         _playerWeapon = GetComponent<PlayerWeapon>();
+        _inventoryManager = GetComponent<InventoryManager>();
+        _inventoryManager.Init(_uiManager);
     }
 
     private void Start()

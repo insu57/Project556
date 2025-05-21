@@ -1,14 +1,31 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text ammoText;
     [SerializeField] private GameObject playerUI;
     [SerializeField] private RectTransform pickupUI;
+    
     [SerializeField] private TMP_Text pickupText;
     [SerializeField] private TMP_Text equipText;
+    [SerializeField] private float pickupTextSize = 50f;
     [SerializeField] private RectTransform itemInteractUI;
+
+    [Header("Player Inventory")]
+    [SerializeField] private RectTransform contentRT;
+    [SerializeField] private float defaultHeight = 900f;
+    [SerializeField] private Image headwear;
+    [SerializeField] private Image eyewear;
+    [SerializeField] private Image bodyArmor;
+    [SerializeField] private Image primaryWeapon;
+    [SerializeField] private Image secondaryWeapon;
+    [SerializeField] private Image chestRig;
+    [SerializeField] private Image backpack;
+    [SerializeField] private List<Image> pockets = new List<Image>();
+    
     public void UpdateAmmoText(int currentAmmo)
     {
         ammoText.text = currentAmmo.ToString();

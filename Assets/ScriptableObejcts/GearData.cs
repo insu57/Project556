@@ -16,6 +16,8 @@ public class GearData : BaseItemDataSO
     [SerializeField] private int slotWidth;
     [SerializeField] private int slotHeight;
     
+    [SerializeField] private GameObject slotPrefab;
+    [SerializeField] private bool isPartitioned;
     public override string ItemID => itemID;
     public override string ItemName => itemName;
     public GearType GearType => gearType;
@@ -27,5 +29,7 @@ public class GearData : BaseItemDataSO
     public int SlotWidth => slotWidth;
     public int SlotHeight => slotHeight;
     
+    public GameObject SlotPrefab => slotPrefab;
+    public bool IsPartitioned => isPartitioned;
     
 }
