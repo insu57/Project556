@@ -43,6 +43,8 @@ public enum GearType
     UnarmoredRig,
     HeadWear,
     EyeWear,
+    Weapon,
+    None,
 }
 
 public class EnumManager : MonoBehaviour

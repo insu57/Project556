@@ -15,12 +15,12 @@ MonoBehaviour:
   itemID: 
   itemName: TT Raid Pack Mk3
   gearType: 0
-  itemSprite: {fileID: 0}
+  itemSprite: {fileID: 21300000, guid: b4740d989e17ace4f804f744eac58922, type: 3}
   pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0, y: 0}
   itemWidth: 8
-  itemHeight: 8
+  itemHeight: 10
   slotWidth: 8
-  slotHeight: 8
-  slotPrefab: {fileID: 0}
+  slotHeight: 10
+  slotPrefab: {fileID: 5480171855282475857, guid: 11669c409bb7ca041a08e27817f3eb57, type: 3}
   isPartitioned: 0

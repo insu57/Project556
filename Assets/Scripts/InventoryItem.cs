@@ -12,6 +12,7 @@ public class InventoryItem
     public int Height => _itemData.ItemHeight;
     public Vector2 SizeVector => new(_itemData.ItemWidth, _itemData.ItemHeight);
     public int Idx => _idx;
+    public IItemData ItemData => _itemData;
     
     public InventoryItem(IItemData itemData)
     {
@@ -20,6 +21,7 @@ public class InventoryItem
         //초기화따로...? pickUp 아이템 따로?
         
     }
+
     public void MoveItem(int idx)
     {
         //슬롯 위치 변경
