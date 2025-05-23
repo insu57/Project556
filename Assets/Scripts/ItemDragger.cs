@@ -11,6 +11,9 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
     private CanvasGroup _canvasGroup;
+    //private Image
+    private Transform _itemDefaultParent;
+    private Transform _itemDraggingParent;
     
     private InventoryUI _inventoryUI;
     private InventoryItem _item;
@@ -47,6 +50,9 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemImage.sprite = itemData.ItemSprite;
 
         _id = id;
+        
+        _itemDefaultParent = transform.parent;
+        _itemDraggingParent = _inventoryUI.transform;
     }
 
     private (Vector2, Guid) GetFirstSlotPos(Vector2 mousePos)
@@ -70,6 +76,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     {
         _canvasGroup.blocksRaycasts = false;
         _pointerDownPos = _itemRT.anchoredPosition;
+        //_itemImage.maskable = false;
+        transform.SetParent(_itemDraggingParent);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -83,6 +91,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos))
         {
+            //다른 RT에서도 인벤토리 슬롯 구분... 위의 globalMouse로 check...-> 어떤 인벤인지...
             //_inventoryUI
             Debug.Log(GetFirstSlotPos(localPos).Item1);
             
@@ -92,6 +101,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        transform.SetParent(_itemDefaultParent);
+        
         //check position...
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos
@@ -101,6 +112,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         
         _inventoryUI.DisableSlotAvailable();
         _canvasGroup.blocksRaycasts = true;
+        //_itemImage.maskable = true;
+       
     }
 
     

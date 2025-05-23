@@ -54,7 +54,7 @@ public class PlayerControl : MonoBehaviour
       _playerManager = GetComponent<PlayerManager>();
       _rigidbody = GetComponent<Rigidbody2D>();
       
-      _playerInput = GetComponent<PlayerInput>();
+      _playerInput = GetComponent<PlayerInput>(); //PlayerInput - Player Action Map
       var map = _playerInput.actions.FindActionMap("Player");
       _moveAction = map.FindAction("Move");
       _jumpAction = map.FindAction("Jump");
@@ -64,22 +64,22 @@ public class PlayerControl : MonoBehaviour
       _openSettingAction = map.FindAction("OpenSetting");
       _scrollWheelAction = map.FindAction("ScrollWheel");
       
-      _uiControl = FindAnyObjectByType<UIControl>();
-      _uiControl.Init(this);
+      _uiControl = FindAnyObjectByType<UIControl>(); //UIControl
+      _uiControl.Init(this); //초기화
    }
 
    private void Start()
    {
       _mainCamera = Camera.main;
-      _baseRArmPosition = rightArm.transform.localPosition;
+      _baseRArmPosition = rightArm.transform.localPosition; 
       _colliders = GetComponents<Collider2D>();
       _groundMask = LayerMask.GetMask("Ground");
-      _climbMask = LayerMask.GetMask("Climbing");//선언과 함께?
+      _climbMask = LayerMask.GetMask("Climbing");
    }
 
    private void OnEnable()
    {
-      _moveAction.performed += OnMove;
+      _moveAction.performed += OnMove; //InputAction 이벤트처리
       _moveAction.canceled += OnMove;
       _jumpAction.performed += OnJump;
       _shootAction.started += OnShoot;
@@ -154,12 +154,12 @@ public class PlayerControl : MonoBehaviour
       //장전 등 몇몇 행동에서는 안움직여야한다.
       if (!_canRotateArm) return;
 
-      bool isOneHanded = _playerManager.CheckIsOneHanded();
+      bool isOneHanded = _playerManager.CheckIsOneHanded(); //한손무기-양손무기 인지 체크
 
-      Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+      Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
       mousePos.z = 0;
 
-      Vector2 direction;
+      Vector2 direction; //방향 계산
       if (isOneHanded)
       {
          direction = mousePos - rightArm.transform.position;
@@ -172,9 +172,9 @@ public class PlayerControl : MonoBehaviour
       }
  
       
-      float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+      float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg; //팔 - 마우스 각도 계산
 
-      if (_isFlipped) //좌측
+      if (_isFlipped) //좌측 flip에 맞게 계산
       {
          if (angle > 0)
          {
@@ -188,7 +188,7 @@ public class PlayerControl : MonoBehaviour
 
       if (isOneHanded)
       {
-         angle = Mathf.Clamp(angle, -60f, 60f);
+         angle = Mathf.Clamp(angle, -60f, 60f); //각도제한
       
          _shootAngle = angle;
          rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);

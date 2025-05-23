@@ -32,7 +32,7 @@ public class InventoryUI : MonoBehaviour
     //private static readonly Vector2 StartMinPos = new Vector2(0, 0);
     //private static readonly Vector2 StartMaxPos = new Vector2(100, -100);
     //private static readonly Vector2 StartImagePos = new Vector2(50, -50);
-        
+    List<RectTransform> slots = new List<RectTransform>();
     private void Awake()
     {
         InventoryGridRT = inventoryGrid.GetComponent<RectTransform>();
@@ -63,16 +63,18 @@ public class InventoryUI : MonoBehaviour
         {
             for (int x = 0; x < inventoryXSize; x++)
             {
-                Instantiate(inventorySlotPrefab, inventoryGrid.transform);
+                RectTransform slotRt = Instantiate(inventorySlotPrefab, inventoryGrid.transform)
+                    .GetComponent<RectTransform>();
+                //시발
+                slots.Add(slotRt);
                 
                 Vector2 offset = new Vector2(x, y) * cellOffset;
                 Vector2 minPos = startMinPos + offset;
                 Vector2 maxPos = startMaxPos + offset;
                 Vector2 imagePos = startImagePos + offset;
-                
                 SlotData slotData = new SlotData(minPos, maxPos, imagePos);
-                
                 _slotDataArray[x + y * inventoryXSize] = slotData;
+               
             } 
         }
         
@@ -130,6 +132,14 @@ public class InventoryUI : MonoBehaviour
     
     public Vector2 ItemMove(Vector2 originPos, Vector2 targetPos, Guid id)
     {
+        //test
+        int a = 0;
+        foreach (var slotRt in slots)
+        {
+            Debug.Log(a + " "+slotRt.anchoredPosition);
+            a++;
+        }
+        
         slotAvailable.enabled = false;
 
         //버그가...?
