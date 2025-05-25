@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
 
-public struct SlotData
+public class CellData
 {
     public bool IsEmpty;
+    public RectTransform CellRT;
     public readonly Vector2 MinPosition;
     public readonly Vector2 MaxPosition;
     public readonly Vector2 ImagePosition;
@@ -11,7 +12,7 @@ public struct SlotData
     public bool IsGearSlot;
     public GearType GearType;
     
-    public SlotData( Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition )
+    public CellData( Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition )
     {
         IsEmpty = true;
         MinPosition = minPosition;

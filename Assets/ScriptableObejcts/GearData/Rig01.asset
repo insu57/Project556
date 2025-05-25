@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6081b0486af0a9c43af90081dd4bab44, type: 3}
+  m_Name: Rig01
+  m_EditorClassIdentifier: 
+  itemID: 
+  itemName: 
+  gearType: 3
+  itemSprite: {fileID: 21300000, guid: 6427b476737c63148a95a020bddc45f6, type: 3}
+  pickUpColliderOffset: {x: 0, y: 0}
+  pickUpColliderSize: {x: 0, y: 0}
+  itemWidth: 3
+  itemHeight: 2
+  slotWidth: 0
+  slotHeight: 0
+  slotPrefab: {fileID: 7321939041111035002, guid: 3e14dad52dfba0d4496ac34ffee8edf3, type: 3}
+  isPartitioned: 1

@@ -18,7 +18,7 @@ public class InventoryUI : MonoBehaviour
     public float SlotSize => slotSize;
     public RectTransform InventoryGridRT { get; private set; }
     
-    private SlotData[] _slotDataArray;
+    private CellData[] _slotDataArray;
     //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
     private Dictionary<Guid, InventoryItem> _itemDataDictionary = new Dictionary<Guid, InventoryItem>(); 
     
@@ -50,7 +50,7 @@ public class InventoryUI : MonoBehaviour
         _gridLayout.cellSize = new Vector2(slotSize, slotSize);
         //Index 0 (pivot 0.5, 0.5) -> 50, -50
         // (0, 0) ~ (100, -100) Slot RectTransform 범위...
-        _slotDataArray = new SlotData[inventoryXSize * inventoryYSize];
+        _slotDataArray = new CellData[inventoryXSize * inventoryYSize];
         
         //Vector2 cellOffset = new Vector2(100, -100);
         //가변 가능한 슬롯 크기로 변경(기존 100 고정)
@@ -72,7 +72,7 @@ public class InventoryUI : MonoBehaviour
                 Vector2 minPos = startMinPos + offset;
                 Vector2 maxPos = startMaxPos + offset;
                 Vector2 imagePos = startImagePos + offset;
-                SlotData slotData = new SlotData(minPos, maxPos, imagePos);
+                CellData slotData = new CellData(minPos, maxPos, imagePos);
                 _slotDataArray[x + y * inventoryXSize] = slotData;
                
             } 
@@ -125,7 +125,8 @@ public class InventoryUI : MonoBehaviour
 
     private void SetSlot(int idx , bool isEmpty, Guid id) //아이템 이동 시 슬롯 설정
     {
-        ref var slotData = ref _slotDataArray[idx];
+        //ref var slotData = ref _slotDataArray[idx];
+        var slotData = _slotDataArray[idx];
         slotData.IsEmpty = isEmpty;
         slotData.Id = isEmpty ? Guid.Empty : id;
     }
@@ -136,7 +137,7 @@ public class InventoryUI : MonoBehaviour
         int a = 0;
         foreach (var slotRt in slots)
         {
-            Debug.Log(a + " "+slotRt.anchoredPosition);
+            //Debug.Log(a + " "+slotRt.anchoredPosition);
             a++;
         }
         
@@ -165,7 +166,7 @@ public class InventoryUI : MonoBehaviour
                 for (int w = 0; w < width; w++)
                 {
                     int idx = targetFirstIdx + h * inventoryXSize + w;
-                    Debug.Log("Drag!...Idx: " + idx);//실제 이동하는 위치 -> 마우스 기준, SlotAvailable -> 서로 다름...(수정 필)
+                    //  Debug.Log("Drag!...Idx: " + idx);//실제 이동하는 위치 -> 마우스 기준, SlotAvailable -> 서로 다름...(수정 필)
                     SetSlot(idx, false, id);
                 }
             }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private Transform _itemDefaultParent;
     private Transform _itemDraggingParent;
     
+    private InventoryManager _inventoryManager;
     private InventoryUI _inventoryUI;
     private InventoryItem _item;
     //private IItemData _itemData;
@@ -25,10 +27,11 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     //[SerializeField] private Image outline;
     private Image _itemImage;
     [SerializeField] private Image highlight;
-
     private float _slotSize;
+
+    //test
+    [SerializeField] private List<RectTransform> panels;
     
-    //anchor min 0.5, 0.5 max 0.5, 0.5 pivot 0.5, 0.5  
     private void Awake()
     {
         _itemRT = GetComponent<RectTransform>();
@@ -39,6 +42,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
     public void Init(IItemData itemData, Guid id)
     {
+        //_inventoryManager = GetComponentInParent<InventoryManager>();
+        
         _inventoryUI = GetComponentInParent<InventoryUI>();
         _slotSize = _inventoryUI.SlotSize;
         _inventoryRT = _inventoryUI.InventoryGridRT;
@@ -78,6 +83,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _pointerDownPos = _itemRT.anchoredPosition;
         //_itemImage.maskable = false;
         transform.SetParent(_itemDraggingParent);
+        
+        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -93,9 +100,18 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         {
             //다른 RT에서도 인벤토리 슬롯 구분... 위의 globalMouse로 check...-> 어떤 인벤인지...
             //_inventoryUI
-            Debug.Log(GetFirstSlotPos(localPos).Item1);
+            //Debug.Log(GetFirstSlotPos(localPos).Item1);
             
             _inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos));
+        }
+        
+        //test
+        foreach (var panel in panels)
+        {
+            if (RectTransformUtility.RectangleContainsScreenPoint(panel, eventData.position, null))
+            {
+                Debug.Log("RectContainsScreenPoint!: "+panel+" Position: "+eventData.position);
+            }
         }
     }
 

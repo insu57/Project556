@@ -174,8 +174,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab361740db9540d4ebfa5a9f2726c55c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 0
-  height: 0
+  slotDefinitions:
+  - slotRT: {fileID: 7500113826402882753}
+    cellCount: {x: 8, y: 8}
 --- !u!1001 &251356604692902304
 PrefabInstance:
   m_ObjectHideFlags: 0

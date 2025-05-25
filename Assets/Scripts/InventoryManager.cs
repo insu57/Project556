@@ -2,29 +2,37 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    private InventoryItem _headwearData;
-    private SlotData _headwearSlot;
-    private InventoryItem _bodyArmorData;
-    private SlotData _bodyArmorSlot;
-    private InventoryItem _chestRigData;
-    private SlotData _chestRigSlot;
-    private InventoryItem _primaryWeaponData;
-    private SlotData _primaryWeaponSlot;
-    private InventoryItem _secondaryWeaponData;
-    private SlotData _secondaryWeaponSlot;
-    private InventoryItem _backpackData;
-    private SlotData _backpackSlot;
-
-    private SlotData[] _pocketSlots = new SlotData[4];
-    private Dictionary<Guid, SlotData> _pocketItemDict = new Dictionary<Guid, SlotData>();
+    [SerializeField] private float slotSize = 50f;
     
-    private UIManager _uiManager;
-
+    //Left Panel
+    private InventoryItem _headwearData;
+    private CellData _headwearSlot;
+    private InventoryItem _bodyArmorData;
+    private CellData _bodyArmorSlot;
+    private InventoryItem _primaryWeaponData;
+    private CellData _primaryWeaponSlot;
+    private InventoryItem _secondaryWeaponData;
+    private CellData _secondaryWeaponSlot;
+    //Middle Panel
+    private InventoryItem _chestRigData;
+    private CellData _chestRigSlot;
+    private InventoryItem _backpackData;
+    private CellData _backpackSlot;
     private Inventory _rigInventory;
     private Inventory _backpackInventory;
+    //Right Panel
+    private Inventory _lootInventory;
+    
+    private CellData[] _pocketSlots = new CellData[4];
+    private Dictionary<Guid, CellData> _pocketItemDict = new Dictionary<Guid, CellData>();
+    
+    
+    private UIManager _uiManager;
+    
     //private Inventory 
     //test
     [SerializeField] private GearData raidPack01Test;
@@ -48,6 +56,15 @@ public class InventoryManager : MonoBehaviour
             //슬롯 empty false로
             _uiManager.SetBackpackSlot(backpackData);
         }
+    }
+
+    public bool CheckSlotAvailable()
+    {
+        //좌측 인벤토리(장비 슬롯)
+        //중간 인벤토리(리그, 가방 인벤토리, 주머니 슬롯 4개)
+        //우측 인벤토리(적 시체, 상자)
+        //1. 어떤 인벤토리인지...
+        return false;
     }
     
     private void Start()

@@ -1,19 +1,32 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Inventory: MonoBehaviour
 {
-    [SerializeField] private float width;
-    [SerializeField] private float height;
-
-    //private SlotData[] _slotDataArray;
-    //private Dictionary<Guid, InventoryItem> _inventoryItemDict = new Dictionary<Guid, InventoryItem>();
-    private List<SlotData[]> _slotDataArrayList = new List<SlotData[]>();
-    private List<Dictionary<Guid, InventoryItem>> _itemDataDictList = new List<Dictionary<Guid, InventoryItem>>();
-    
-    public void Init()
+    [Serializable]
+    private struct SlotInfo
     {
-        //
+        public RectTransform slotRT;
+        public Vector2Int cellCount;
     }
+    
+    [SerializeField] private List<SlotInfo> slotDefinitions = new List<SlotInfo>();
+    private RectTransform _inventoryRT;
+    
+    private List<CellData> _cellData = new List<CellData>();
+    private Dictionary<Guid, InventoryItem> _itemDict = new Dictionary<Guid, InventoryItem>();
+    
+    public float Width { private set; get; }
+    public float Height { private set; get; }
+
+    private void Awake()
+    {
+        _inventoryRT = GetComponent<RectTransform>();
+        Width = _inventoryRT.rect.width;
+        Height = _inventoryRT.rect.height;
+        
+    }
+    
 }

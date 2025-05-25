@@ -15,16 +15,21 @@ public class UIManager : MonoBehaviour
     [SerializeField] private float pickupTextSize = 50f;
     [SerializeField] private RectTransform itemInteractUI;
 
-    [SerializeField] private float slotSize = 50f;
+    [SerializeField, Space] private float slotSize = 50f;
     
     [Header("Player Inventory")]
     //[SerializeField] private RectTransform contentRT;
     //[SerializeField] private float defaultHeight = 900f;
+    [Header("Left Panel")]
+    [SerializeField] private RectTransform leftPanel;
     [SerializeField] private Image headwear;
     [SerializeField] private Image eyewear;
     [SerializeField] private Image bodyArmor;
     [SerializeField] private Image primaryWeapon;
     [SerializeField] private Image secondaryWeapon;
+    
+    [Header("Middle Panel")]
+    [SerializeField] private RectTransform middlePanel;
     [SerializeField] private Image chestRig;
     [SerializeField] private RectTransform chestRigRT;
     [SerializeField] private RectTransform rigSlotParent;
@@ -35,8 +40,14 @@ public class UIManager : MonoBehaviour
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
     private float _middlePanelItemPadding; //slotSize * 2
-    [SerializeField] private List<Image> pockets = new List<Image>();
-
+    [SerializeField, Space] private List<Image> pockets = new List<Image>();
+    
+    [Header("Right Panel")]
+    [SerializeField] private RectTransform rightPanel;
+    
+    [SerializeField, Space] private Image slotAvailable;
+    //아니면 슬롯 색상 변경?
+    
     private void Awake()
     {
         _middlePanelItemPadding = slotSize * 2;
@@ -79,6 +90,11 @@ public class UIManager : MonoBehaviour
         itemInteractUI.anchoredPosition =  uiPos;
     }
 
+    public void CheckRectTransform(Vector2 position)
+    {
+        
+    }
+    
     public void SetRigSlot(GameObject slotPrefab)
     {
         if (_rigSlotInstance)
@@ -100,8 +116,9 @@ public class UIManager : MonoBehaviour
             GameObject slotPrefab = backpackData.SlotPrefab;
             backpack.sprite = backpackData.ItemSprite;
             _backpackSlotInstance = Instantiate(slotPrefab, backpackSlotParent);
-            float slotPrefabHeight = 
-                slotPrefab.GetComponent<RectTransform>().rect.height - _middlePanelItemPadding;
+            Inventory inventory = _backpackSlotInstance.GetComponent<Inventory>();
+            float slotPrefabHeight = inventory.Height;
+                //slotPrefab.GetComponent<RectTransform>().rect.height - _middlePanelItemPadding;
             if (slotPrefabHeight > 0)
             {
                 backpackRT.sizeDelta = new Vector2(backpackRT.sizeDelta.x, minMiddlePanelItemHeight + slotPrefabHeight);
