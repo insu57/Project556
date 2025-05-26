@@ -13,6 +13,7 @@ public class Inventory: MonoBehaviour
     }
     
     [SerializeField] private List<SlotInfo> slotDefinitions = new List<SlotInfo>();
+    [SerializeField] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
     private List<CellData> _cellData = new List<CellData>();

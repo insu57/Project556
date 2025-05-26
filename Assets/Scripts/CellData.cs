@@ -3,23 +3,34 @@ using UnityEngine;
 
 public class CellData
 {
-    public bool IsEmpty;
-    public RectTransform CellRT;
-    public readonly Vector2 MinPosition;
-    public readonly Vector2 MaxPosition;
-    public readonly Vector2 ImagePosition;
-    public Guid Id;
-    public bool IsGearSlot;
-    public GearType GearType;
-    
-    public CellData( Vector2 minPosition, Vector2 maxPosition, Vector2 imagePosition )
+    private Vector2 CellOffset => new Vector2(CellRT.sizeDelta.x, -CellRT.sizeDelta.y) / 2;
+    public bool IsEmpty { private set; get; }
+    public RectTransform CellRT { private set; get; }
+    public Vector2 MinPosition => CellRT.anchoredPosition - CellOffset;
+    public Vector2 MaxPosition => CellRT.anchoredPosition + CellOffset;
+    public Vector2 ImagePosition => CellRT.anchoredPosition ;
+    public Guid Id { private set; get; }
+    public bool IsGearSlot { private set; get; }
+    public GearType GearType { private set; get; }
+
+    public CellData( RectTransform cellRT )
     {
         IsEmpty = true;
-        MinPosition = minPosition;
-        MaxPosition = maxPosition;
-        ImagePosition = imagePosition;
+        CellRT = cellRT;
         Id = Guid.Empty;
         IsGearSlot = false;
         GearType = GearType.None;
+    }
+
+    public void SetGearSlot(GearType gearType)
+    {
+        IsGearSlot = true;
+        GearType = gearType;
+    }
+
+    public void SetEmpty(bool isEmpty, Guid id)
+    {
+        IsEmpty = isEmpty;
+        Id = id;
     }
 }

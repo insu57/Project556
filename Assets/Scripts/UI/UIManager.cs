@@ -44,13 +44,25 @@ public class UIManager : MonoBehaviour
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
+    //[SerializeField] private RectTransform crateRT;
+    [SerializeField] private RectTransform crateSlotParent;
+    private GameObject _crateSlotInstance;
     
     [SerializeField, Space] private Image slotAvailable;
     //아니면 슬롯 색상 변경?
     
+    private List<RectTransform> _panels = new List<RectTransform>();
+    
+    //test
+    [SerializeField, Space] private ItemDragger test01;
+    [SerializeField] private ItemDragger test02;
+    
     private void Awake()
     {
         _middlePanelItemPadding = slotSize * 2;
+        _panels.Add(leftPanel);
+        _panels.Add(middlePanel);
+        _panels.Add(rightPanel);
     }
 
     public void UpdateAmmoText(int currentAmmo)
@@ -92,7 +104,13 @@ public class UIManager : MonoBehaviour
 
     public void CheckRectTransform(Vector2 position)
     {
-        
+        foreach (var panel in _panels)
+        {
+            if (RectTransformUtility.RectangleContainsScreenPoint(panel, position))
+            {
+                Debug.Log("CheckRectTransform:" + panel);
+            }
+        }
     }
     
     public void SetRigSlot(GameObject slotPrefab)

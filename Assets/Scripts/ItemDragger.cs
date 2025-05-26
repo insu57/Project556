@@ -17,7 +17,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private Transform _itemDraggingParent;
     
     private InventoryManager _inventoryManager;
-    private InventoryUI _inventoryUI;
+    //private InventoryUI _inventoryUI;
     private InventoryItem _item;
     //private IItemData _itemData;
     private int _widthSize;
@@ -40,13 +40,13 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemImage = GetComponent<Image>();
     }
 
-    public void Init(IItemData itemData, Guid id)
+    public void Init(IItemData itemData, Guid id, InventoryManager inventoryManager, RectTransform inventoryRT)
     {
         //_inventoryManager = GetComponentInParent<InventoryManager>();
-        
-        _inventoryUI = GetComponentInParent<InventoryUI>();
-        _slotSize = _inventoryUI.SlotSize;
-        _inventoryRT = _inventoryUI.InventoryGridRT;
+        //_inventoryUI = GetComponentInParent<InventoryUI>();
+        _inventoryManager = inventoryManager;
+        _slotSize = inventoryManager.SlotSize;
+        _inventoryRT = inventoryRT;
         
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
@@ -57,7 +57,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _id = id;
         
         _itemDefaultParent = transform.parent;
-        _itemDraggingParent = _inventoryUI.transform;
+        _itemDraggingParent = inventoryRT;
     }
 
     private (Vector2, Guid) GetFirstSlotPos(Vector2 mousePos)
@@ -102,7 +102,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
             //_inventoryUI
             //Debug.Log(GetFirstSlotPos(localPos).Item1);
             
-            _inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos));
+            //_inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos));
         }
         
         //test
@@ -124,9 +124,9 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
                 _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos
             )) return;
         var firstSlot = GetFirstSlotPos(localPos);
-        _itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id);
+        //_itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id);
         
-        _inventoryUI.DisableSlotAvailable();
+        //_inventoryUI.DisableSlotAvailable();
         _canvasGroup.blocksRaycasts = true;
         //_itemImage.maskable = true;
        

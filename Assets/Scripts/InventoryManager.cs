@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     [SerializeField] private float slotSize = 50f;
+    public float SlotSize => slotSize;
     
     //Left Panel
     private InventoryItem _headwearData;
@@ -33,7 +34,6 @@ public class InventoryManager : MonoBehaviour
     
     private UIManager _uiManager;
     
-    //private Inventory 
     //test
     [SerializeField] private GearData raidPack01Test;
     

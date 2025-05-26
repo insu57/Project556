@@ -18,7 +18,7 @@ public class InventoryUI : MonoBehaviour
     public float SlotSize => slotSize;
     public RectTransform InventoryGridRT { get; private set; }
     
-    private CellData[] _slotDataArray;
+    private CellData[] _cellDataArray;
     //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
     private Dictionary<Guid, InventoryItem> _itemDataDictionary = new Dictionary<Guid, InventoryItem>(); 
     
@@ -37,23 +37,15 @@ public class InventoryUI : MonoBehaviour
     {
         InventoryGridRT = inventoryGrid.GetComponent<RectTransform>();
         _gridLayout = inventoryGrid.GetComponent<GridLayoutGroup>();
-    }
-    
-    private void Start()
-    {
         
-        //인벤토리 크기에 따라 inventoryGrid크기 조절
-        //var gridRect = inventoryGrid.GetComponent<RectTransform>();
-
+        
         InventoryGridRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, inventoryXSize * slotSize);
         InventoryGridRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, inventoryYSize * slotSize);
         _gridLayout.cellSize = new Vector2(slotSize, slotSize);
-        //Index 0 (pivot 0.5, 0.5) -> 50, -50
-        // (0, 0) ~ (100, -100) Slot RectTransform 범위...
-        _slotDataArray = new CellData[inventoryXSize * inventoryYSize];
         
-        //Vector2 cellOffset = new Vector2(100, -100);
-        //가변 가능한 슬롯 크기로 변경(기존 100 고정)
+        _cellDataArray = new CellData[inventoryXSize * inventoryYSize];
+        
+        /*
         Vector2 cellOffset = new Vector2(slotSize, -slotSize);
         Vector2 startMaxPos = new Vector2(slotSize, -slotSize);
         Vector2 startMinPos = new Vector2(0, 0);
@@ -63,22 +55,38 @@ public class InventoryUI : MonoBehaviour
         {
             for (int x = 0; x < inventoryXSize; x++)
             {
-                RectTransform slotRt = Instantiate(inventorySlotPrefab, inventoryGrid.transform)
+                RectTransform slotRt = Instantiate(inventorySlotPrefab, InventoryGridRT)
                     .GetComponent<RectTransform>();
-                //시발
+                
                 slots.Add(slotRt);
                 
                 Vector2 offset = new Vector2(x, y) * cellOffset;
                 Vector2 minPos = startMinPos + offset;
                 Vector2 maxPos = startMaxPos + offset;
                 Vector2 imagePos = startImagePos + offset;
-                CellData slotData = new CellData(minPos, maxPos, imagePos);
-                _slotDataArray[x + y * inventoryXSize] = slotData;
+                CellData slotData = new CellData(slotRt);
+                _cellDataArray[x + y * inventoryXSize] = slotData;
                
             } 
         }
+        */
+    }
+    
+    private void Start()
+    {
+        
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(InventoryGridRT);
+        foreach (RectTransform child in InventoryGridRT)
+        {
+            Debug.Log($"Slot {child.name} pos = {child.anchoredPosition}");
+        }
+        
+        //인벤토리 크기에 따라 inventoryGrid크기 조절
+        //var gridRect = inventoryGrid.GetComponent<RectTransform>();
         
         //아이템 테스트
+        /*
         RectTransform itemRectTransform = item.GetComponent<RectTransform>();
         InventoryItem bandageItem = new InventoryItem(bandageData);
         bandageItem.MoveItem(23);
@@ -99,17 +107,29 @@ public class InventoryUI : MonoBehaviour
         int index = 23;
 
         SetSlot(index, false, bandageItem.Id);
-        itemRectTransform.anchoredPosition = _slotDataArray[index].ImagePosition;
+        itemRectTransform.anchoredPosition = _cellDataArray[index].ImagePosition;
         
         // 슬롯의 인덱스(위치)를 알면 아이템도 알고 아이템을 알면 슬롯도 ???? 단방향으로만 설계?
         
         SetSlot(1, false, pistolItem.Id);
         SetSlot(2, false, pistolItem.Id);
-        itemPistolRT.anchoredPosition = (_slotDataArray[1].MinPosition + _slotDataArray[2].MaxPosition) / 2;
+        itemPistolRT.anchoredPosition = (_cellDataArray[1].MinPosition + _cellDataArray[2].MaxPosition) / 2;
         //anchor?
         
         //NxM 인벤토리(N*M만큼 Cell생성), AxB크기 아이템, 드래그 이동(마우스 입력처리), 칸 점유 정보
         //i, j -> 100, -100
+        */
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            for (int i = 0; i < _cellDataArray.Length; i++)
+            {
+                Debug.Log($"CellData({i}): "+_cellDataArray[i].MinPosition + " "  + _cellDataArray[i].MaxPosition + " "  + _cellDataArray[i].ImagePosition);
+            }
+        }
     }
 
     private int GetSlotIndex(Vector2 pos)
@@ -126,9 +146,11 @@ public class InventoryUI : MonoBehaviour
     private void SetSlot(int idx , bool isEmpty, Guid id) //아이템 이동 시 슬롯 설정
     {
         //ref var slotData = ref _slotDataArray[idx];
-        var slotData = _slotDataArray[idx];
-        slotData.IsEmpty = isEmpty;
-        slotData.Id = isEmpty ? Guid.Empty : id;
+        var slotData = _cellDataArray[idx];
+        //slotData.IsEmpty = isEmpty;
+        //slotData.Id = isEmpty ? Guid.Empty : id;
+
+        slotData.SetEmpty(isEmpty, isEmpty ? Guid.Empty : id);
     }
     
     public Vector2 ItemMove(Vector2 originPos, Vector2 targetPos, Guid id)
@@ -172,8 +194,8 @@ public class InventoryUI : MonoBehaviour
             }
 
             int targetEndIdx = targetFirstIdx + (width - 1) + (height - 1) * inventoryXSize;
-            Vector2 minPos = _slotDataArray[targetFirstIdx].MinPosition;
-            Vector2 maxPos = _slotDataArray[targetEndIdx].MaxPosition;
+            Vector2 minPos = _cellDataArray[targetFirstIdx].MinPosition;
+            Vector2 maxPos = _cellDataArray[targetEndIdx].MaxPosition;
             dragItem.MoveItem(targetFirstIdx);
             return (minPos + maxPos) / 2;
             //return minPos;
@@ -203,20 +225,20 @@ public class InventoryUI : MonoBehaviour
             for (int w = 0; w < dragItem.Width; w++)
             {
                 //
-                Vector2 pos = _slotDataArray[firstIdx].ImagePosition + new Vector2(w * slotSize, h * -slotSize);
+                Vector2 pos = _cellDataArray[firstIdx].ImagePosition + new Vector2(w * slotSize, h * -slotSize);
                 //아이템크기만큼 슬롯 체크
                 int slotIdx = GetSlotIndex(pos);
                 
-                if (slotIdx < 0 || (!_slotDataArray[slotIdx].IsEmpty && _slotDataArray[slotIdx].Id != dragItem.Id ))
+                if (slotIdx < 0 || (!_cellDataArray[slotIdx].IsEmpty && _cellDataArray[slotIdx].Id != dragItem.Id ))
                 {
                     
                     Debug.Log("unavailable! - Index: " + slotIdx);
-                    ShowSlotAvailable(_slotDataArray[firstIdx].MinPosition, dragItem.SizeVector, false);
+                    ShowSlotAvailable(_cellDataArray[firstIdx].MinPosition, dragItem.SizeVector, false);
                     return false;
                 }
             }
         }
-        ShowSlotAvailable(_slotDataArray[firstIdx].MinPosition, dragItem.SizeVector, true);
+        ShowSlotAvailable(_cellDataArray[firstIdx].MinPosition, dragItem.SizeVector, true);
         
         return true;
     }
