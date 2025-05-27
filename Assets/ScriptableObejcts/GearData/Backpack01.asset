@@ -22,5 +22,5 @@ MonoBehaviour:
   itemHeight: 5
   slotWidth: 5
   slotHeight: 5
-  slotPrefab: {fileID: 7321939041111035002, guid: d360443130c00684dbb211ea7e060f56, type: 3}
+  slotPrefab: {fileID: 5726686478635747400, guid: 678b666690819394f81d956156dac4ca, type: 3}
   isPartitioned: 0

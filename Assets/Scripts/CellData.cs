@@ -5,7 +5,7 @@ public class CellData
 {
     private Vector2 CellOffset => new Vector2(CellRT.sizeDelta.x, -CellRT.sizeDelta.y) / 2;
     public bool IsEmpty { private set; get; }
-    public RectTransform CellRT { private set; get; }
+    public RectTransform CellRT { get; }
     public Vector2 MinPosition => CellRT.anchoredPosition - CellOffset;
     public Vector2 MaxPosition => CellRT.anchoredPosition + CellOffset;
     public Vector2 ImagePosition => CellRT.anchoredPosition ;

@@ -36,12 +36,39 @@ public class InventoryManager : MonoBehaviour
     
     //test
     [SerializeField] private GearData raidPack01Test;
+    [SerializeField] private GearData rig01Test;
+    [SerializeField] private GameObject crate01Test;
+    
+    private void Start()
+    {
+        //test
+        InventoryItem raidPackItem = new InventoryItem(raidPack01Test);
+        SetBackpack(raidPackItem);
+        InventoryItem rig01TestItem = new InventoryItem(rig01Test);
+        SetRig(rig01TestItem);
+        
+        SetLootInventory(crate01Test);
+    }
     
     public void Init(UIManager uiManager)
     {
         _uiManager = uiManager;
     }
 
+    public void SetRig(InventoryItem rig)
+    {
+        _chestRigData = rig;
+        if (_chestRigData == null)
+        {
+            _uiManager.SetRigSlot(null);
+        }
+        else
+        {
+            GearData rigData = rig.ItemData as GearData;
+            _uiManager.SetRigSlot(rigData);
+        }
+    }
+    
     public void SetBackpack(InventoryItem backpack)
     {
         _backpackData = backpack;
@@ -58,6 +85,14 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void SetLootInventory(GameObject lootInventoryPrefab) //나중에 LootDataClass로 바꾸는것 감안할것
+    {
+        var lootInventory = lootInventoryPrefab.GetComponent<Inventory>();
+        _lootInventory = lootInventory;
+        
+        _uiManager.SetLootSlot(lootInventoryPrefab, lootInventory.Height);
+    }
+    
     public bool CheckSlotAvailable()
     {
         //좌측 인벤토리(장비 슬롯)
@@ -67,10 +102,5 @@ public class InventoryManager : MonoBehaviour
         return false;
     }
     
-    private void Start()
-    {
-        //test
-        InventoryItem raidPackItem = new InventoryItem(raidPack01Test);
-        SetBackpack(raidPackItem);
-    }
+    
 }

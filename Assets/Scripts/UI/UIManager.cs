@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -16,6 +17,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform itemInteractUI;
 
     [SerializeField, Space] private float slotSize = 50f;
+    private float _panelSlotPadding; //slotSize * 3
     
     [Header("Player Inventory")]
     //[SerializeField] private RectTransform contentRT;
@@ -30,28 +32,30 @@ public class UIManager : MonoBehaviour
     
     [Header("Middle Panel")]
     [SerializeField] private RectTransform middlePanel;
-    [SerializeField] private Image chestRig;
+    [SerializeField] private Image chestRigImage;
     [SerializeField] private RectTransform chestRigRT;
     [SerializeField] private RectTransform rigSlotParent;
     private GameObject _rigSlotInstance;
-    [SerializeField] private Image backpack;
+    [SerializeField] private Image backpackImage;
     [SerializeField] private RectTransform backpackRT;
     [SerializeField] private RectTransform backpackSlotParent;
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
-    private float _middlePanelItemPadding; //slotSize * 2
     [SerializeField, Space] private List<Image> pockets = new List<Image>();
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
-    //[SerializeField] private RectTransform crateRT;
-    [SerializeField] private RectTransform crateSlotParent;
-    private GameObject _crateSlotInstance;
+    //[SerializeField] private RectTransform lootSlotRT;\
+    [SerializeField] private RectTransform lootSlotParent;
+    [SerializeField] private float minLootSlotHeight = 800f;
+    
+    
+    private GameObject _lootSlotInstance;
     
     [SerializeField, Space] private Image slotAvailable;
     //아니면 슬롯 색상 변경?
     
-    private List<RectTransform> _panels = new List<RectTransform>();
+    private List<RectTransform> _panels = new List<RectTransform>(); //패널
     
     //test
     [SerializeField, Space] private ItemDragger test01;
@@ -59,7 +63,7 @@ public class UIManager : MonoBehaviour
     
     private void Awake()
     {
-        _middlePanelItemPadding = slotSize * 2;
+        _panelSlotPadding = slotSize * 3;
         _panels.Add(leftPanel);
         _panels.Add(middlePanel);
         _panels.Add(rightPanel);
@@ -113,13 +117,30 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    public void SetRigSlot(GameObject slotPrefab)
+    public void SetRigSlot(GearData rigData)
     {
         if (_rigSlotInstance)
         {
             Destroy(_rigSlotInstance);
         }
-        _rigSlotInstance = Instantiate(slotPrefab, rigSlotParent);
+
+        if (rigData)
+        {
+            GameObject slotPrefab = rigData.SlotPrefab;
+            chestRigImage.sprite = rigData.ItemSprite;
+            _rigSlotInstance = Instantiate(slotPrefab, rigSlotParent);
+            Inventory inventory = _rigSlotInstance.GetComponent<Inventory>();
+            float slotPrefabHeight = inventory.Height;
+            if (slotPrefabHeight > minMiddlePanelItemHeight)
+            {
+                chestRigRT.sizeDelta = new Vector2(chestRigRT.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+            }
+            else
+            {
+                chestRigRT.sizeDelta = new Vector2(chestRigRT.sizeDelta.x, minMiddlePanelItemHeight);
+            }
+        }
+        
         
     }
     public void SetBackpackSlot(GearData backpackData)
@@ -132,14 +153,15 @@ public class UIManager : MonoBehaviour
         if (backpackData)
         {
             GameObject slotPrefab = backpackData.SlotPrefab;
-            backpack.sprite = backpackData.ItemSprite;
+            backpackImage.sprite = backpackData.ItemSprite;
             _backpackSlotInstance = Instantiate(slotPrefab, backpackSlotParent);
+            //높이체크..?
             Inventory inventory = _backpackSlotInstance.GetComponent<Inventory>();
             float slotPrefabHeight = inventory.Height;
                 //slotPrefab.GetComponent<RectTransform>().rect.height - _middlePanelItemPadding;
-            if (slotPrefabHeight > 0)
+            if (slotPrefabHeight > minMiddlePanelItemHeight)
             {
-                backpackRT.sizeDelta = new Vector2(backpackRT.sizeDelta.x, minMiddlePanelItemHeight + slotPrefabHeight);
+                backpackRT.sizeDelta = new Vector2(backpackRT.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
             }
             else
             {
@@ -148,6 +170,28 @@ public class UIManager : MonoBehaviour
             //if()
         }
         
+    }
+
+    public void SetLootSlot(GameObject lootInventoryPrefab, float height)
+    {
+        if (_lootSlotInstance)
+        {
+            Destroy(_lootSlotInstance); //오브젝트 풀링처럼 관리? (한 스테이지에서는 루팅 인벤토리관련 메모리에?)
+        }
+
+        if (lootInventoryPrefab)
+        {
+            _lootSlotInstance = Instantiate(lootInventoryPrefab, lootSlotParent);
+            float slotPrefabHeight = height + _panelSlotPadding;
+            if (slotPrefabHeight > minLootSlotHeight)
+            {
+                lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
+            }
+            else
+            {
+                lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
+            }
+        }
     }
     
 }
