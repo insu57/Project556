@@ -171,7 +171,7 @@ public class InventoryUI : MonoBehaviour
             InventoryItem dragItem = _itemDataDictionary[id];
             int width = dragItem.Width;
             int height = dragItem.Height;
-            int originFirstIdx = dragItem.Idx;//?
+            int originFirstIdx = 0;//dragItem.Idx;//?
             int targetFirstIdx = GetSlotIndex(targetPos);
             //기존 슬롯 Empty
             for (int h = 0; h < height; h++)
@@ -196,7 +196,7 @@ public class InventoryUI : MonoBehaviour
             int targetEndIdx = targetFirstIdx + (width - 1) + (height - 1) * inventoryXSize;
             Vector2 minPos = _cellDataArray[targetFirstIdx].MinPosition;
             Vector2 maxPos = _cellDataArray[targetEndIdx].MaxPosition;
-            dragItem.MoveItem(targetFirstIdx);
+            //dragItem.MoveItem(targetFirstIdx);
             return (minPos + maxPos) / 2;
             //return minPos;
         }

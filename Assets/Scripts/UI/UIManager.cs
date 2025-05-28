@@ -41,7 +41,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform backpackSlotParent;
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
-    [SerializeField, Space] private List<Image> pockets = new List<Image>();
+    [SerializeField, Space] private RectTransform pocketsRT;
+    [SerializeField] private List<Image> pockets = new List<Image>();
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
@@ -56,17 +57,48 @@ public class UIManager : MonoBehaviour
     //아니면 슬롯 색상 변경?
     
     private List<RectTransform> _panels = new List<RectTransform>(); //패널
+    private List<RectTransform> _leftSlots = new List<RectTransform>();
+    private List<RectTransform> _midSlots = new List<RectTransform>();
     
     //test
     [SerializeField, Space] private ItemDragger test01;
     [SerializeField] private ItemDragger test02;
+    //[SerializeField] private BaseItemDataSO test01Data;
     
     private void Awake()
     {
         _panelSlotPadding = slotSize * 3;
+        
+        //수동추가?(번거롭고 실수가능) list로 직렬화?(구분안됨) 자식객체로?
+        //수동 -> 하나 추가/제거 할 때 문제... 인벤(데이터) UI 둘 다 수정 -> 간단하긴함
+        //panel RT -> panel 자식인 인벤토리 구분 -> 각 슬롯
         _panels.Add(leftPanel);
         _panels.Add(middlePanel);
         _panels.Add(rightPanel);
+        
+        _leftSlots.Add(headwear.rectTransform);
+        _leftSlots.Add(eyewear.rectTransform);
+        _leftSlots.Add(bodyArmor.rectTransform);
+        _leftSlots.Add(primaryWeapon.rectTransform);
+        _leftSlots.Add(secondaryWeapon.rectTransform);
+        
+        _midSlots.Add(chestRigRT);
+        _midSlots.Add(pocketsRT);
+        _midSlots.Add(backpackRT);
+        //test ItemDragger -> 초기화는 어떻게...?
+        //test01.Init(test01Data, );
+        
+        
+    }
+
+    public void InitLeftSlots()
+    {
+        
+    }
+
+    public void InitItemDragger()
+    {
+        
     }
 
     public void UpdateAmmoText(int currentAmmo)
@@ -108,11 +140,43 @@ public class UIManager : MonoBehaviour
 
     public void CheckRectTransform(Vector2 position)
     {
+        RectTransform matchPanel = null;
         foreach (var panel in _panels)
         {
             if (RectTransformUtility.RectangleContainsScreenPoint(panel, position))
             {
                 Debug.Log("CheckRectTransform:" + panel);
+                matchPanel = panel;
+            }
+        }
+
+        if (!matchPanel) return;
+        
+        if (matchPanel == leftPanel)
+        {
+            foreach (var slot in _leftSlots)
+            {
+                if (RectTransformUtility.RectangleContainsScreenPoint(slot, position))
+                {
+                    Debug.Log("CheckSlot LeftPanel:" + slot);
+                }
+            }
+        }
+        else if (matchPanel == middlePanel)
+        {
+            foreach (var slot in _midSlots)
+            {
+                if (RectTransformUtility.RectangleContainsScreenPoint(slot, position))
+                {
+                    Debug.Log("CheckSlot MidPanel:" + slot);
+                }
+            }  
+        }
+        else if (matchPanel == rightPanel)
+        {
+            if (RectTransformUtility.RectangleContainsScreenPoint(lootSlotParent, position))
+            {
+                Debug.Log("CheckSlot RightPanel:" + lootSlotParent);
             }
         }
     }
@@ -129,7 +193,7 @@ public class UIManager : MonoBehaviour
             GameObject slotPrefab = rigData.SlotPrefab;
             chestRigImage.sprite = rigData.ItemSprite;
             _rigSlotInstance = Instantiate(slotPrefab, rigSlotParent);
-            Inventory inventory = _rigSlotInstance.GetComponent<Inventory>();
+            Inventory inventory = _rigSlotInstance.GetComponent<Inventory>();//?
             float slotPrefabHeight = inventory.Height;
             if (slotPrefabHeight > minMiddlePanelItemHeight)
             {

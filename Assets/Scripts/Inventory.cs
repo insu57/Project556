@@ -10,16 +10,17 @@ public class Inventory: MonoBehaviour
     {
         public RectTransform slotRT;
         public Vector2Int cellCount;
+        public bool isGearSlot;
     }
     
     [SerializeField] private List<SlotData> slotDataList = new List<SlotData>();
-    [SerializeField] private RectTransform itemRT;
+    [SerializeField, Space] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
     //private List<CellData> _cellData = new List<CellData>();
    // private List<RectTransform> _slotList = new List<RectTransform>();
     //private Dictionary<RectTransform, Vector2Int> 
-    private Dictionary<RectTransform, (List<CellData> cells, Vector2Int size)> _slotDict 
+    private Dictionary<RectTransform, (List<CellData> cells, Vector2Int size)> _slotDict // Slot -> CellData List
         = new Dictionary<RectTransform, (List<CellData>, Vector2Int)>();
     private Dictionary<Guid, InventoryItem> _itemDict = new Dictionary<Guid, InventoryItem>();
     
@@ -44,7 +45,6 @@ public class Inventory: MonoBehaviour
                 var child = slotRT.GetChild(i) as RectTransform;
                 CellData cellData = new CellData(child);
                 cellDataList.Add(cellData);
-                //slot의 width height는???
             }
             _slotDict[slotRT] = (cellDataList, slotData.cellCount);
             //_slotDict.Add(slotRT,{cellDataList, slotData.cellCount});
@@ -60,6 +60,21 @@ public class Inventory: MonoBehaviour
         {
             Debug.Log(slot.Key + " " + slot.Value);
         }
+    }
+
+    public void AddItem(InventoryItem item, RectTransform slotRT, int idx)
+    {
+        //어디에? -> 일단은 지정해서...
+        //test?
+        //var slotRT01 = slotDataList[0].slotRT;
+        //idx -> 아이템 좌상단 기준...
+        //_slotDict[slotRT].c
+        item.MoveItem(slotRT, idx);
+        
+        //for
+        //좌상단부터 슬롯의 빈 곳(가능한 위치)에 넣기 -> 추후 추가
+        
+        
     }
     
 }

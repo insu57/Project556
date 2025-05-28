@@ -40,13 +40,15 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemImage = GetComponent<Image>();
     }
 
-    public void Init(IItemData itemData, Guid id, InventoryManager inventoryManager, RectTransform inventoryRT)
+    public void Init(InventoryItem item, InventoryManager inventoryManager, RectTransform inventoryRT)
     {
         //_inventoryManager = GetComponentInParent<InventoryManager>();
         //_inventoryUI = GetComponentInParent<InventoryUI>();
         _inventoryManager = inventoryManager;
         _slotSize = inventoryManager.SlotSize;
         _inventoryRT = inventoryRT;
+
+        var itemData = item.ItemData;
         
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
@@ -54,7 +56,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemRT.sizeDelta = imageSize;
         _itemImage.sprite = itemData.ItemSprite;
 
-        _id = id;
+        _id = item.Id;
         
         _itemDefaultParent = transform.parent;
         _itemDraggingParent = inventoryRT;
@@ -94,6 +96,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         {
             _itemRT.position = globalMousePos;
         }
+        
+        _inventoryManager.CheckSlotAvailable(globalMousePos);
 
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos))
@@ -105,14 +109,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
             //_inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos));
         }
         
-        //test
-        foreach (var panel in panels)
-        {
-            if (RectTransformUtility.RectangleContainsScreenPoint(panel, eventData.position, null))
-            {
-                Debug.Log("RectContainsScreenPoint!: "+panel+" Position: "+eventData.position);
-            }
-        }
+        
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -124,7 +121,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
                 _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos
             )) return;
         var firstSlot = GetFirstSlotPos(localPos);
-        //_itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id);
+        //_itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id); //바꾸기...
         
         //_inventoryUI.DisableSlotAvailable();
         _canvasGroup.blocksRaycasts = true;

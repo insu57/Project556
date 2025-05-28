@@ -38,6 +38,9 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GearData raidPack01Test;
     [SerializeField] private GearData rig01Test;
     [SerializeField] private GameObject crate01Test;
+    [SerializeField] private BaseItemDataSO pistol1Test;
+    [SerializeField] private BaseItemDataSO bandageTest;
+    [SerializeField] private ItemDragger itemDragger01;
     
     private void Start()
     {
@@ -46,8 +49,10 @@ public class InventoryManager : MonoBehaviour
         SetBackpack(raidPackItem);
         InventoryItem rig01TestItem = new InventoryItem(rig01Test);
         SetRig(rig01TestItem);
-        
         SetLootInventory(crate01Test);
+
+        InventoryItem pistol1TestItem = new InventoryItem(pistol1Test);
+        itemDragger01.Init(pistol1TestItem, this, _uiManager.GetComponent<RectTransform>());
     }
     
     public void Init(UIManager uiManager)
@@ -55,6 +60,11 @@ public class InventoryManager : MonoBehaviour
         _uiManager = uiManager;
     }
 
+    public void AddItemToRig(InventoryItem item)
+    {
+        
+    }
+    
     public void SetRig(InventoryItem rig)
     {
         _chestRigData = rig;
@@ -93,12 +103,14 @@ public class InventoryManager : MonoBehaviour
         _uiManager.SetLootSlot(lootInventoryPrefab, lootInventory.Height);
     }
     
-    public bool CheckSlotAvailable()
+    public bool CheckSlotAvailable(Vector2 position)
     {
         //좌측 인벤토리(장비 슬롯)
         //중간 인벤토리(리그, 가방 인벤토리, 주머니 슬롯 4개)
         //우측 인벤토리(적 시체, 상자)
         //1. 어떤 인벤토리인지...
+        
+        _uiManager.CheckRectTransform(position);
         return false;
     }
     

@@ -8,7 +8,7 @@ public class SlotPointer : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     [SerializeField] private Color defaultColor;
     [SerializeField] private Color highlightColor;
     
-    private InventoryUI _inventoryUI;
+    //private InventoryUI _inventoryUI;
 
     //public bool IsEmpty = true;
     
