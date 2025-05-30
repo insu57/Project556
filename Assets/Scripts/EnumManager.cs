@@ -37,6 +37,7 @@ public enum AmmoCategory
 
 public enum GearType
 {
+    None,
     Backpack,
     ArmorVest,
     ArmoredRig,
@@ -44,7 +45,6 @@ public enum GearType
     HeadWear,
     EyeWear,
     Weapon,
-    None,
 }
 
 public class EnumManager : MonoBehaviour

@@ -24,25 +24,37 @@ public class UIManager : MonoBehaviour
     //[SerializeField] private float defaultHeight = 900f;
     [Header("Left Panel")]
     [SerializeField] private RectTransform leftPanel;
-    [SerializeField] private Image headwear;
-    [SerializeField] private Image eyewear;
-    [SerializeField] private Image bodyArmor;
-    [SerializeField] private Image primaryWeapon;
-    [SerializeField] private Image secondaryWeapon;
+    [SerializeField] private Inventory leftInventory;
+    [SerializeField] private RectTransform headwearSlot;
+    [SerializeField] private RectTransform eyewearSlot;
+    [SerializeField] private RectTransform bodyArmorSlot;
+    [SerializeField] private RectTransform primaryWeaponSlot;
+    [SerializeField] private RectTransform secondaryWeaponSlot;
+    
+    public RectTransform HeadwearRT => headwearSlot;
+    public RectTransform EyewearRT => eyewearSlot;
+    public RectTransform BodyArmorRT => bodyArmorSlot;
+    public RectTransform PWeaponRT => primaryWeaponSlot;
+    public RectTransform SWeaponRT => secondaryWeaponSlot;
     
     [Header("Middle Panel")]
     [SerializeField] private RectTransform middlePanel;
-    [SerializeField] private Image chestRigImage;
-    [SerializeField] private RectTransform chestRigRT;
-    [SerializeField] private RectTransform rigSlotParent;
+    [SerializeField] private Inventory midInventory;
+    [SerializeField] private RectTransform chestRigSlot;
+    [SerializeField] private RectTransform chestRigParent;
+    [SerializeField] private RectTransform rigInvenParent;
     private GameObject _rigSlotInstance;
-    [SerializeField] private Image backpackImage;
-    [SerializeField] private RectTransform backpackRT;
-    [SerializeField] private RectTransform backpackSlotParent;
+    [SerializeField] private RectTransform backpackSlot;
+    [SerializeField] private RectTransform backpackParent;
+    [SerializeField] private RectTransform packInvenParent;
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
     [SerializeField, Space] private RectTransform pocketsRT;
-    [SerializeField] private List<Image> pockets = new List<Image>();
+    [SerializeField] private List<RectTransform> pockets = new List<RectTransform>();
+
+    public RectTransform RigRT => chestRigSlot;
+    public RectTransform BackpackRT => backpackSlot;
+    public List<RectTransform> PocketsRT => pockets;
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
@@ -76,19 +88,20 @@ public class UIManager : MonoBehaviour
         _panels.Add(middlePanel);
         _panels.Add(rightPanel);
         
-        _leftSlots.Add(headwear.rectTransform);
-        _leftSlots.Add(eyewear.rectTransform);
-        _leftSlots.Add(bodyArmor.rectTransform);
-        _leftSlots.Add(primaryWeapon.rectTransform);
-        _leftSlots.Add(secondaryWeapon.rectTransform);
+        _leftSlots.Add(headwearSlot);
+        _leftSlots.Add(eyewearSlot);
+        _leftSlots.Add(bodyArmorSlot);
+        _leftSlots.Add(primaryWeaponSlot);
+        _leftSlots.Add(secondaryWeaponSlot);
         
-        _midSlots.Add(chestRigRT);
+        _midSlots.Add(chestRigParent);
         _midSlots.Add(pocketsRT);
-        _midSlots.Add(backpackRT);
+        _midSlots.Add(backpackParent);
+        
+        
+        
         //test ItemDragger -> 초기화는 어떻게...?
         //test01.Init(test01Data, );
-        
-        
     }
 
     public void InitLeftSlots()
@@ -181,7 +194,7 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    public void SetRigSlot(GearData rigData)
+    public Inventory SetRigSlot(GearData rigData)
     {
         if (_rigSlotInstance)
         {
@@ -191,23 +204,26 @@ public class UIManager : MonoBehaviour
         if (rigData)
         {
             GameObject slotPrefab = rigData.SlotPrefab;
-            chestRigImage.sprite = rigData.ItemSprite;
-            _rigSlotInstance = Instantiate(slotPrefab, rigSlotParent);
-            Inventory inventory = _rigSlotInstance.GetComponent<Inventory>();//?
+            //chestRigImage.sprite = rigData.ItemSprite;
+            _rigSlotInstance = Instantiate(slotPrefab, rigInvenParent);
+            Inventory inventory = _rigSlotInstance.GetComponent<Inventory>(); //다른방식?
             float slotPrefabHeight = inventory.Height;
             if (slotPrefabHeight > minMiddlePanelItemHeight)
             {
-                chestRigRT.sizeDelta = new Vector2(chestRigRT.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+                chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
             }
             else
             {
-                chestRigRT.sizeDelta = new Vector2(chestRigRT.sizeDelta.x, minMiddlePanelItemHeight);
+                chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
             }
+
+            return inventory;
         }
-        
-        
+
+        return null;
+
     }
-    public void SetBackpackSlot(GearData backpackData)
+    public Inventory SetBackpackSlot(GearData backpackData)
     {
         if (_backpackSlotInstance)
         {
@@ -217,26 +233,28 @@ public class UIManager : MonoBehaviour
         if (backpackData)
         {
             GameObject slotPrefab = backpackData.SlotPrefab;
-            backpackImage.sprite = backpackData.ItemSprite;
-            _backpackSlotInstance = Instantiate(slotPrefab, backpackSlotParent);
+            //backpackImage.sprite = backpackData.ItemSprite;
+            _backpackSlotInstance = Instantiate(slotPrefab, packInvenParent);
             //높이체크..?
             Inventory inventory = _backpackSlotInstance.GetComponent<Inventory>();
             float slotPrefabHeight = inventory.Height;
                 //slotPrefab.GetComponent<RectTransform>().rect.height - _middlePanelItemPadding;
             if (slotPrefabHeight > minMiddlePanelItemHeight)
             {
-                backpackRT.sizeDelta = new Vector2(backpackRT.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+                backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
             }
             else
             {
-                backpackRT.sizeDelta = new Vector2(backpackRT.sizeDelta.x, minMiddlePanelItemHeight);
+                backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
             }
             //if()
+            
+            return inventory;
         }
-        
+        return null;
     }
 
-    public void SetLootSlot(GameObject lootInventoryPrefab, float height)
+    public Inventory SetLootSlot(GameObject lootInventoryPrefab)
     {
         if (_lootSlotInstance)
         {
@@ -246,7 +264,8 @@ public class UIManager : MonoBehaviour
         if (lootInventoryPrefab)
         {
             _lootSlotInstance = Instantiate(lootInventoryPrefab, lootSlotParent);
-            float slotPrefabHeight = height + _panelSlotPadding;
+            Inventory inventory = _lootSlotInstance.GetComponent<Inventory>();
+            float slotPrefabHeight = inventory.Height + _panelSlotPadding;
             if (slotPrefabHeight > minLootSlotHeight)
             {
                 lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
@@ -255,7 +274,9 @@ public class UIManager : MonoBehaviour
             {
                 lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
             }
+            return inventory;
         }
+        return null;
     }
     
 }

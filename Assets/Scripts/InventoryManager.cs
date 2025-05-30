@@ -11,13 +11,16 @@ public class InventoryManager : MonoBehaviour
     
     //Left Panel
     private InventoryItem _headwearData;
-    private CellData _headwearSlot;
+    public CellData HeadwearSlot {get; set;}
+    private InventoryItem _eyewearData;
+    public CellData EyewearSlot { get; set; }
     private InventoryItem _bodyArmorData;
-    private CellData _bodyArmorSlot;
+    public CellData BodyArmorSlot { get; set; }
     private InventoryItem _primaryWeaponData;
-    private CellData _primaryWeaponSlot;
+    public CellData PrimaryWeaponSlot { get; set; }
     private InventoryItem _secondaryWeaponData;
-    private CellData _secondaryWeaponSlot;
+    public CellData SecondaryWeaponSlot { get; set; }
+
     //Middle Panel
     private InventoryItem _chestRigData;
     private CellData _chestRigSlot;
@@ -41,7 +44,13 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private BaseItemDataSO pistol1Test;
     [SerializeField] private BaseItemDataSO bandageTest;
     [SerializeField] private ItemDragger itemDragger01;
-    
+
+    public InventoryManager(CellData primaryWeaponSlot)
+    {
+        PrimaryWeaponSlot = primaryWeaponSlot;
+    }
+
+
     private void Start()
     {
         //test
@@ -64,18 +73,18 @@ public class InventoryManager : MonoBehaviour
     {
         
     }
-    
+    //Inventory 인스턴스 문제... InventoryItem-Inventory(인스턴스된 오브젝트로 서로...)
     public void SetRig(InventoryItem rig)
     {
         _chestRigData = rig;
         if (_chestRigData == null)
         {
-            _uiManager.SetRigSlot(null);
+            _rigInventory = _uiManager.SetRigSlot(null);
         }
         else
         {
             GearData rigData = rig.ItemData as GearData;
-            _uiManager.SetRigSlot(rigData);
+            _rigInventory = _uiManager.SetRigSlot(rigData);
         }
     }
     
@@ -85,22 +94,22 @@ public class InventoryManager : MonoBehaviour
         if (backpack == null)//슬롯 비우기
         {
             //_backpackSlot 슬롯 Empty로
-            _uiManager.SetBackpackSlot(null);
+            _backpackInventory = _uiManager.SetBackpackSlot(null);
         }
         else
         {
             GearData backpackData = backpack.ItemData as GearData;
             //슬롯 empty false로
-            _uiManager.SetBackpackSlot(backpackData);
+            _backpackInventory = _uiManager.SetBackpackSlot(backpackData);
         }
     }
 
     public void SetLootInventory(GameObject lootInventoryPrefab) //나중에 LootDataClass로 바꾸는것 감안할것
     {
-        var lootInventory = lootInventoryPrefab.GetComponent<Inventory>();
-        _lootInventory = lootInventory;
+        //var lootInventory = lootInventoryPrefab.GetComponent<Inventory>();
+        //_lootInventory = lootInventory;
         
-        _uiManager.SetLootSlot(lootInventoryPrefab, lootInventory.Height);
+        _lootInventory =  _uiManager.SetLootSlot(lootInventoryPrefab);
     }
     
     public bool CheckSlotAvailable(Vector2 position)

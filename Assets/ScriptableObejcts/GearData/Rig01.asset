@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemID: 
   itemName: 
-  gearType: 3
+  gearType: 4
   itemSprite: {fileID: 21300000, guid: 6427b476737c63148a95a020bddc45f6, type: 3}
   pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0, y: 0}

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemID: 
   itemName: "\uAD70\uC6A9\uBC30\uB0AD01"
-  gearType: 0
+  gearType: 1
   itemSprite: {fileID: 21300000, guid: e955b58657ea4aa4ba01f05402d3666e, type: 3}
   pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0, y: 0}

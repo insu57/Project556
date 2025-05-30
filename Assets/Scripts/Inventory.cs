@@ -11,6 +11,7 @@ public class Inventory: MonoBehaviour
         public RectTransform slotRT;
         public Vector2Int cellCount;
         public bool isGearSlot;
+        public GearType gearType;
     }
     
     [SerializeField] private List<SlotData> slotDataList = new List<SlotData>();
@@ -26,6 +27,7 @@ public class Inventory: MonoBehaviour
     
     public float Width { private set; get; }
     public float Height { private set; get; }
+    public RectTransform InventoryRT => _inventoryRT;
     public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
     private void Awake()
@@ -44,6 +46,7 @@ public class Inventory: MonoBehaviour
             {
                 var child = slotRT.GetChild(i) as RectTransform;
                 CellData cellData = new CellData(child);
+                //cellData.Init(child);
                 cellDataList.Add(cellData);
             }
             _slotDict[slotRT] = (cellDataList, slotData.cellCount);
@@ -59,6 +62,17 @@ public class Inventory: MonoBehaviour
         foreach (var slot in _slotDict)
         {
             Debug.Log(slot.Key + " " + slot.Value);
+        }
+    }
+
+    public void CheckSlot(Vector2 mousePos)
+    {
+        foreach (var slotData in slotDataList)
+        {
+            if (RectTransformUtility.RectangleContainsScreenPoint(slotData.slotRT, mousePos))
+            {
+                Debug.Log(slotData);
+            }
         }
     }
 
