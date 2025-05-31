@@ -28,8 +28,25 @@ public class InventoryUIPresenter
         _leftGearSlots[uiManager.SWeaponRT] = inventoryManager.SecondaryWeaponSlot;
         
         //Mid Panel Init
+        inventoryManager.ChestRigSlot = new CellData(uiManager.RigRT);
+        _midGearSlots[uiManager.RigRT] = inventoryManager.ChestRigSlot;
+        inventoryManager.BackpackSlot = new CellData(uiManager.BackpackRT);
+        _midGearSlots[uiManager.BackpackRT] = inventoryManager.BackpackSlot;
         
+        for (int i = 0; i < 4; i++)
+        {
+            inventoryManager.PocketSlots[i] = new CellData(uiManager.PocketsRT[i]);
+            _midGearSlots[uiManager.PocketsRT[i]] = inventoryManager.PocketSlots[i];
+        }
+        
+        //Event
+        _inventoryManager.OnCheckSlot += HandleOnCheckSlot;
+
     }
-    
-    
+
+    private void HandleOnCheckSlot(Vector2 position)
+    {
+        //ItemDragger -> OnCheckSlot
+        _uiManager.CheckRectTransform(position);
+    }
 }

@@ -49,9 +49,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform packInvenParent;
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
-    [SerializeField, Space] private RectTransform pocketsRT;
+    [FormerlySerializedAs("pocketsRT")] [SerializeField, Space] private RectTransform pocketsParent;
     [SerializeField] private List<RectTransform> pockets = new List<RectTransform>();
-
+    
     public RectTransform RigRT => chestRigSlot;
     public RectTransform BackpackRT => backpackSlot;
     public List<RectTransform> PocketsRT => pockets;
@@ -95,7 +95,7 @@ public class UIManager : MonoBehaviour
         _leftSlots.Add(secondaryWeaponSlot);
         
         _midSlots.Add(chestRigParent);
-        _midSlots.Add(pocketsRT);
+        _midSlots.Add(pocketsParent);
         _midSlots.Add(backpackParent);
         
         

@@ -23,19 +23,20 @@ public class InventoryManager : MonoBehaviour
 
     //Middle Panel
     private InventoryItem _chestRigData;
-    private CellData _chestRigSlot;
+    public CellData ChestRigSlot { get; set; }
     private InventoryItem _backpackData;
-    private CellData _backpackSlot;
+    public CellData BackpackSlot { get; set; }
     private Inventory _rigInventory;
     private Inventory _backpackInventory;
     //Right Panel
     private Inventory _lootInventory;
-    
-    private CellData[] _pocketSlots = new CellData[4];
+
+    public CellData[] PocketSlots { get; private set; } = new CellData[4];
     private Dictionary<Guid, CellData> _pocketItemDict = new Dictionary<Guid, CellData>();
     
-    
     private UIManager _uiManager;
+
+    public event Action<Vector2> OnCheckSlot; 
     
     //test
     [SerializeField] private GearData raidPack01Test;
@@ -44,12 +45,11 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private BaseItemDataSO pistol1Test;
     [SerializeField] private BaseItemDataSO bandageTest;
     [SerializeField] private ItemDragger itemDragger01;
-
-    public InventoryManager(CellData primaryWeaponSlot)
+    
+    private void Awake()
     {
-        PrimaryWeaponSlot = primaryWeaponSlot;
+        
     }
-
 
     private void Start()
     {
@@ -67,13 +67,14 @@ public class InventoryManager : MonoBehaviour
     public void Init(UIManager uiManager)
     {
         _uiManager = uiManager;
+        
     }
 
     public void AddItemToRig(InventoryItem item)
     {
         
     }
-    //Inventory 인스턴스 문제... InventoryItem-Inventory(인스턴스된 오브젝트로 서로...)
+    //Presenter 이벤트 처리...
     public void SetRig(InventoryItem rig)
     {
         _chestRigData = rig;
@@ -114,12 +115,14 @@ public class InventoryManager : MonoBehaviour
     
     public bool CheckSlotAvailable(Vector2 position)
     {
+       
         //좌측 인벤토리(장비 슬롯)
         //중간 인벤토리(리그, 가방 인벤토리, 주머니 슬롯 4개)
         //우측 인벤토리(적 시체, 상자)
         //1. 어떤 인벤토리인지...
         
-        _uiManager.CheckRectTransform(position);
+        OnCheckSlot?.Invoke(position);
+        //_uiManager.CheckRectTransform(position);
         return false;
     }
     
