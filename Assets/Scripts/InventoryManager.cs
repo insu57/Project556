@@ -28,15 +28,19 @@ public class InventoryManager : MonoBehaviour
     public CellData BackpackSlot { get; set; }
     private Inventory _rigInventory;
     private Inventory _backpackInventory;
+    public Inventory BackpackInventory => _backpackInventory;
+    public Inventory RigInventory => _rigInventory;
     //Right Panel
     private Inventory _lootInventory;
+    public Inventory LootInventory => _lootInventory;
 
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
     private Dictionary<Guid, CellData> _pocketItemDict = new Dictionary<Guid, CellData>();
     
     private UIManager _uiManager;
 
-    public event Action<Vector2> OnCheckSlot; 
+    public event Action<Vector2> OnCheckSlot;
+    public event Action<GameObject, GearType> OnSetInventory; 
     
     //test
     [SerializeField] private GearData raidPack01Test;
@@ -61,7 +65,7 @@ public class InventoryManager : MonoBehaviour
         SetLootInventory(crate01Test);
 
         InventoryItem pistol1TestItem = new InventoryItem(pistol1Test);
-        itemDragger01.Init(pistol1TestItem, this, _uiManager.GetComponent<RectTransform>());
+        itemDragger01.Init(pistol1TestItem, _uiManager, _uiManager.GetComponent<RectTransform>());
     }
     
     public void Init(UIManager uiManager)
@@ -85,7 +89,7 @@ public class InventoryManager : MonoBehaviour
         else
         {
             GearData rigData = rig.ItemData as GearData;
-            _rigInventory = _uiManager.SetRigSlot(rigData);
+            _rigInventory = _uiManager.SetRigSlot(rigData?.SlotPrefab);
         }
     }
     
@@ -101,7 +105,7 @@ public class InventoryManager : MonoBehaviour
         {
             GearData backpackData = backpack.ItemData as GearData;
             //슬롯 empty false로
-            _backpackInventory = _uiManager.SetBackpackSlot(backpackData);
+            _backpackInventory = _uiManager.SetBackpackSlot(backpackData?.SlotPrefab);
         }
     }
 
@@ -125,6 +129,15 @@ public class InventoryManager : MonoBehaviour
         //_uiManager.CheckRectTransform(position);
         return false;
     }
-    
+
+    public void SetInventory(GameObject inventoryPrefab, GearType gearType)
+    {
+        OnSetInventory?.Invoke(inventoryPrefab, gearType);;
+    }
+
+    public void SetGear()
+    {
+        
+    }
     
 }

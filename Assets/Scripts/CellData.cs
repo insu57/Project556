@@ -13,13 +13,13 @@ public class CellData
     public bool IsGearSlot { private set; get; }
     public GearType GearType { private set; get; }
 
-    public CellData( RectTransform cellRT )
+    public CellData( RectTransform cellRT, GearType gearType)
     {
         IsEmpty = true;
         CellRT = cellRT;
         Id = Guid.Empty;
-        IsGearSlot = false;
-        GearType = GearType.None;
+        IsGearSlot = gearType != GearType.None;//none이면 일반 Cell
+        GearType = gearType;
     }
 
     public void SetGearSlot(GearType gearType)

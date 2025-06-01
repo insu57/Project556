@@ -45,7 +45,7 @@ public class Inventory: MonoBehaviour
             for (int i = 0; i < slotRT.childCount; i++)
             {
                 var child = slotRT.GetChild(i) as RectTransform;
-                CellData cellData = new CellData(child);
+                CellData cellData = new CellData(child,GearType.None);
                 //cellData.Init(child);
                 cellDataList.Add(cellData);
             }

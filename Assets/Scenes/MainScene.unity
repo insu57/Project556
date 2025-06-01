@@ -1424,10 +1424,10 @@ MonoBehaviour:
   leftPanel: {fileID: 120543682}
   leftInventory: {fileID: 1983832233}
   headwearSlot: {fileID: 1840609090}
-  eyewearSlot: {fileID: 41960264}
-  bodyArmorSlot: {fileID: 80611384}
-  primaryWeaponSlot: {fileID: 1372455112}
-  secondaryWeaponSlot: {fileID: 1246552315}
+  eyewearSlot: {fileID: 1782067863}
+  bodyArmorSlot: {fileID: 1067884386}
+  primaryWeaponSlot: {fileID: 2071270327}
+  secondaryWeaponSlot: {fileID: 1387162711}
   middlePanel: {fileID: 286267793}
   midInventory: {fileID: 488420802}
   chestRigSlot: {fileID: 1102216827}
@@ -1437,7 +1437,7 @@ MonoBehaviour:
   backpackParent: {fileID: 982210874}
   packInvenParent: {fileID: 1987272833}
   minMiddlePanelItemHeight: 250
-  pocketsRT: {fileID: 488420801}
+  pocketsParent: {fileID: 488420801}
   pockets:
   - {fileID: 2004249662}
   - {fileID: 1976272675}

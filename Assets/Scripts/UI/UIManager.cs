@@ -18,6 +18,8 @@ public class UIManager : MonoBehaviour
 
     [SerializeField, Space] private float slotSize = 50f;
     private float _panelSlotPadding; //slotSize * 3
+    public float SlotSize => slotSize;
+    
     
     [Header("Player Inventory")]
     //[SerializeField] private RectTransform contentRT;
@@ -55,22 +57,25 @@ public class UIManager : MonoBehaviour
     public RectTransform RigRT => chestRigSlot;
     public RectTransform BackpackRT => backpackSlot;
     public List<RectTransform> PocketsRT => pockets;
+    public RectTransform RigInvenParent => rigInvenParent;
+    public RectTransform PackInvenParent => packInvenParent;
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
     //[SerializeField] private RectTransform lootSlotRT;\
     [SerializeField] private RectTransform lootSlotParent;
     [SerializeField] private float minLootSlotHeight = 800f;
-    
+    public RectTransform LootSlotParent => lootSlotParent;
     
     private GameObject _lootSlotInstance;
     
     [SerializeField, Space] private Image slotAvailable;
     //아니면 슬롯 색상 변경?
     
-    private List<RectTransform> _panels = new List<RectTransform>(); //패널
-    private List<RectTransform> _leftSlots = new List<RectTransform>();
-    private List<RectTransform> _midSlots = new List<RectTransform>();
+    public event Action<bool, RectTransform> OnCheckRectTransform; 
+    private readonly List<RectTransform> _panelsRT = new List<RectTransform>(); //패널
+    private readonly List<RectTransform> _gearSlotRT = new List<RectTransform>();
+    private readonly List<RectTransform> _inventoriesRT = new List<RectTransform>();
     
     //test
     [SerializeField, Space] private ItemDragger test01;
@@ -84,21 +89,25 @@ public class UIManager : MonoBehaviour
         //수동추가?(번거롭고 실수가능) list로 직렬화?(구분안됨) 자식객체로?
         //수동 -> 하나 추가/제거 할 때 문제... 인벤(데이터) UI 둘 다 수정 -> 간단하긴함
         //panel RT -> panel 자식인 인벤토리 구분 -> 각 슬롯
-        _panels.Add(leftPanel);
-        _panels.Add(middlePanel);
-        _panels.Add(rightPanel);
+        _panelsRT.Add(leftPanel);
+        _panelsRT.Add(middlePanel);
+        _panelsRT.Add(rightPanel);
         
-        _leftSlots.Add(headwearSlot);
-        _leftSlots.Add(eyewearSlot);
-        _leftSlots.Add(bodyArmorSlot);
-        _leftSlots.Add(primaryWeaponSlot);
-        _leftSlots.Add(secondaryWeaponSlot);
+        _gearSlotRT.Add(headwearSlot);
+        _gearSlotRT.Add(eyewearSlot);
+        _gearSlotRT.Add(bodyArmorSlot);
+        _gearSlotRT.Add(primaryWeaponSlot);
+        _gearSlotRT.Add(secondaryWeaponSlot);
+        _gearSlotRT.Add(chestRigSlot);
+        _gearSlotRT.Add(backpackSlot);
+        foreach (var pocketRT in pockets)
+        {
+            _gearSlotRT.Add(pocketRT);
+        }
         
-        _midSlots.Add(chestRigParent);
-        _midSlots.Add(pocketsParent);
-        _midSlots.Add(backpackParent);
-        
-        
+        _inventoriesRT.Add(rigInvenParent);
+        _inventoriesRT.Add(packInvenParent);
+        _inventoriesRT.Add(lootSlotParent);
         
         //test ItemDragger -> 초기화는 어떻게...?
         //test01.Init(test01Data, );
@@ -153,61 +162,40 @@ public class UIManager : MonoBehaviour
 
     public void CheckRectTransform(Vector2 position)
     {
-        RectTransform matchPanel = null;
-        foreach (var panel in _panels)
+        RectTransform matchSlot = null;
+        
+        foreach (var slot in _gearSlotRT)
         {
-            if (RectTransformUtility.RectangleContainsScreenPoint(panel, position))
-            {
-                Debug.Log("CheckRectTransform:" + panel);
-                matchPanel = panel;
-            }
+            if (!RectTransformUtility.RectangleContainsScreenPoint(slot, position)) continue;
+            matchSlot = slot;
+            OnCheckRectTransform?.Invoke(true, matchSlot); 
+            return;
         }
 
-        if (!matchPanel) return;
-        
-        if (matchPanel == leftPanel)
+        foreach (var inventory in _inventoriesRT)
         {
-            foreach (var slot in _leftSlots)
-            {
-                if (RectTransformUtility.RectangleContainsScreenPoint(slot, position))
-                {
-                    Debug.Log("CheckSlot LeftPanel:" + slot);
-                }
-            }
-        }
-        else if (matchPanel == middlePanel)
-        {
-            foreach (var slot in _midSlots)
-            {
-                if (RectTransformUtility.RectangleContainsScreenPoint(slot, position))
-                {
-                    Debug.Log("CheckSlot MidPanel:" + slot);
-                }
-            }  
-        }
-        else if (matchPanel == rightPanel)
-        {
-            if (RectTransformUtility.RectangleContainsScreenPoint(lootSlotParent, position))
-            {
-                Debug.Log("CheckSlot RightPanel:" + lootSlotParent);
-            }
+            if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, position)) continue;
+            matchSlot = inventory;
+            OnCheckRectTransform?.Invoke(false, matchSlot); 
+            return; //(inventory, matchSlot)
         }
     }
     
-    public Inventory SetRigSlot(GearData rigData)
+    public Inventory SetRigSlot(GameObject rigInvenPrefab)
     {
         if (_rigSlotInstance)
         {
             Destroy(_rigSlotInstance);
         }
 
-        if (rigData)
+        if (rigInvenPrefab)
         {
-            GameObject slotPrefab = rigData.SlotPrefab;
+            //GameObject slotPrefab = rigData.SlotPrefab;
             //chestRigImage.sprite = rigData.ItemSprite;
-            _rigSlotInstance = Instantiate(slotPrefab, rigInvenParent);
+            _rigSlotInstance = Instantiate(rigInvenPrefab, rigInvenParent);
             Inventory inventory = _rigSlotInstance.GetComponent<Inventory>(); //다른방식?
             float slotPrefabHeight = inventory.Height;
+            rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
             if (slotPrefabHeight > minMiddlePanelItemHeight)
             {
                 chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
@@ -223,22 +211,21 @@ public class UIManager : MonoBehaviour
         return null;
 
     }
-    public Inventory SetBackpackSlot(GearData backpackData)
+    public Inventory SetBackpackSlot(GameObject backpackInvenPrefab)
     {
         if (_backpackSlotInstance)
         {
             Destroy(_backpackSlotInstance);
         }
 
-        if (backpackData)
+        if (backpackInvenPrefab)
         {
-            GameObject slotPrefab = backpackData.SlotPrefab;
-            //backpackImage.sprite = backpackData.ItemSprite;
-            _backpackSlotInstance = Instantiate(slotPrefab, packInvenParent);
+            _backpackSlotInstance = Instantiate(backpackInvenPrefab, packInvenParent);
             //높이체크..?
             Inventory inventory = _backpackSlotInstance.GetComponent<Inventory>();
             float slotPrefabHeight = inventory.Height;
                 //slotPrefab.GetComponent<RectTransform>().rect.height - _middlePanelItemPadding;
+                packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
             if (slotPrefabHeight > minMiddlePanelItemHeight)
             {
                 backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
@@ -266,6 +253,7 @@ public class UIManager : MonoBehaviour
             _lootSlotInstance = Instantiate(lootInventoryPrefab, lootSlotParent);
             Inventory inventory = _lootSlotInstance.GetComponent<Inventory>();
             float slotPrefabHeight = inventory.Height + _panelSlotPadding;
+            lootSlotParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
             if (slotPrefabHeight > minLootSlotHeight)
             {
                 lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
