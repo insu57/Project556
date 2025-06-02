@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     private RectTransform _itemRT;
-    //private RectTransform _inventoryRT;
     private RectTransform _inventoryRT;
     private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
@@ -19,7 +18,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private UIManager _uiManager;
     //private InventoryManager _inventoryManager;
     //private InventoryUI _inventoryUI;
-    private InventoryItem _item;
+    //private InventoryItem _item;
     //private IItemData _itemData;
     private int _widthSize;
     private int _heightSize;
@@ -41,14 +40,11 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemImage = GetComponent<Image>();
     }
 
-    public void Init(InventoryItem item, UIManager uiManager, RectTransform inventoryRT)
+    public void Init(InventoryItem item, UIManager uiManager)
     {
-        //_inventoryManager = GetComponentInParent<InventoryManager>();
-        //_inventoryUI = GetComponentInParent<InventoryUI>();
-        //_inventoryManager = inventoryManager;
         _uiManager = uiManager;
         _slotSize = uiManager.SlotSize;
-        _inventoryRT = inventoryRT;
+        //_inventoryRT = inventoryRT;
 
         var itemData = item.ItemData;
         
@@ -61,9 +57,16 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _id = item.Id;
         
         _itemDefaultParent = transform.parent;
-        _itemDraggingParent = inventoryRT;
+        _itemDraggingParent = uiManager.gameObject.transform;
     }
 
+    public void SetInventoryRT(RectTransform inventoryRT)
+    {
+        _inventoryRT = inventoryRT;
+        transform.SetParent(_inventoryRT);
+        _itemDefaultParent = transform.parent;
+    }
+    
     private (Vector2 pos, Guid id) GetFirstSlotPos(Vector2 mousePos)
     {
         float x = mousePos.x + (-_slotSize * _widthSize + _slotSize) / 2f;

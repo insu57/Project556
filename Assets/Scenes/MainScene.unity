@@ -1447,6 +1447,7 @@ MonoBehaviour:
   lootSlotParent: {fileID: 2007659534}
   minLootSlotHeight: 800
   slotAvailable: {fileID: 968565301}
+  itemDraggerPrefab: {fileID: 7716092572404661750, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
   test01: {fileID: 0}
   test02: {fileID: 0}
 --- !u!114 &364393532
@@ -6936,7 +6937,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5930975178880390204, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7716092572404661750, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: panels.Array.size

@@ -22,8 +22,6 @@ public class UIManager : MonoBehaviour
     
     
     [Header("Player Inventory")]
-    //[SerializeField] private RectTransform contentRT;
-    //[SerializeField] private float defaultHeight = 900f;
     [Header("Left Panel")]
     [SerializeField] private RectTransform leftPanel;
     [SerializeField] private Inventory leftInventory;
@@ -52,7 +50,7 @@ public class UIManager : MonoBehaviour
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
     [FormerlySerializedAs("pocketsRT")] [SerializeField, Space] private RectTransform pocketsParent;
-    [SerializeField] private List<RectTransform> pockets = new List<RectTransform>();
+    [SerializeField] private List<RectTransform> pockets = new();
     
     public RectTransform RigRT => chestRigSlot;
     public RectTransform BackpackRT => backpackSlot;
@@ -62,7 +60,6 @@ public class UIManager : MonoBehaviour
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
-    //[SerializeField] private RectTransform lootSlotRT;\
     [SerializeField] private RectTransform lootSlotParent;
     [SerializeField] private float minLootSlotHeight = 800f;
     public RectTransform LootSlotParent => lootSlotParent;
@@ -70,6 +67,7 @@ public class UIManager : MonoBehaviour
     private GameObject _lootSlotInstance;
     
     [SerializeField, Space] private Image slotAvailable;
+    [SerializeField] private ItemDragger itemDraggerPrefab;
     //아니면 슬롯 색상 변경?
     
     public event Action<bool, RectTransform> OnCheckRectTransform; 
@@ -86,9 +84,6 @@ public class UIManager : MonoBehaviour
     {
         _panelSlotPadding = slotSize * 3;
         
-        //수동추가?(번거롭고 실수가능) list로 직렬화?(구분안됨) 자식객체로?
-        //수동 -> 하나 추가/제거 할 때 문제... 인벤(데이터) UI 둘 다 수정 -> 간단하긴함
-        //panel RT -> panel 자식인 인벤토리 구분 -> 각 슬롯
         _panelsRT.Add(leftPanel);
         _panelsRT.Add(middlePanel);
         _panelsRT.Add(rightPanel);
@@ -108,19 +103,13 @@ public class UIManager : MonoBehaviour
         _inventoriesRT.Add(rigInvenParent);
         _inventoriesRT.Add(packInvenParent);
         _inventoriesRT.Add(lootSlotParent);
-        
-        //test ItemDragger -> 초기화는 어떻게...?
-        //test01.Init(test01Data, );
     }
 
-    public void InitLeftSlots()
+    public ItemDragger InitItemDragger(InventoryItem item, RectTransform parent)
     {
-        
-    }
-
-    public void InitItemDragger()
-    {
-        
+        var itemDragger = Instantiate(itemDraggerPrefab, parent);
+        itemDragger.Init(item, this);
+        return itemDragger;
     }
 
     public void UpdateAmmoText(int currentAmmo)
@@ -160,6 +149,11 @@ public class UIManager : MonoBehaviour
         itemInteractUI.anchoredPosition =  uiPos;
     }
 
+    public void SetItemDragger()
+    {
+        
+    }
+
     public void CheckRectTransform(Vector2 position)
     {
         RectTransform matchSlot = null;
@@ -190,8 +184,7 @@ public class UIManager : MonoBehaviour
 
         if (rigInvenPrefab)
         {
-            //GameObject slotPrefab = rigData.SlotPrefab;
-            //chestRigImage.sprite = rigData.ItemSprite;
+            Debug.Log("SetRigSlot");
             _rigSlotInstance = Instantiate(rigInvenPrefab, rigInvenParent);
             Inventory inventory = _rigSlotInstance.GetComponent<Inventory>(); //다른방식?
             float slotPrefabHeight = inventory.Height;
@@ -207,9 +200,7 @@ public class UIManager : MonoBehaviour
 
             return inventory;
         }
-
         return null;
-
     }
     public Inventory SetBackpackSlot(GameObject backpackInvenPrefab)
     {
@@ -221,11 +212,9 @@ public class UIManager : MonoBehaviour
         if (backpackInvenPrefab)
         {
             _backpackSlotInstance = Instantiate(backpackInvenPrefab, packInvenParent);
-            //높이체크..?
             Inventory inventory = _backpackSlotInstance.GetComponent<Inventory>();
             float slotPrefabHeight = inventory.Height;
-                //slotPrefab.GetComponent<RectTransform>().rect.height - _middlePanelItemPadding;
-                packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
+            packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
             if (slotPrefabHeight > minMiddlePanelItemHeight)
             {
                 backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);

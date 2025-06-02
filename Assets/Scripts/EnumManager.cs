@@ -39,7 +39,7 @@ public enum GearType
 {
     None,
     Backpack,
-    ArmorVest,
+    BodyArmor,
     ArmoredRig,
     UnarmoredRig,
     HeadWear,

@@ -10,6 +10,7 @@ public interface IItemData
     public Vector2 PickUpColliderSize { get; }
     public int ItemWidth { get; }
     public int ItemHeight { get; }
+    public GearType GearType { get; }
     //public Vector2 ItemSize { get; }
 }
  

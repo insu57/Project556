@@ -45,8 +45,8 @@ public class Inventory: MonoBehaviour
             for (int i = 0; i < slotRT.childCount; i++)
             {
                 var child = slotRT.GetChild(i) as RectTransform;
-                CellData cellData = new CellData(child,GearType.None);
-                //cellData.Init(child);
+                CellData cellData = new CellData(GearType.None);
+                cellData.SetCellRT(child);
                 cellDataList.Add(cellData);
             }
             _slotDict[slotRT] = (cellDataList, slotData.cellCount);
@@ -58,10 +58,10 @@ public class Inventory: MonoBehaviour
 
     private void Start()
     {
-        Debug.Log(gameObject.name);
+        //Debug.Log(gameObject.name);
         foreach (var slot in _slotDict)
         {
-            Debug.Log(slot.Key + " " + slot.Value);
+            //Debug.Log(slot.Key + " " + slot.Value);
         }
     }
 

@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class InventoryUIPresenter
 {
-    private InventoryManager _inventoryManager;
-    private UIManager _uiManager;
+    private readonly InventoryManager _inventoryManager;
+    private readonly UIManager _uiManager;
     
-    private Dictionary<RectTransform, CellData> _gearSlots = new Dictionary<RectTransform, CellData>();
-    private Dictionary<RectTransform, Inventory> _inventoriesSlots = new Dictionary<RectTransform, Inventory>();
+    private Dictionary<RectTransform, CellData> _gearSlotsMap = new();
+    private Dictionary<RectTransform, int> _inventoriesMap = new();
+    
     private RectTransform _rigInventoryKey;
     private RectTransform _backpackInventoryKey;
     private RectTransform _lootInventoryKey;
@@ -18,34 +19,36 @@ public class InventoryUIPresenter
         _uiManager = uiManager;
 
         //Left Panel Init
-        inventoryManager.HeadwearSlot = new CellData(uiManager.HeadwearRT, GearType.HeadWear);
-        //inventoryManager.HeadwearSlot.SetGearSlot(G);
-        _gearSlots[uiManager.HeadwearRT] = inventoryManager.HeadwearSlot;
-        inventoryManager.EyewearSlot = new CellData(uiManager.EyewearRT, GearType.EyeWear);
-        _gearSlots[uiManager.EyewearRT] = inventoryManager.EyewearSlot;
-        inventoryManager.BodyArmorSlot = new CellData(uiManager.BodyArmorRT, GearType.ArmorVest);
-        _gearSlots[uiManager.BodyArmorRT] = inventoryManager.BodyArmorSlot;
-        inventoryManager.PrimaryWeaponSlot = new CellData(uiManager.PWeaponRT, GearType.Weapon);
-        _gearSlots[uiManager.PWeaponRT] = inventoryManager.PrimaryWeaponSlot;
-        inventoryManager.SecondaryWeaponSlot = new CellData(uiManager.SWeaponRT, GearType.Weapon);
-        _gearSlots[uiManager.SWeaponRT] = inventoryManager.SecondaryWeaponSlot;
+        inventoryManager.HeadwearSlot.SetCellRT(uiManager.HeadwearRT);
+        _gearSlotsMap[uiManager.HeadwearRT] = inventoryManager.HeadwearSlot;
+        
+        inventoryManager.EyewearSlot.SetCellRT(uiManager.EyewearRT);
+        _gearSlotsMap[uiManager.EyewearRT] = inventoryManager.EyewearSlot;
+        
+        inventoryManager.BodyArmorSlot.SetCellRT(uiManager.BodyArmorRT);
+        _gearSlotsMap[uiManager.BodyArmorRT] = inventoryManager.BodyArmorSlot;
+        
+        inventoryManager.PrimaryWeaponSlot.SetCellRT(uiManager.PWeaponRT);
+        _gearSlotsMap[uiManager.PWeaponRT] = inventoryManager.PrimaryWeaponSlot;
+        
+        inventoryManager.SecondaryWeaponSlot.SetCellRT(uiManager.SWeaponRT);
+        _gearSlotsMap[uiManager.SWeaponRT] = inventoryManager.SecondaryWeaponSlot;
         
         //Mid Panel Init
-        inventoryManager.ChestRigSlot = new CellData(uiManager.RigRT, GearType.ArmoredRig);
-        _gearSlots[uiManager.RigRT] = inventoryManager.ChestRigSlot;
-        inventoryManager.BackpackSlot = new CellData(uiManager.BackpackRT, GearType.Backpack);
-        _gearSlots[uiManager.BackpackRT] = inventoryManager.BackpackSlot;
+        inventoryManager.ChestRigSlot.SetCellRT(uiManager.RigRT);
+        _gearSlotsMap[uiManager.RigRT] = inventoryManager.ChestRigSlot;
+        
+        inventoryManager.BackpackSlot.SetCellRT(uiManager.BackpackRT);
+        _gearSlotsMap[uiManager.BackpackRT] = inventoryManager.BackpackSlot;
+        
         for (int i = 0; i < 4; i++)
         {
-            inventoryManager.PocketSlots[i] = new CellData(uiManager.PocketsRT[i], GearType.None);
-            _gearSlots[uiManager.PocketsRT[i]] = inventoryManager.PocketSlots[i];
+            inventoryManager.PocketSlots[i].SetCellRT(uiManager.PocketsRT[i]);
+            _gearSlotsMap[uiManager.PocketsRT[i]] = inventoryManager.PocketSlots[i];
         }
         //Inventory 추가
-        _inventoriesSlots[uiManager.RigInvenParent] = _inventoryManager.RigInventory;
         _rigInventoryKey = uiManager.RigInvenParent;
-        _inventoriesSlots[uiManager.PackInvenParent] = _inventoryManager.BackpackInventory;;
         _backpackInventoryKey = uiManager.PackInvenParent;
-        _inventoriesSlots[uiManager.LootSlotParent] = _inventoryManager.LootInventory;
         _lootInventoryKey = uiManager.LootSlotParent;
         
         //Event
@@ -54,6 +57,8 @@ public class InventoryUIPresenter
         _inventoryManager.OnSetInventory += HandleOnSetInventory;
         //UIManager
         _uiManager.OnCheckRectTransform += HandleOnCheckRectTransform;
+        
+        
     }
 
     private void HandleOnCheckSlot(Vector2 position)
@@ -68,14 +73,14 @@ public class InventoryUIPresenter
         Debug.Log("HandleOnCheckRT!: "+"isGearSlot: "+isGearSlot+" matchRT: "+matchRT+"");
         if (isGearSlot)
         {
-            if (_gearSlots.ContainsKey(matchRT))
+            if (_gearSlotsMap.ContainsKey(matchRT))
             {
-                Debug.Log("GearSlot: "+_gearSlots[matchRT].GearType + " "  + _gearSlots[matchRT].IsEmpty);
+                Debug.Log("GearSlot: "+_gearSlotsMap[matchRT].GearType + " "  + _gearSlotsMap[matchRT].IsEmpty);
             }
         }
         else
         {
-            if (_inventoriesSlots.ContainsKey(matchRT))
+            if (_inventoriesMap.ContainsKey(matchRT))
             {
                 //Debug.Log(_inventoriesSlots[matchRT].name);
             }
@@ -84,18 +89,30 @@ public class InventoryUIPresenter
 
     private void HandleOnSetInventory(GameObject inventoryPrefab, GearType gearType)
     {
+        Inventory inventory;
         switch (gearType)
         {
             case GearType.ArmoredRig:
-                //_inventoryManager.RigInventory = _uiManager.SetRigSlot(inventoryPrefab); //어떻게 더 개선??
-                _inventoriesSlots[_rigInventoryKey] = _uiManager.SetRigSlot(inventoryPrefab);
-                //_rigInventory = 
+            case GearType.UnarmoredRig:    
+                inventory = _uiManager.SetRigSlot(inventoryPrefab);
+                _inventoryManager.SetInventoryData(inventory, gearType);
                 break;
             case GearType.Backpack:
-                _uiManager.SetBackpackSlot(inventoryPrefab);
+                inventory = _uiManager.SetBackpackSlot(inventoryPrefab);
+                _inventoryManager.SetInventoryData(inventory, gearType);
                 break;
             case GearType.None: //LootInventory
-                _uiManager.SetLootSlot(inventoryPrefab);
+                inventory = _uiManager.SetLootSlot(inventoryPrefab);
+                _inventoryManager.SetInventoryData(inventory, gearType);
+                
+                //test
+
+                var itemDragger = _uiManager.InitItemDragger(_inventoryManager.PistolTest, _lootInventoryKey); 
+                //주웠을때...
+                
+                itemDragger.SetInventoryRT(_inventoryManager.LootInventory.ItemRT);
+                //ItemDragger설정...
+                //Inventory -> itemRT
                 break;
         }
     }

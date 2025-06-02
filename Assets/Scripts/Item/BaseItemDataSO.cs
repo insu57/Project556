@@ -10,6 +10,8 @@ public abstract class BaseItemDataSO : ScriptableObject, IItemData
     public abstract Vector2 PickUpColliderSize { get; }
     public abstract int ItemWidth { get; }
     public abstract int ItemHeight { get; }
+    public abstract GearType GearType { get; }
+    
     //public abstract Vector2 ItemSize { get; }
     //public abstract GameObject ItemPrefab { get; }
 }

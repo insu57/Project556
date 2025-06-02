@@ -24,4 +24,5 @@ public class MedicalData : BaseItemDataSO
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
+    public override GearType GearType => GearType.None;
 }

@@ -137,6 +137,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlight: {fileID: 8871443052328100409}
+  panels: []
 --- !u!225 &5205590070267574599
 CanvasGroup:
   m_ObjectHideFlags: 0

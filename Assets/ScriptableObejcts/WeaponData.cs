@@ -48,6 +48,8 @@ public class WeaponData : BaseItemDataSO
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
+    public override GearType GearType => GearType.Weapon;
+
     //public override GameObject ItemPrefab => itemPrefab;//임시
     public Vector3 MuzzlePosition => muzzlePosition;
     //public override Vector2 ItemSize => itemSize;

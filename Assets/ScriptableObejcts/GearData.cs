@@ -20,7 +20,7 @@ public class GearData : BaseItemDataSO
     [SerializeField] private bool isPartitioned;
     public override string ItemID => itemID;
     public override string ItemName => itemName;
-    public GearType GearType => gearType;
+    public override GearType GearType => gearType;
     public override Sprite ItemSprite => itemSprite;
     public override Vector2 PickUpColliderOffset => pickUpColliderOffset;
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
