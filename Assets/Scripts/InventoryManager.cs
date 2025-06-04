@@ -37,10 +37,10 @@ public class InventoryManager : MonoBehaviour
 
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
     private Dictionary<Guid, CellData> _pocketItemDict = new();
-    
+    public Dictionary<Guid, InventoryItem> ItemDict { get; } = new();
     private UIManager _uiManager;
 
-    public event Action<Vector2> OnCheckSlot;
+    //public event Action<Vector2> OnCheckSlot;
     public event Action<GameObject, GearType> OnSetInventory; 
     
     //test
@@ -63,16 +63,13 @@ public class InventoryManager : MonoBehaviour
         //test
         InventoryItem raidPackItem = new InventoryItem(raidPack01Test);
         //SetBackpack(raidPackItem);
-        SetGear(raidPackItem);
+        SetGear(GearType.Backpack, raidPackItem);
         InventoryItem rig01TestItem = new InventoryItem(rig01Test);
         //SetRig(rig01TestItem);
-        SetGear(rig01TestItem);
+        SetGear(GearType.UnarmoredRig, rig01TestItem);
         //SetLootInventory(crate01Test);
         SetInventorySlot(crate01Test, GearType.None);
-
         
-        //itemDragger01.Init(pistol1TestItem, _uiManager);
-
     }
     
     public void Init(UIManager uiManager)
@@ -82,7 +79,9 @@ public class InventoryManager : MonoBehaviour
         {
             PocketSlots[i] = new CellData(GearType.None);
         }
+        
         PistolTest = new InventoryItem(pistol1Test);
+        
     }
 
     public void AddItemToRig(InventoryItem item)
@@ -91,21 +90,21 @@ public class InventoryManager : MonoBehaviour
     }
     //Presenter 이벤트 처리...
     
-    public bool CheckSlotAvailable(Vector2 position)
+    public bool CheckSlotAvailable(Vector2 position) //가능 여부...
     {
         //좌측 인벤토리(장비 슬롯)
         //중간 인벤토리(리그, 가방 인벤토리, 주머니 슬롯 4개)
         //우측 인벤토리(적 시체, 상자)
         //1. 어떤 인벤토리인지...
-        
-        OnCheckSlot?.Invoke(position);
+   
         //_uiManager.CheckRectTransform(position);
         return false;
     }
+    
 
     public void SetInventorySlot(GameObject inventoryPrefab, GearType gearType)
     {
-        OnSetInventory?.Invoke(inventoryPrefab, gearType);;
+        OnSetInventory?.Invoke(inventoryPrefab, gearType); //인벤토리 프리팹 생성/초기화
     }
 
     public void SetInventoryData(Inventory inventory, GearType gearType)
@@ -126,33 +125,40 @@ public class InventoryManager : MonoBehaviour
     }
     
 
-    public void SetGear(InventoryItem item) //슬롯이 비었는가 -> SetGear(비었다고생각) 슬롯체크할 때 비었는지 종류맞는지 등 검사
+    public void SetGear(GearType gearType, InventoryItem item) //슬롯이 비었는가 -> SetGear(비었다고생각) 슬롯체크할 때 비었는지 종류맞는지 등 검사
     {
-        GearType gearType = item.ItemData.GearType;
+        //장비 능력치???
         GearData gearData;
         switch (gearType)
         {
             case GearType.HeadWear:
                 _headwearData = item;
+                HeadwearSlot.SetEmpty(false, item.Id);
                 break;
             case GearType.EyeWear:
                 _eyewearData = item;
+                EyewearSlot.SetEmpty(false, item.Id);
                 break;
             case GearType.BodyArmor:
                 _bodyArmorData = item;
+                BodyArmorSlot.SetEmpty(false, item.Id);
                 break;
             case GearType.ArmoredRig:
             case GearType.UnarmoredRig:    
                 _chestRigData = item;
+                ChestRigSlot.SetEmpty(false, item.Id);
                 gearData = item.ItemData as GearData;
                 if (gearData) SetInventorySlot(gearData.SlotPrefab, gearType);
                 break;
             case GearType.Backpack:
                 _backpackData = item;
+                BackpackSlot.SetEmpty(false, item.Id);
                 gearData = item.ItemData as GearData;
                 if (gearData) SetInventorySlot(gearData.SlotPrefab, gearType);
                 break;
         }
+        ItemDict[item.Id] = item;
+        Debug.Log("SetGear: " + item.ItemData.ItemName);
     }
 
     public void SetWeapon(InventoryItem item, bool isPrimary)
@@ -165,6 +171,11 @@ public class InventoryManager : MonoBehaviour
         {
             _secondaryWeaponData = item;
         }
+        
+    }
+
+    public void CheckGearSlot(CellData cellData, Guid id)
+    {
         
     }
     

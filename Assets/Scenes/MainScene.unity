@@ -1428,6 +1428,7 @@ MonoBehaviour:
   bodyArmorSlot: {fileID: 1067884386}
   primaryWeaponSlot: {fileID: 2071270327}
   secondaryWeaponSlot: {fileID: 1387162711}
+  leftPanelItemParentRT: {fileID: 0}
   middlePanel: {fileID: 286267793}
   midInventory: {fileID: 488420802}
   chestRigSlot: {fileID: 1102216827}
@@ -1443,6 +1444,7 @@ MonoBehaviour:
   - {fileID: 1976272675}
   - {fileID: 753401120}
   - {fileID: 348411592}
+  midPanelItemRT: {fileID: 0}
   rightPanel: {fileID: 364490179}
   lootSlotParent: {fileID: 2007659534}
   minLootSlotHeight: 800
@@ -8346,7 +8348,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlight: {fileID: 0}
-  panels: []
 --- !u!225 &1280273305
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -11192,7 +11193,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlight: {fileID: 0}
-  panels: []
 --- !u!114 &2013546672
 MonoBehaviour:
   m_ObjectHideFlags: 0

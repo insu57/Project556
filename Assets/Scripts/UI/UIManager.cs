@@ -30,12 +30,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform bodyArmorSlot;
     [SerializeField] private RectTransform primaryWeaponSlot;
     [SerializeField] private RectTransform secondaryWeaponSlot;
-    
-    public RectTransform HeadwearRT => headwearSlot;
-    public RectTransform EyewearRT => eyewearSlot;
-    public RectTransform BodyArmorRT => bodyArmorSlot;
-    public RectTransform PWeaponRT => primaryWeaponSlot;
-    public RectTransform SWeaponRT => secondaryWeaponSlot;
+    [SerializeField] private RectTransform leftPanelItemParentRT;
+    public RectTransform HeadwearSlotRT => headwearSlot;
+    public RectTransform EyewearSlotRT => eyewearSlot;
+    public RectTransform BodyArmorSlotRT => bodyArmorSlot;
+    public RectTransform PWeaponSlotRT => primaryWeaponSlot;
+    public RectTransform SWeaponSlotRT => secondaryWeaponSlot;
+    public RectTransform LeftPanelItemParentRT => leftPanelItemParentRT;
     
     [Header("Middle Panel")]
     [SerializeField] private RectTransform middlePanel;
@@ -49,14 +50,15 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform packInvenParent;
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
-    [FormerlySerializedAs("pocketsRT")] [SerializeField, Space] private RectTransform pocketsParent;
+    [SerializeField, Space] private RectTransform pocketsParent;
     [SerializeField] private List<RectTransform> pockets = new();
+    [SerializeField] private RectTransform midPanelItemRT;
     
-    public RectTransform RigRT => chestRigSlot;
-    public RectTransform BackpackRT => backpackSlot;
-    public List<RectTransform> PocketsRT => pockets;
+    public RectTransform RigSlotRT => chestRigSlot;
+    public RectTransform BackpackSlotRT => backpackSlot;
+    public List<RectTransform> PocketsSlotRT => pockets;
     public RectTransform RigInvenParent => rigInvenParent;
-    public RectTransform PackInvenParent => packInvenParent;
+    public RectTransform BackpackInvenParent => packInvenParent;
     
     [Header("Right Panel")]
     [SerializeField] private RectTransform rightPanel;
@@ -68,9 +70,11 @@ public class UIManager : MonoBehaviour
     
     [SerializeField, Space] private Image slotAvailable;
     [SerializeField] private ItemDragger itemDraggerPrefab;
+    private ItemDragger _currentItemDragger;
     //아니면 슬롯 색상 변경?
     
-    public event Action<bool, RectTransform> OnCheckRectTransform; 
+    public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckGearSlot;
+    public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckInventoryCell;
     private readonly List<RectTransform> _panelsRT = new List<RectTransform>(); //패널
     private readonly List<RectTransform> _gearSlotRT = new List<RectTransform>();
     private readonly List<RectTransform> _inventoriesRT = new List<RectTransform>();
@@ -105,10 +109,10 @@ public class UIManager : MonoBehaviour
         _inventoriesRT.Add(lootSlotParent);
     }
 
-    public ItemDragger InitItemDragger(InventoryItem item, RectTransform parent)
+    public ItemDragger InitItemDragger(InventoryItem item, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        var itemDragger = Instantiate(itemDraggerPrefab, parent);
-        itemDragger.Init(item, this);
+        var itemDragger = Instantiate(itemDraggerPrefab, itemParentRT);
+        itemDragger.Init(item, this, itemParentRT, inventoryRT);
         return itemDragger;
     }
 
@@ -149,28 +153,43 @@ public class UIManager : MonoBehaviour
         itemInteractUI.anchoredPosition =  uiPos;
     }
 
-    public void SetItemDragger()
+    public void MoveCurrentItemDragger(Vector2 position, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        
+        _currentItemDragger.MoveItemDragger(position, itemParentRT, inventoryRT);
     }
 
-    public void CheckRectTransform(Vector2 position)
+    public RectTransform GetItemInventoryRT(Vector2 originPos)
     {
-        RectTransform matchSlot = null;
-        
+        foreach (var inventory in _inventoriesRT)
+        {
+            if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, originPos)) continue;
+            var matchSlot = inventory;
+            return matchSlot;
+        }
+        //Inventory->ItemDict(Inventories) or InventoryManager -> ItemDict(GearSlot...)
+        return null;
+    }
+    
+    public void CheckItemSlot(ItemDragger draggingItem, Vector2 originPos, Vector2 mousePos, Guid id)
+    {
+        RectTransform matchSlot;
+        _currentItemDragger = draggingItem;
+
+        var originInvenRT = draggingItem.InventoryRT;
         foreach (var slot in _gearSlotRT)
         {
-            if (!RectTransformUtility.RectangleContainsScreenPoint(slot, position)) continue;
+            if (!RectTransformUtility.RectangleContainsScreenPoint(slot, mousePos)) continue;
             matchSlot = slot;
-            OnCheckRectTransform?.Invoke(true, matchSlot); 
+            OnCheckGearSlot?.Invoke(matchSlot, originInvenRT, mousePos, id); 
             return;
         }
 
         foreach (var inventory in _inventoriesRT)
         {
-            if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, position)) continue;
+            if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, mousePos)) continue;
+            //      Debug.Log(inventory.name);
             matchSlot = inventory;
-            OnCheckRectTransform?.Invoke(false, matchSlot); 
+            OnCheckInventoryCell?.Invoke(matchSlot,originInvenRT, mousePos, id); 
             return; //(inventory, matchSlot)
         }
     }

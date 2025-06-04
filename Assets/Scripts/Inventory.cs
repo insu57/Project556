@@ -14,21 +14,19 @@ public class Inventory: MonoBehaviour
         public GearType gearType;
     }
     
-    [SerializeField] private List<SlotData> slotDataList = new List<SlotData>();
+    [SerializeField] private List<SlotData> slotDataList = new();
     [SerializeField, Space] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
-    //private List<CellData> _cellData = new List<CellData>();
-   // private List<RectTransform> _slotList = new List<RectTransform>();
-    //private Dictionary<RectTransform, Vector2Int> 
     private Dictionary<RectTransform, (List<CellData> cells, Vector2Int size)> _slotDict // Slot -> CellData List
-        = new Dictionary<RectTransform, (List<CellData>, Vector2Int)>();
-    private Dictionary<Guid, InventoryItem> _itemDict = new Dictionary<Guid, InventoryItem>();
+        = new();
+    private Dictionary<Guid, InventoryItem> _itemDict = new();
     
     public float Width { private set; get; }
     public float Height { private set; get; }
     public RectTransform InventoryRT => _inventoryRT;
     public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
+    public Dictionary<Guid, InventoryItem> ItemDict => _itemDict;
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
     private void Awake()
     {
@@ -76,16 +74,15 @@ public class Inventory: MonoBehaviour
         }
     }
 
+    public void MoveItem(Vector2 mousePos)
+    {
+        
+    }
+    
     public void AddItem(InventoryItem item, RectTransform slotRT, int idx)
     {
-        //어디에? -> 일단은 지정해서...
-        //test?
-        //var slotRT01 = slotDataList[0].slotRT;
-        //idx -> 아이템 좌상단 기준...
-        //_slotDict[slotRT].c
-        item.MoveItem(slotRT, idx);
         
-        //for
+        item.MoveItem(slotRT, idx);
         //좌상단부터 슬롯의 빈 곳(가능한 위치)에 넣기 -> 추후 추가
         
         

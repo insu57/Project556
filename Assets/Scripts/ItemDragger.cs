@@ -7,30 +7,25 @@ using UnityEngine.UI;
 public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     private RectTransform _itemRT;
+    private RectTransform _itemParentRT;
     private RectTransform _inventoryRT;
+    public RectTransform InventoryRT => _inventoryRT;
+    private Transform _itemDraggingParent;
     private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
     private CanvasGroup _canvasGroup;
-    //private Image
-    private Transform _itemDefaultParent;
-    private Transform _itemDraggingParent;
 
     private UIManager _uiManager;
-    //private InventoryManager _inventoryManager;
-    //private InventoryUI _inventoryUI;
-    //private InventoryItem _item;
-    //private IItemData _itemData;
     private int _widthSize;
     private int _heightSize;
     private Guid _id;
+    //private GearType _gearType;
     private int _idx;
     //[SerializeField] private Image outline;
     private Image _itemImage;
     [SerializeField] private Image highlight;
     private float _slotSize;
-
-    //test
-    [SerializeField] private List<RectTransform> panels;
+    
     
     private void Awake()
     {
@@ -40,14 +35,14 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemImage = GetComponent<Image>();
     }
 
-    public void Init(InventoryItem item, UIManager uiManager)
+    public void Init(InventoryItem item, UIManager uiManager, RectTransform itemParent, RectTransform inventoryRT)
     {
         _uiManager = uiManager;
         _slotSize = uiManager.SlotSize;
         //_inventoryRT = inventoryRT;
 
         var itemData = item.ItemData;
-        
+        //_gearType = itemData.GearType;
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
         Vector2 imageSize = new Vector2(_widthSize * _slotSize, _heightSize * _slotSize);
@@ -56,15 +51,19 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
         _id = item.Id;
         
-        _itemDefaultParent = transform.parent;
+        //_itemDefaultParent = transform.parent;
+        _itemParentRT = itemParent;
         _itemDraggingParent = uiManager.gameObject.transform;
+        _inventoryRT = inventoryRT;
     }
 
-    public void SetInventoryRT(RectTransform inventoryRT)
+    public void MoveItemDragger(Vector2 pos, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        _inventoryRT = inventoryRT;
-        transform.SetParent(_inventoryRT);
-        _itemDefaultParent = transform.parent;
+        _itemRT.anchoredPosition = pos;
+        _itemParentRT = itemParentRT;
+        transform.SetParent(_itemParentRT);
+        _inventoryRT = inventoryRT; //null -> GearSlot
+        //_itemDefaultParent = transform.parent;
     }
     
     private (Vector2 pos, Guid id) GetFirstSlotPos(Vector2 mousePos)
@@ -101,12 +100,11 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         {
             _itemRT.position = globalMousePos;
         }
-        
         //_inventoryManager.CheckSlotAvailable(globalMousePos);
-        _uiManager.CheckRectTransform(globalMousePos);
+        _uiManager.CheckItemSlot(this, _pointerDownPos, globalMousePos, _id);
             
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos))
+                _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos))
         {
             //다른 RT에서도 인벤토리 슬롯 구분... 위의 globalMouse로 check...-> 어떤 인벤인지...
             //_inventoryUI
@@ -120,13 +118,15 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        transform.SetParent(_itemDefaultParent);
+        transform.SetParent(_itemParentRT);
         
         //check position...
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _inventoryRT, eventData.position, eventData.pressEventCamera, out var localPos
+                _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos
             )) return;
-        var firstSlot = GetFirstSlotPos(localPos);
+        
+        
+        //var firstSlot = GetFirstSlotPos(localPos);
         //_itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id); //바꾸기...
         
         //_inventoryUI.DisableSlotAvailable();

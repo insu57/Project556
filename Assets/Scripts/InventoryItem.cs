@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InventoryItem
 {
-    private IItemData _itemData;
+    private readonly IItemData _itemData;
     private RectTransform _slotRT;
     private int _idx;
 
@@ -14,19 +14,20 @@ public class InventoryItem
     public RectTransform SlotRT => _slotRT;
     public int Idx => _idx;
     public IItemData ItemData => _itemData;
+    public GearType GearType => _itemData.GearType;
     
     public InventoryItem(IItemData itemData)
     {
         this._itemData = itemData;
         Id = Guid.NewGuid(); 
         //초기화따로...? pickUp 아이템 따로?
-        
     }
 
     public void MoveItem(RectTransform slotRT, int idx)
     {
         //슬롯 위치 변경
         _slotRT = slotRT;
+        //
         _idx = idx;
     }
 }
