@@ -73,21 +73,21 @@ public class InventoryUIPresenter
         //EndDrag -> 확정...
         if (_gearSlotsMap.ContainsKey(matchRT))
         {
-            if(!_gearSlotsMap[matchRT].IsEmpty) return; 
+            if (!_gearSlotsMap[matchRT].IsEmpty) return;
             //return -> 불가능...표시(붉은색...)
             //OnDrag -> 임시저장, EndDrag -> 이동 or 복귀?
 
-            InventoryItem item;
-            if (!originInvenRT)
+            InventoryItem item; //현재 드래그 중인 아이템
+            if (!originInvenRT)//기존 위치 인벤토리 체크
             {
                 if(!_inventoryManager.ItemDict.ContainsKey(id)) Debug.LogError("Item not found...!: " + id);
-                item = _inventoryManager.ItemDict[id];
+                item = _inventoryManager.ItemDict[id]; //GearSlots Item Dict
             }
             else
             {
                 if(!_invenMap.ContainsKey(originInvenRT)) Debug.LogError("Inventory not found...!: " + id);
                 var inventory = _invenMap[originInvenRT];
-                item = inventory.ItemDict[id];
+                item = inventory.ItemDict[id]; //Inventory의 ItemDict
             }
 
             if (item != null)
@@ -97,13 +97,13 @@ public class InventoryUIPresenter
                 var slotCell = _gearSlotsMap[matchRT];  //체크 중인 슬롯의 Cell
                 GearType slotGearType = slotCell.GearType; //슬롯의  타입
                 
-                if(slotGearType != gearType) return; //아이템과 슬롯의 타입이 다르면 불가...
+                if(slotGearType != gearType) return; //아이템과 슬롯의 타입이 다르면 불가.
                 
-                if (slotGearType is GearType.ArmoredRig) //방탄리그 - 방탄조끼의 제한... 개선 어떻게?
+                if (gearType is GearType.ArmoredRig) //방탄리그 - 방탄조끼의 제한... 개선 어떻게?
                 {
-                    if(!_inventoryManager.BodyArmorSlot.IsEmpty) return;
+                    if(!_inventoryManager.BodyArmorSlot.IsEmpty) return; //방탄복이 장착된 상태면 방탄 리그 불가.
                 }
-                else if (slotGearType is GearType.BodyArmor)
+                else if (gearType is GearType.BodyArmor) //방탄복일 때
                 {
                     if (!_inventoryManager.ChestRigSlot.IsEmpty) //장착된 리그가 방탄 리그면 불가.
                     {
@@ -112,12 +112,21 @@ public class InventoryUIPresenter
                         if(rigItemType == GearType.ArmoredRig) return; 
                     }
                 }
-                _inventoryManager.SetGear(gearType, item);
-                
-                //_uiManager.MoveCurrentItemDragger(slotCell.ImagePosition, _uiManager.LeftPanelItemParentRT, null);
+
+                var imagePos = new Vector2(matchRT.sizeDelta.x, -matchRT.sizeDelta.y) / 2;
+                _uiManager.MoveCurrentItemDragger(imagePos, matchRT, null);
+                //GearSlot -> matchSlot의 자식으로 - 크기: 슬롯 크기에 따라
+                //InvenSlot -> Inven.ItemRT의 자식으로 - 크기: Cell개수에 따라(1x2 -> 50x100)
+                Debug.Log("Min: " + slotCell.MinPosition);
+                Debug.Log("Max: " + slotCell.MaxPosition);
                 //기존 슬롯(Cell) 비우기...
+                // _inventoryManager.SetGear(gearType, item); ->EndDrag에서...->Event?
             }
             
+            //ItemDragger -> TargetPosition설정.(bool isAvailable로 false면 원래 위치(PointerDownPos), true면 TargetPos
+            //Width&Height(SizeDelta) -> 이것도 bool isGearSlot?? -> 그냥 Size Vector2로 하는게 나을듯. 
+            //GearSlot 일 때 size, cell기준 Default size...? Cell -> 50*50(Cell 개수에 따라 증가) GearSlot 100*100, 
+            //무기 400*100
             if (!originInvenRT)//InvenRT가 없음 -> GearSlot에서 이동
             {
                

@@ -19,7 +19,8 @@ public class UIManager : MonoBehaviour
     [SerializeField, Space] private float slotSize = 50f;
     private float _panelSlotPadding; //slotSize * 3
     public float SlotSize => slotSize;
-    
+    public Vector2 GearSlotSize => new Vector2(slotSize, slotSize) * 2;
+    public Vector2 WeaponSlotSize => new Vector2(slotSize * 4, slotSize) * 2;
     
     [Header("Player Inventory")]
     [Header("Left Panel")]
@@ -153,9 +154,14 @@ public class UIManager : MonoBehaviour
         itemInteractUI.anchoredPosition =  uiPos;
     }
 
+    public void UpdateItemDraggerAvailability(Vector2 targetPos)
+    {
+        //_currentItemDragger.
+    }
+    
     public void MoveCurrentItemDragger(Vector2 position, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        _currentItemDragger.MoveItemDragger(position, itemParentRT, inventoryRT);
+        _currentItemDragger.SetTargetPosItemDragger(position, itemParentRT, inventoryRT, true);
     }
 
     public RectTransform GetItemInventoryRT(Vector2 originPos)
@@ -170,7 +176,7 @@ public class UIManager : MonoBehaviour
         return null;
     }
     
-    public void CheckItemSlot(ItemDragger draggingItem, Vector2 originPos, Vector2 mousePos, Guid id)
+    public void CheckItemSlot(ItemDragger draggingItem, Vector2 mousePos, Guid id)
     {
         RectTransform matchSlot;
         _currentItemDragger = draggingItem;
@@ -203,7 +209,7 @@ public class UIManager : MonoBehaviour
 
         if (rigInvenPrefab)
         {
-            Debug.Log("SetRigSlot");
+            //Debug.Log("SetRigSlot");
             _rigSlotInstance = Instantiate(rigInvenPrefab, rigInvenParent);
             Inventory inventory = _rigSlotInstance.GetComponent<Inventory>(); //다른방식?
             float slotPrefabHeight = inventory.Height;

@@ -127,7 +127,7 @@ public class InventoryUI : MonoBehaviour
         {
             for (int i = 0; i < _cellDataArray.Length; i++)
             {
-                Debug.Log($"CellData({i}): "+_cellDataArray[i].MinPosition + " "  + _cellDataArray[i].MaxPosition + " "  + _cellDataArray[i].ImagePosition);
+                Debug.Log($"CellData({i}): "+_cellDataArray[i].MinPosition + " "  + _cellDataArray[i].MaxPosition);
             }
         }
     }
@@ -225,7 +225,7 @@ public class InventoryUI : MonoBehaviour
             for (int w = 0; w < dragItem.Width; w++)
             {
                 //
-                Vector2 pos = _cellDataArray[firstIdx].ImagePosition + new Vector2(w * slotSize, h * -slotSize);
+                Vector2 pos = _cellDataArray[firstIdx].CellRT.anchoredPosition + new Vector2(w * slotSize, h * -slotSize);
                 //아이템크기만큼 슬롯 체크
                 int slotIdx = GetSlotIndex(pos);
                 

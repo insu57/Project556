@@ -8,7 +8,7 @@ public class CellData
     public RectTransform CellRT { get; private set; }
     public Vector2 MinPosition => CellRT.anchoredPosition - CellOffset;
     public Vector2 MaxPosition => CellRT.anchoredPosition + CellOffset;
-    public Vector2 ImagePosition => CellRT.anchoredPosition ;
+    //public Vector2 ImagePosition => CellRT.anchoredPosition  ;
     public Guid Id { private set; get; }
     public bool IsGearSlot { private set; get; }
     public GearType GearType { private set; get; }

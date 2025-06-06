@@ -143,7 +143,7 @@ public class InventoryManager : MonoBehaviour
                 _bodyArmorData = item;
                 BodyArmorSlot.SetEmpty(false, item.Id);
                 break;
-            case GearType.ArmoredRig:
+            case GearType.ArmoredRig://리그
             case GearType.UnarmoredRig:    
                 _chestRigData = item;
                 ChestRigSlot.SetEmpty(false, item.Id);

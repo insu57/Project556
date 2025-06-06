@@ -9,10 +9,15 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     private RectTransform _itemRT;
     private RectTransform _itemParentRT;
     private RectTransform _inventoryRT;
+    private RectTransform _targetItemParentRT;
+    private RectTransform _targetInventoryRT;
     public RectTransform InventoryRT => _inventoryRT;
     private Transform _itemDraggingParent;
     private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
+    private Vector2 _targetPos;
+    private bool _isAvailable;
+    
     private CanvasGroup _canvasGroup;
 
     private UIManager _uiManager;
@@ -51,19 +56,24 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
 
         _id = item.Id;
         
-        //_itemDefaultParent = transform.parent;
         _itemParentRT = itemParent;
         _itemDraggingParent = uiManager.gameObject.transform;
         _inventoryRT = inventoryRT;
+        _isAvailable = false;
     }
 
-    public void MoveItemDragger(Vector2 pos, RectTransform itemParentRT, RectTransform inventoryRT)
+    public void SetTargetPosItemDragger(Vector2 targetPos, RectTransform itemParentRT,
+        RectTransform inventoryRT, bool isAvailable)//크기는??? GearSlot vs InvenSlot 
     {
-        _itemRT.anchoredPosition = pos;
-        _itemParentRT = itemParentRT;
-        transform.SetParent(_itemParentRT);
-        _inventoryRT = inventoryRT; //null -> GearSlot
-        //_itemDefaultParent = transform.parent;
+        //_itemRT.anchoredPosition = pos;
+        _isAvailable = isAvailable;
+        if (!isAvailable) return;
+        _targetPos = targetPos;
+        //이것도 EndDrag에서...
+        _targetItemParentRT = itemParentRT;
+        //transform.SetParent(_itemParentRT);//부모설정
+        _targetInventoryRT = inventoryRT; //null -> GearSlot
+        
     }
     
     private (Vector2 pos, Guid id) GetFirstSlotPos(Vector2 mousePos)
@@ -87,10 +97,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     {
         _canvasGroup.blocksRaycasts = false;
         _pointerDownPos = _itemRT.anchoredPosition;
-        //_itemImage.maskable = false;
         transform.SetParent(_itemDraggingParent);
-        
-        
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -101,7 +108,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
             _itemRT.position = globalMousePos;
         }
         //_inventoryManager.CheckSlotAvailable(globalMousePos);
-        _uiManager.CheckItemSlot(this, _pointerDownPos, globalMousePos, _id);
+        _uiManager.CheckItemSlot(this,globalMousePos, _id);
             
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos))
@@ -120,6 +127,18 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     {
         transform.SetParent(_itemParentRT);
         
+        if (_isAvailable) //현재 슬롯이 가능한경우
+        {
+            _itemParentRT = _targetItemParentRT;
+            transform.SetParent(_itemParentRT);
+            _itemRT.anchoredPosition = _targetPos;
+            _inventoryRT = _targetInventoryRT;
+        }
+        else //불가능하면 원래 위치로...
+        {
+            _itemRT.anchoredPosition = _pointerDownPos;
+        }
+        
         //check position...
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos
@@ -128,11 +147,10 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         
         //var firstSlot = GetFirstSlotPos(localPos);
         //_itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id); //바꾸기...
-        
         //_inventoryUI.DisableSlotAvailable();
+        
+        _isAvailable = false; //다시 초기화
         _canvasGroup.blocksRaycasts = true;
-        //_itemImage.maskable = true;
-       
     }
 
     
