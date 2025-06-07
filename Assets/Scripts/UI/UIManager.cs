@@ -70,8 +70,8 @@ public class UIManager : MonoBehaviour
     private GameObject _lootSlotInstance;
     
     [SerializeField, Space] private Image slotAvailable;
-    [SerializeField] private ItemDragger itemDraggerPrefab;
-    private ItemDragger _currentItemDragger;
+    [FormerlySerializedAs("itemDraggerPrefab")] [SerializeField] private ItemDragHandler itemDragHandlerPrefab;
+    private ItemDragHandler _currentItemDragHandler;
     //아니면 슬롯 색상 변경?
     
     public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckGearSlot;
@@ -81,8 +81,8 @@ public class UIManager : MonoBehaviour
     private readonly List<RectTransform> _inventoriesRT = new List<RectTransform>();
     
     //test
-    [SerializeField, Space] private ItemDragger test01;
-    [SerializeField] private ItemDragger test02;
+    [SerializeField, Space] private ItemDragHandler test01;
+    [SerializeField] private ItemDragHandler test02;
     //[SerializeField] private BaseItemDataSO test01Data;
     
     private void Awake()
@@ -110,10 +110,10 @@ public class UIManager : MonoBehaviour
         _inventoriesRT.Add(lootSlotParent);
     }
 
-    public ItemDragger InitItemDragger(InventoryItem item, RectTransform itemParentRT, RectTransform inventoryRT)
+    public ItemDragHandler InitItemDragger(InventoryItem item, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        var itemDragger = Instantiate(itemDraggerPrefab, itemParentRT);
-        itemDragger.Init(item, this, itemParentRT, inventoryRT);
+        var itemDragger = Instantiate(itemDragHandlerPrefab, itemParentRT);
+        //itemDragger.Init(item, this, itemParentRT, inventoryRT, transform);
         return itemDragger;
     }
 
@@ -161,7 +161,7 @@ public class UIManager : MonoBehaviour
     
     public void MoveCurrentItemDragger(Vector2 position, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        _currentItemDragger.SetTargetPosItemDragger(position, itemParentRT, inventoryRT, true);
+        _currentItemDragHandler.SetTargetPosItemDragger(position, itemParentRT, inventoryRT, true);
     }
 
     public RectTransform GetItemInventoryRT(Vector2 originPos)
@@ -176,28 +176,29 @@ public class UIManager : MonoBehaviour
         return null;
     }
     
-    public void CheckItemSlot(ItemDragger draggingItem, Vector2 mousePos, Guid id)
+    public (RectTransform matchSlot, bool isGearSlot) CheckItemSlot(Vector2 mousePos)
     {
-        RectTransform matchSlot;
-        _currentItemDragger = draggingItem;
+        //RectTransform matchSlot;
+        //_currentItemDragHandler = draggingItem;
 
-        var originInvenRT = draggingItem.InventoryRT;
+        //var originInvenRT = draggingItem.InventoryRT;
         foreach (var slot in _gearSlotRT)
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(slot, mousePos)) continue;
-            matchSlot = slot;
-            OnCheckGearSlot?.Invoke(matchSlot, originInvenRT, mousePos, id); 
-            return;
+            //matchSlot = slot;
+            //OnCheckGearSlot?.Invoke(matchSlot, originInvenRT, mousePos, id); 
+            return (slot, true);
         }
 
         foreach (var inventory in _inventoriesRT)
         {
             if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, mousePos)) continue;
             //      Debug.Log(inventory.name);
-            matchSlot = inventory;
-            OnCheckInventoryCell?.Invoke(matchSlot,originInvenRT, mousePos, id); 
-            return; //(inventory, matchSlot)
+            //matchSlot = inventory;
+            //OnCheckInventoryCell?.Invoke(matchSlot,originInvenRT, mousePos, id); 
+            return (inventory, false); //(inventory, matchSlot)
         }
+        return (null,  false);
     }
     
     public Inventory SetRigSlot(GameObject rigInvenPrefab)

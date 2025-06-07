@@ -1,53 +1,66 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-public class InventoryUIPresenter
+public class InventoryUIPresenter : MonoBehaviour
 {
-    private readonly InventoryManager _inventoryManager;
-    private readonly UIManager _uiManager;
+    private InventoryManager _inventoryManager;
+    private UIManager _uiManager;
 
     private readonly Dictionary<RectTransform, CellData> _gearSlotsMap = new();
     private readonly Dictionary<RectTransform, Inventory> _invenMap = new();
-    
-    public InventoryUIPresenter(InventoryManager inventoryManager, UIManager uiManager)
+
+    public float SlotSize => _uiManager.SlotSize;
+    //ItemDragger List?
+    //test
+    [SerializeField] private ItemDragHandler itemDragHandlerTest;
+    [SerializeField] private BaseItemDataSO pistolTestData;
+    private InventoryItem pistolTest;
+    private void Awake()
     {
-        _inventoryManager = inventoryManager;
-        _uiManager = uiManager;
-
+        _inventoryManager = GetComponent<InventoryManager>();
+        _inventoryManager.Init();
+        _uiManager = FindFirstObjectByType<UIManager>();
+        
+    }
+    
+    private void Start()
+    {
         //Left Panel Init
-        inventoryManager.HeadwearSlot.SetCellRT(uiManager.HeadwearSlotRT);
-        _gearSlotsMap[uiManager.HeadwearSlotRT] = inventoryManager.HeadwearSlot;
+        _inventoryManager.HeadwearSlot.SetCellRT(_uiManager.HeadwearSlotRT);
+        _gearSlotsMap[_uiManager.HeadwearSlotRT] = _inventoryManager.HeadwearSlot;
 
-        inventoryManager.EyewearSlot.SetCellRT(uiManager.EyewearSlotRT);
-        _gearSlotsMap[uiManager.EyewearSlotRT] = inventoryManager.EyewearSlot;
+        _inventoryManager.EyewearSlot.SetCellRT(_uiManager.EyewearSlotRT);
+        _gearSlotsMap[_uiManager.EyewearSlotRT] = _inventoryManager.EyewearSlot;
 
-        inventoryManager.BodyArmorSlot.SetCellRT(uiManager.BodyArmorSlotRT);
-        _gearSlotsMap[uiManager.BodyArmorSlotRT] = inventoryManager.BodyArmorSlot;
+        _inventoryManager.BodyArmorSlot.SetCellRT(_uiManager.BodyArmorSlotRT);
+        _gearSlotsMap[_uiManager.BodyArmorSlotRT] = _inventoryManager.BodyArmorSlot;
 
-        inventoryManager.PrimaryWeaponSlot.SetCellRT(uiManager.PWeaponSlotRT);
-        _gearSlotsMap[uiManager.PWeaponSlotRT] = inventoryManager.PrimaryWeaponSlot;
+        _inventoryManager.PrimaryWeaponSlot.SetCellRT(_uiManager.PWeaponSlotRT);
+        _gearSlotsMap[_uiManager.PWeaponSlotRT] = _inventoryManager.PrimaryWeaponSlot;
 
-        inventoryManager.SecondaryWeaponSlot.SetCellRT(uiManager.SWeaponSlotRT);
-        _gearSlotsMap[uiManager.SWeaponSlotRT] = inventoryManager.SecondaryWeaponSlot;
+        _inventoryManager.SecondaryWeaponSlot.SetCellRT(_uiManager.SWeaponSlotRT);
+        _gearSlotsMap[_uiManager.SWeaponSlotRT] = _inventoryManager.SecondaryWeaponSlot;
 
         //Mid Panel Init
-        inventoryManager.ChestRigSlot.SetCellRT(uiManager.RigSlotRT);
-        _gearSlotsMap[uiManager.RigSlotRT] = inventoryManager.ChestRigSlot;
+        _inventoryManager.ChestRigSlot.SetCellRT(_uiManager.RigSlotRT);
+        _gearSlotsMap[_uiManager.RigSlotRT] = _inventoryManager.ChestRigSlot;
 
-        inventoryManager.BackpackSlot.SetCellRT(uiManager.BackpackSlotRT);
-        _gearSlotsMap[uiManager.BackpackSlotRT] = inventoryManager.BackpackSlot;
+        _inventoryManager.BackpackSlot.SetCellRT(_uiManager.BackpackSlotRT);
+        _gearSlotsMap[_uiManager.BackpackSlotRT] = _inventoryManager.BackpackSlot;
 
         for (int i = 0; i < 4; i++)
         {
-            inventoryManager.PocketSlots[i].SetCellRT(uiManager.PocketsSlotRT[i]);
-            _gearSlotsMap[uiManager.PocketsSlotRT[i]] = inventoryManager.PocketSlots[i];
+            _inventoryManager.PocketSlots[i].SetCellRT(_uiManager.PocketsSlotRT[i]);
+            _gearSlotsMap[_uiManager.PocketsSlotRT[i]] = _inventoryManager.PocketSlots[i];
         }
         
         //Inventory 추가 **Inventory 초기 상태는 null!
-        _invenMap[uiManager.RigInvenParent] = inventoryManager.RigInventory;
-        _invenMap[uiManager.BackpackInvenParent] = inventoryManager.BackpackInventory;
-        _invenMap[uiManager.LootSlotParent] = inventoryManager.LootInventory;
+        _invenMap[_uiManager.RigInvenParent] = _inventoryManager.RigInventory;
+        _invenMap[_uiManager.BackpackInvenParent] = _inventoryManager.BackpackInventory;
+        _invenMap[_uiManager.LootSlotParent] = _inventoryManager.LootInventory;
         
         
         
@@ -57,11 +70,101 @@ public class InventoryUIPresenter
         //UIManager
         _uiManager.OnCheckGearSlot += HandleOnCheckGearSlot;
         _uiManager.OnCheckInventoryCell += HandleOnCheckInventoryCell;
-
-
+        //ItemDragger...
+        
+       
     }
 
+    private void OnDestroy()
+    {
+        //Event unsubscribe
+        _inventoryManager.OnSetInventory -= HandleOnSetInventory;
+        _uiManager.OnCheckGearSlot -= HandleOnCheckGearSlot;
+        _uiManager.OnCheckInventoryCell -= HandleOnCheckInventoryCell;
+    }
+
+    public void InitItemDragHandler(ItemDragHandler itemDrag)//아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
+    {
+        itemDrag.OnDragEvent += HandleOnDragItem;
+        itemDrag.OnEndDragEvent += HandleOnEndDragItem;
+    }
+
+    public void OnDisableItemDragHandler(ItemDragHandler itemDrag)
+    {
+        itemDrag.OnDragEvent -= HandleOnDragItem;
+        itemDrag.OnEndDragEvent -= HandleOnEndDragItem;
+    }
+    
     private void GetItemRectTransform(Vector2 originPos)
+    {
+        
+    }
+
+    private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
+    {
+        var slotInfo = _uiManager.CheckItemSlot(mousePos);
+        if (!slotInfo.matchSlot) return;
+        if (!slotInfo.isGearSlot) return;
+        Debug.Log("MatchSlot: " + slotInfo.matchSlot.name);
+        var isAvailable = 
+            CheckGearSlot(slotInfo.matchSlot, itemDrag.InventoryRT, mousePos, itemID); //Available
+        Debug.Log("IsAvailable: " + isAvailable);
+    }
+
+    private void HandleOnEndDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
+    {
+        Debug.Log("EndDragItem: " + itemDrag.name);
+    }
+
+    private bool CheckGearSlot(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
+    {
+        //if (!_gearSlotsMap.ContainsKey(matchRT)) return;
+        if(!_gearSlotsMap[matchRT].IsEmpty) return false;
+        
+        InventoryItem item;
+        if (!originInvenRT)//기존 위치 인벤토리 체크
+        {
+            if(!_inventoryManager.ItemDict.ContainsKey(id)) Debug.LogError("Item not found...!: " + id);
+            item = _inventoryManager.ItemDict[id]; //GearSlots Item Dict
+        }
+        else
+        {
+            if(!_invenMap.ContainsKey(originInvenRT)) Debug.LogError("Inventory not found...!: " + id);
+            var inventory = _invenMap[originInvenRT];
+            item = inventory.ItemDict[id]; //Inventory의 ItemDict
+        }
+
+        if (item == null)
+        {
+            Debug.LogError("Item not found...!: " + id);
+            return false;
+        }
+
+        GearType gearType = item.GearType; //드래그 중인 아이템의 타입
+                
+        var slotCell = _gearSlotsMap[matchRT];  //체크 중인 슬롯의 Cell
+        GearType slotGearType = slotCell.GearType; //슬롯의  타입
+                
+        if(slotGearType != gearType) return false; //아이템과 슬롯의 타입이 다르면 불가.
+                
+        if (gearType is GearType.ArmoredRig) //방탄리그 - 방탄조끼의 제한... 개선 어떻게?
+        {
+            if(!_inventoryManager.BodyArmorSlot.IsEmpty) return false; //방탄복이 장착된 상태면 방탄 리그 불가.
+        }
+        else if (gearType is GearType.BodyArmor) //방탄복일 때
+        {
+            if (!_inventoryManager.ChestRigSlot.IsEmpty) //장착된 리그가 방탄 리그면 불가.
+            {
+                var rigID = _inventoryManager.ChestRigSlot.Id;
+                var rigItemType =  _inventoryManager.ItemDict[rigID].GearType;
+                if(rigItemType == GearType.ArmoredRig) return false; 
+            }
+        }
+
+        return true;//Slot Available      
+    }
+
+    private void CheckInventory(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
     {
         
     }
@@ -175,10 +278,14 @@ public class InventoryUIPresenter
                 inventory = _uiManager.SetLootSlot(inventoryPrefab);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.LootSlotParent] = inventory;
+                
+                
                 //test
-                _uiManager.InitItemDragger(_inventoryManager.PistolTest
-                    , _inventoryManager.LootInventory.ItemRT, _uiManager.LootSlotParent);
-                inventory.ItemDict[_inventoryManager.PistolTest.Id] = _inventoryManager.PistolTest;
+                pistolTest = new(pistolTestData);
+                itemDragHandlerTest.Init(pistolTest, this, _inventoryManager.LootInventory.ItemRT,
+                    _uiManager.LootSlotParent, _uiManager.transform);
+
+                inventory.ItemDict[pistolTest.Id] = pistolTest;
                 //주웠을때... 
                 //Inventory -> itemRT
                 break;

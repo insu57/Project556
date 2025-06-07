@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     private RectTransform _itemRT;
     private RectTransform _itemParentRT;
@@ -20,6 +20,7 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     
     private CanvasGroup _canvasGroup;
 
+    private InventoryUIPresenter _inventoryUIPresenter;
     private UIManager _uiManager;
     private int _widthSize;
     private int _heightSize;
@@ -31,6 +32,8 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     [SerializeField] private Image highlight;
     private float _slotSize;
     
+    public event Action<ItemDragHandler, Vector2, Guid> OnDragEvent;
+    public event Action<ItemDragHandler, Vector2, Guid> OnEndDragEvent;
     
     private void Awake()
     {
@@ -40,16 +43,36 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _itemImage = GetComponent<Image>();
     }
 
-    public void Init(InventoryItem item, UIManager uiManager, RectTransform itemParent, RectTransform inventoryRT)
+    private void OnEnable()
     {
-        _uiManager = uiManager;
-        _slotSize = uiManager.SlotSize;
+        if (_inventoryUIPresenter)
+        {
+            _inventoryUIPresenter.InitItemDragHandler(this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_inventoryUIPresenter)
+        {
+            _inventoryUIPresenter.OnDisableItemDragHandler(this);
+        }
+    }
+
+    public void Init(InventoryItem item, InventoryUIPresenter presenter
+        , RectTransform itemParent, RectTransform inventoryRT, Transform uiParent)
+    {
+        //_uiManager = uiManager;
+        _inventoryUIPresenter = presenter;
+        _inventoryUIPresenter.InitItemDragHandler(this);
+        _slotSize = presenter.SlotSize;
         //_inventoryRT = inventoryRT;
 
         var itemData = item.ItemData;
         //_gearType = itemData.GearType;
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
+        Debug.Log(_slotSize);
         Vector2 imageSize = new Vector2(_widthSize * _slotSize, _heightSize * _slotSize);
         _itemRT.sizeDelta = imageSize;
         _itemImage.sprite = itemData.ItemSprite;
@@ -57,11 +80,11 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
         _id = item.Id;
         
         _itemParentRT = itemParent;
-        _itemDraggingParent = uiManager.gameObject.transform;
+        _itemDraggingParent = uiParent;
         _inventoryRT = inventoryRT;
         _isAvailable = false;
     }
-
+    
     public void SetTargetPosItemDragger(Vector2 targetPos, RectTransform itemParentRT,
         RectTransform inventoryRT, bool isAvailable)//크기는??? GearSlot vs InvenSlot 
     {
@@ -108,7 +131,10 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
             _itemRT.position = globalMousePos;
         }
         //_inventoryManager.CheckSlotAvailable(globalMousePos);
-        _uiManager.CheckItemSlot(this,globalMousePos, _id);
+        
+        //EVENT invoke
+        OnDragEvent?.Invoke(this, globalMousePos, _id);
+        //_uiManager.CheckItemSlot(this,globalMousePos, _id);
             
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos))
@@ -126,6 +152,15 @@ public class ItemDragger : MonoBehaviour, IPointerDownHandler, IDragHandler, IEn
     public void OnEndDrag(PointerEventData eventData)
     {
         transform.SetParent(_itemParentRT);
+        
+        
+        if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
+        {
+            _itemRT.position = globalMousePos;
+        }
+        
+        OnEndDragEvent?.Invoke(this, globalMousePos, _id);
         
         if (_isAvailable) //현재 슬롯이 가능한경우
         {

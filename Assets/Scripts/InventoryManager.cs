@@ -8,8 +8,8 @@ using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    [SerializeField] private float slotSize = 50f;
-    public float SlotSize => slotSize;
+    //[SerializeField] private float slotSize = 50f;
+    //public float SlotSize => slotSize;
     
     //Left Panel
     private InventoryItem _headwearData;
@@ -38,7 +38,7 @@ public class InventoryManager : MonoBehaviour
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
     private Dictionary<Guid, CellData> _pocketItemDict = new();
     public Dictionary<Guid, InventoryItem> ItemDict { get; } = new();
-    private UIManager _uiManager;
+    //private UIManager _uiManager;
 
     //public event Action<Vector2> OnCheckSlot;
     public event Action<GameObject, GearType> OnSetInventory; 
@@ -49,13 +49,16 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private GameObject crate01Test;
     [SerializeField] private BaseItemDataSO pistol1Test;
     [SerializeField] private BaseItemDataSO bandageTest;
-    [SerializeField] private ItemDragger itemDragger01;
+    [SerializeField] private ItemDragHandler itemDragger01;
     public InventoryItem PistolTest { get; private set; }
 
     private void Awake()
     {
-        
-        
+        for (int i = 0; i < 4; i++) //PocketSlot 4
+        {
+            PocketSlots[i] = new CellData(GearType.None);
+        }
+        PistolTest = new InventoryItem(pistol1Test);
     }
 
     private void Start()
@@ -72,15 +75,10 @@ public class InventoryManager : MonoBehaviour
         
     }
     
-    public void Init(UIManager uiManager)
+    public void Init()
     {
-        _uiManager = uiManager;
-        for (int i = 0; i < 4; i++) //PocketSlot 4
-        {
-            PocketSlots[i] = new CellData(GearType.None);
-        }
+        //_uiManager = uiManager;
         
-        PistolTest = new InventoryItem(pistol1Test);
         
     }
 

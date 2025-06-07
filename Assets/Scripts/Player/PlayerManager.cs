@@ -25,10 +25,10 @@ public class PlayerManager : MonoBehaviour
         _uiManager = FindFirstObjectByType<UIManager>();
         _playerAnimation = GetComponent<PlayerAnimation>();
         _playerWeapon = GetComponent<PlayerWeapon>();
-        _inventoryManager = GetComponent<InventoryManager>();
-        _inventoryManager.Init(_uiManager);
+        //_inventoryManager = GetComponent<InventoryManager>();
+        //_inventoryManager.Init();
         
-        _inventoryUIPresenter = new InventoryUIPresenter(_inventoryManager, _uiManager);
+        //_inventoryUIPresenter = new InventoryUIPresenter(_inventoryManager, _uiManager);
         
     }
 

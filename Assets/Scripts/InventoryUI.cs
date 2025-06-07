@@ -23,8 +23,8 @@ public class InventoryUI : MonoBehaviour
     private Dictionary<Guid, InventoryItem> _itemDataDictionary = new Dictionary<Guid, InventoryItem>(); 
     
     //TEMP Test
-    [SerializeField] private ItemDragger item;
-    [SerializeField] private ItemDragger itemPistol;
+    [SerializeField] private ItemDragHandler item;
+    [SerializeField] private ItemDragHandler itemPistol;
     [SerializeField] private BaseItemDataSO bandageData;
     [SerializeField] private BaseItemDataSO m1911a1Data;
     
