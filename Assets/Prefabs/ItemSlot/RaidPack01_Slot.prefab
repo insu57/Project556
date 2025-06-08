@@ -146,11 +146,11 @@ RectTransform:
   - {fileID: 8803961096636263660}
   m_Father: {fileID: 7500113826402882753}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 400, y: 500}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &562856214879333871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -229,6 +229,8 @@ MonoBehaviour:
   slotDataList:
   - slotRT: {fileID: 3270350777214519499}
     cellCount: {x: 8, y: 10}
+    isGearSlot: 0
+    gearType: 0
   itemRT: {fileID: 505271715666026640}
 --- !u!1001 &251356604692902304
 PrefabInstance:

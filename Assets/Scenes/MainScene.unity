@@ -1425,8 +1425,9 @@ MonoBehaviour:
   pickupTextSize: 50
   itemInteractUI: {fileID: 1327665870}
   slotSize: 50
+  availableColor: {r: 0, g: 1, b: 0, a: 0.5019608}
+  unavailableColor: {r: 1, g: 0, b: 0, a: 0.5019608}
   leftPanel: {fileID: 120543682}
-  leftInventory: {fileID: 1983832233}
   headwearSlot: {fileID: 1840609090}
   eyewearSlot: {fileID: 1782067863}
   bodyArmorSlot: {fileID: 1067884386}
@@ -1434,7 +1435,6 @@ MonoBehaviour:
   secondaryWeaponSlot: {fileID: 1387162711}
   leftPanelItemParentRT: {fileID: 1776496392}
   middlePanel: {fileID: 286267793}
-  midInventory: {fileID: 488420802}
   chestRigSlot: {fileID: 1102216827}
   chestRigParent: {fileID: 1041109555}
   rigInvenParent: {fileID: 762424933}
@@ -1648,9 +1648,7 @@ RectTransform:
   - {fileID: 2007659534}
   - {fileID: 855630823}
   - {fileID: 1960239309}
-  - {fileID: 1686192076}
   - {fileID: 169024591}
-  - {fileID: 968565300}
   m_Father: {fileID: 259694569}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -1689,7 +1687,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 488420801}
-  - component: {fileID: 488420802}
   m_Layer: 5
   m_Name: Pockets
   m_TagString: Untagged
@@ -1719,44 +1716,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 600, y: 200}
   m_Pivot: {x: 0, y: 1}
---- !u!114 &488420802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 488420800}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab361740db9540d4ebfa5a9f2726c55c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  slotDataList:
-  - slotRT: {fileID: 1102216827}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 3
-  - slotRT: {fileID: 1198045949}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 1
-  - slotRT: {fileID: 2004249662}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 0
-    gearType: 0
-  - slotRT: {fileID: 1976272675}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 0
-    gearType: 0
-  - slotRT: {fileID: 753401120}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 0
-    gearType: 0
-  - slotRT: {fileID: 348411592}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 0
-    gearType: 0
-  itemRT: {fileID: 1183626776}
 --- !u!1 &494013523
 GameObject:
   m_ObjectHideFlags: 0
@@ -6502,11 +6461,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 453797358}
+  m_Father: {fileID: 1251353283}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 1260, y: -190.00005}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &968565301
@@ -6854,7 +6813,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 453797358}
+    m_TransformParent: {fileID: 1251353283}
     m_Modifications:
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_Pivot.x
@@ -6918,11 +6877,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 50
+      value: 1310
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50
+      value: -239.99998
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -8266,6 +8225,8 @@ RectTransform:
   - {fileID: 2027163499}
   - {fileID: 1063541562}
   - {fileID: 395335068}
+  - {fileID: 1686192076}
+  - {fileID: 968565300}
   m_Father: {fileID: 364393530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -10468,7 +10429,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemDragHandlerTest: {fileID: 1686192079}
-  pistolTestData: {fileID: 11400000, guid: 66678e72724268146bc0997c0da8795d, type: 2}
+  pistolTestData: {fileID: 11400000, guid: 8c6fe2c91f209fa4295d05fdda3568c8, type: 2}
 --- !u!114 &1936378615
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10807,7 +10768,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1983832232}
-  - component: {fileID: 1983832233}
   m_Layer: 5
   m_Name: LeftInventory
   m_TagString: Untagged
@@ -10839,40 +10799,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1983832233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1983832231}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab361740db9540d4ebfa5a9f2726c55c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  slotDataList:
-  - slotRT: {fileID: 1840609090}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 5
-  - slotRT: {fileID: 1782067863}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 6
-  - slotRT: {fileID: 1067884386}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 2
-  - slotRT: {fileID: 1372455112}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 7
-  - slotRT: {fileID: 1246552315}
-    cellCount: {x: 1, y: 1}
-    isGearSlot: 1
-    gearType: 7
-  itemRT: {fileID: 1776496392}
 --- !u!1 &1987272832
 GameObject:
   m_ObjectHideFlags: 0
@@ -11895,27 +11821,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_Pivot.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_Pivot.y
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_SizeDelta.x
@@ -11955,11 +11881,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 49.999878
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -46
+      value: -96
       objectReference: {fileID: 0}
     - target: {fileID: 865923315094828056, guid: 2d55ada277b562f45850e960c2deefb9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

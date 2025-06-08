@@ -20,14 +20,21 @@ public class Inventory: MonoBehaviour
     
     private Dictionary<RectTransform, (List<CellData> cells, Vector2Int size)> _slotDict // Slot -> CellData List
         = new();
-    private Dictionary<Guid, InventoryItem> _itemDict = new();
-    
+
     public float Width { private set; get; }
     public float Height { private set; get; }
+    private float _cellSize;
     public RectTransform InventoryRT => _inventoryRT;
     public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
-    public Dictionary<Guid, InventoryItem> ItemDict => _itemDict;
+    public Dictionary<Guid, InventoryItem> ItemDict { get; } = new();
+
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
+
+    public void Init(float slotSize)
+    {
+        _cellSize = slotSize;
+    }
+    
     private void Awake()
     {
         _inventoryRT = GetComponent<RectTransform>();
@@ -63,15 +70,37 @@ public class Inventory: MonoBehaviour
         }
     }
 
-    public void CheckSlot(Vector2 mousePos)
+    public void CheckSlot(Vector2 mousePos, Vector2Int itemSize)
     {
         foreach (var slotData in slotDataList)
         {
             if (RectTransformUtility.RectangleContainsScreenPoint(slotData.slotRT, mousePos))
             {
-                Debug.Log(slotData);
+                var matchSlot = slotData.slotRT;
+                if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(matchSlot, mousePos, null,
+                        out var localPoint)) continue;
+                //Slot -> Pos...
+                var cellsInfo = _slotDict[matchSlot];
+                var cells = cellsInfo.cells;
+                var slotSize = cellsInfo.size;
+                GetCellIdx(localPoint, slotSize, itemSize, out var idx);
+                //localPoint, 
+                Debug.Log(this.name + ": " + matchSlot+ " local Point: " + localPoint +" idx: "+idx);
+                //Firs.
             }
         }
+    }
+
+    public void GetCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemSize ,out int idx)
+    {
+        int width = slotSize.x;
+        int height = slotSize.y;
+        Vector2 firstPoint = localPoint - new Vector2(itemSize.x * _cellSize / 2f, -itemSize.y * _cellSize / 2f);
+        int x = (int) (firstPoint.x / _cellSize);
+        int y = (int)(-firstPoint.y / _cellSize);//y는 음수
+        //기존 InventoryUI코드 참조... 아이템 중간 Pos -> MinCell MaxCell...
+        idx = x + width * y;
+        if (idx < 0 || idx > width * height) idx = -1;
     }
 
     public void MoveItem(Vector2 mousePos)

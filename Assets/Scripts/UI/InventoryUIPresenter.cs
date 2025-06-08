@@ -21,7 +21,7 @@ public class InventoryUIPresenter : MonoBehaviour
     private void Awake()
     {
         _inventoryManager = GetComponent<InventoryManager>();
-        _inventoryManager.Init();
+        //_inventoryManager.Init();
         _uiManager = FindFirstObjectByType<UIManager>();
         
     }
@@ -103,22 +103,35 @@ public class InventoryUIPresenter : MonoBehaviour
     private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
         var slotInfo = _uiManager.CheckItemSlot(mousePos);
-        if (!slotInfo.matchSlot) return;
-        if (!slotInfo.isGearSlot) return;
-        Debug.Log("MatchSlot: " + slotInfo.matchSlot.name);
-        var isAvailable = 
-            CheckGearSlot(slotInfo.matchSlot, itemDrag.InventoryRT, mousePos, itemID); //Available
-        Debug.Log("IsAvailable: " + isAvailable);
+        if (!slotInfo.matchSlot)
+        {
+            _uiManager.ClearShowAvailable();
+            return;
+        }
+        if (slotInfo.isGearSlot)
+        {
+            var isAvailable = 
+                CheckGearSlot(slotInfo.matchSlot, itemDrag.InventoryRT, mousePos, itemID); //Available
+            //Debug.Log("IsAvailable: " + isAvailable);
+            _uiManager.ShowSlotAvailable(isAvailable, slotInfo.matchSlot.position, slotInfo.matchSlot.sizeDelta);
+        }
+        else
+        {
+            CheckInventory(slotInfo.matchSlot, itemDrag.InventoryRT, mousePos, itemID);
+        }
+        //Debug.Log("MatchSlot: " + slotInfo.matchSlot.name);
+        
+        
     }
 
     private void HandleOnEndDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
         Debug.Log("EndDragItem: " + itemDrag.name);
+        _uiManager.ClearShowAvailable();
     }
 
     private bool CheckGearSlot(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
     {
-        //if (!_gearSlotsMap.ContainsKey(matchRT)) return;
         if(!_gearSlotsMap[matchRT].IsEmpty) return false;
         
         InventoryItem item;
@@ -153,12 +166,11 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         else if (gearType is GearType.BodyArmor) //방탄복일 때
         {
-            if (!_inventoryManager.ChestRigSlot.IsEmpty) //장착된 리그가 방탄 리그면 불가.
-            {
-                var rigID = _inventoryManager.ChestRigSlot.Id;
-                var rigItemType =  _inventoryManager.ItemDict[rigID].GearType;
-                if(rigItemType == GearType.ArmoredRig) return false; 
-            }
+            if (_inventoryManager.ChestRigSlot.IsEmpty) return true; //Slot Available      
+            //장착된 리그가 방탄 리그면 불가.
+            var rigID = _inventoryManager.ChestRigSlot.Id;
+            var rigItemType =  _inventoryManager.ItemDict[rigID].GearType;
+            if(rigItemType == GearType.ArmoredRig) return false;
         }
 
         return true;//Slot Available      
@@ -166,7 +178,10 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void CheckInventory(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
     {
-        
+        var targetInven = _invenMap[matchRT];
+        var originInven = _invenMap[originInvenRT];
+        var itemSize = originInven.ItemDict[id].SizeVector;
+        targetInven.CheckSlot(mousePos, itemSize);
     }
     
     private void HandleOnCheckGearSlot(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
@@ -266,26 +281,31 @@ public class InventoryUIPresenter : MonoBehaviour
             case GearType.ArmoredRig:
             case GearType.UnarmoredRig:    
                 inventory = _uiManager.SetRigSlot(inventoryPrefab);
+                inventory.Init(_uiManager.SlotSize);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.RigInvenParent] = inventory;
                 break;
             case GearType.Backpack:
                 inventory = _uiManager.SetBackpackSlot(inventoryPrefab);
+                inventory.Init(_uiManager.SlotSize);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.BackpackInvenParent] = inventory;
                 break;
             case GearType.None: //LootInventory
-                inventory = _uiManager.SetLootSlot(inventoryPrefab);
+                inventory = _uiManager.SetLootSlot(inventoryPrefab); 
+                //문제...새로 생성, 이미 생성됨...구분하기?? UI-Data 분리?
+                inventory.Init(_uiManager.SlotSize);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.LootSlotParent] = inventory;
                 
                 
                 //test
-                pistolTest = new(pistolTestData);
+                pistolTest = new InventoryItem(pistolTestData);
                 itemDragHandlerTest.Init(pistolTest, this, _inventoryManager.LootInventory.ItemRT,
                     _uiManager.LootSlotParent, _uiManager.transform);
 
                 inventory.ItemDict[pistolTest.Id] = pistolTest;
+                //pistolTest.
                 //주웠을때... 
                 //Inventory -> itemRT
                 break;

@@ -16,16 +16,19 @@ public class UIManager : MonoBehaviour
     [SerializeField] private float pickupTextSize = 50f;
     [SerializeField] private RectTransform itemInteractUI;
 
+    [Header("Slot")]
     [SerializeField, Space] private float slotSize = 50f;
     private float _panelSlotPadding; //slotSize * 3
     public float SlotSize => slotSize;
     public Vector2 GearSlotSize => new Vector2(slotSize, slotSize) * 2;
     public Vector2 WeaponSlotSize => new Vector2(slotSize * 4, slotSize) * 2;
+    [SerializeField] private Color availableColor;
+    [SerializeField] private Color unavailableColor;
     
     [Header("Player Inventory")]
     [Header("Left Panel")]
     [SerializeField] private RectTransform leftPanel;
-    [SerializeField] private Inventory leftInventory;
+    //[SerializeField] private Inventory leftInventory;
     [SerializeField] private RectTransform headwearSlot;
     [SerializeField] private RectTransform eyewearSlot;
     [SerializeField] private RectTransform bodyArmorSlot;
@@ -41,7 +44,7 @@ public class UIManager : MonoBehaviour
     
     [Header("Middle Panel")]
     [SerializeField] private RectTransform middlePanel;
-    [SerializeField] private Inventory midInventory;
+    //[SerializeField] private Inventory midInventory;
     [SerializeField] private RectTransform chestRigSlot;
     [SerializeField] private RectTransform chestRigParent;
     [SerializeField] private RectTransform rigInvenParent;
@@ -154,10 +157,20 @@ public class UIManager : MonoBehaviour
         itemInteractUI.anchoredPosition =  uiPos;
     }
 
-    public void UpdateItemDraggerAvailability(Vector2 targetPos)
+    public void ShowSlotAvailable(bool isAvailable, Vector2 position, Vector2 size)
     {
-        //_currentItemDragger.
+        var slotColor = isAvailable ? availableColor : unavailableColor;
+        slotAvailable.enabled = true;
+        slotAvailable.color = slotColor;
+        slotAvailable.rectTransform.position = position;
+        slotAvailable.rectTransform.sizeDelta = size;
     }
+
+    public void ClearShowAvailable()
+    {
+        slotAvailable.enabled = false;
+    }
+    
     
     public void MoveCurrentItemDragger(Vector2 position, RectTransform itemParentRT, RectTransform inventoryRT)
     {

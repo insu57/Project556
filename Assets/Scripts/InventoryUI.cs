@@ -169,8 +169,9 @@ public class InventoryUI : MonoBehaviour
         if (CheckSlotAvailable((targetPos, id)))//자기 자신의 원래 슬롯은??
         {
             InventoryItem dragItem = _itemDataDictionary[id];
-            int width = dragItem.Width;
-            int height = dragItem.Height;
+            Vector2Int itemSize = dragItem.SizeVector;
+            int width = itemSize.x;
+            int height = itemSize.y;
             int originFirstIdx = 0;//dragItem.Idx;//?
             int targetFirstIdx = GetSlotIndex(targetPos);
             //기존 슬롯 Empty
@@ -219,10 +220,10 @@ public class InventoryUI : MonoBehaviour
         //나머지 슬롯도 체크!
         //bool isAvailable = true;
         InventoryItem dragItem = _itemDataDictionary[id]; //현재 들고있는 아이템
-        
-        for (int h = 0; h < dragItem.Height; h++)
+        var itemSize = dragItem.SizeVector;
+        for (int h = 0; h < itemSize.x; h++)
         {
-            for (int w = 0; w < dragItem.Width; w++)
+            for (int w = 0; w < itemSize.y; w++)
             {
                 //
                 Vector2 pos = _cellDataArray[firstIdx].CellRT.anchoredPosition + new Vector2(w * slotSize, h * -slotSize);
