@@ -1424,7 +1424,7 @@ MonoBehaviour:
   equipText: {fileID: 1166503894}
   pickupTextSize: 50
   itemInteractUI: {fileID: 1327665870}
-  slotSize: 50
+  cellSize: 50
   availableColor: {r: 0, g: 1, b: 0, a: 0.5019608}
   unavailableColor: {r: 1, g: 0, b: 0, a: 0.5019608}
   leftPanel: {fileID: 120543682}
@@ -1649,6 +1649,7 @@ RectTransform:
   - {fileID: 855630823}
   - {fileID: 1960239309}
   - {fileID: 169024591}
+  - {fileID: 1686192076}
   m_Father: {fileID: 259694569}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -6813,7 +6814,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1251353283}
+    m_TransformParent: {fileID: 453797358}
     m_Modifications:
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_Pivot.x
@@ -6877,11 +6878,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 1310
+      value: 50.000122
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -239.99998
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -8225,7 +8226,6 @@ RectTransform:
   - {fileID: 2027163499}
   - {fileID: 1063541562}
   - {fileID: 395335068}
-  - {fileID: 1686192076}
   - {fileID: 968565300}
   m_Father: {fileID: 364393530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -10429,7 +10429,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemDragHandlerTest: {fileID: 1686192079}
-  pistolTestData: {fileID: 11400000, guid: 8c6fe2c91f209fa4295d05fdda3568c8, type: 2}
+  pistolTestData: {fileID: 11400000, guid: 66678e72724268146bc0997c0da8795d, type: 2}
 --- !u!114 &1936378615
 MonoBehaviour:
   m_ObjectHideFlags: 0

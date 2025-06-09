@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class InventoryUI : MonoBehaviour
+public class InventoryUILegacy : MonoBehaviour
 {
     //없으면 생성 및 초기화, 있으면 활성/비활성?
     [SerializeField] private GameObject inventoryGrid;

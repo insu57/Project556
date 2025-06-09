@@ -15,13 +15,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text equipText;
     [SerializeField] private float pickupTextSize = 50f;
     [SerializeField] private RectTransform itemInteractUI;
-
+    
     [Header("Slot")]
-    [SerializeField, Space] private float slotSize = 50f;
+    [SerializeField, Space] private float cellSize = 50f;
     private float _panelSlotPadding; //slotSize * 3
-    public float SlotSize => slotSize;
-    public Vector2 GearSlotSize => new Vector2(slotSize, slotSize) * 2;
-    public Vector2 WeaponSlotSize => new Vector2(slotSize * 4, slotSize) * 2;
+    public float CellSize => cellSize;
+    public Vector2 GearSlotSize => new Vector2(cellSize, cellSize) * 2;
+    public Vector2 WeaponSlotSize => new Vector2(cellSize * 4, cellSize) * 2;
     [SerializeField] private Color availableColor;
     [SerializeField] private Color unavailableColor;
     
@@ -90,7 +90,7 @@ public class UIManager : MonoBehaviour
     
     private void Awake()
     {
-        _panelSlotPadding = slotSize * 3;
+        _panelSlotPadding = cellSize * 3;
         
         _panelsRT.Add(leftPanel);
         _panelsRT.Add(middlePanel);
@@ -163,6 +163,7 @@ public class UIManager : MonoBehaviour
         slotAvailable.enabled = true;
         slotAvailable.color = slotColor;
         slotAvailable.rectTransform.position = position;
+        Debug.Log("ShowSlotAvailable: " + position);
         slotAvailable.rectTransform.sizeDelta = size;
     }
 

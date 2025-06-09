@@ -12,7 +12,7 @@ public class InventoryUIPresenter : MonoBehaviour
     private readonly Dictionary<RectTransform, CellData> _gearSlotsMap = new();
     private readonly Dictionary<RectTransform, Inventory> _invenMap = new();
 
-    public float SlotSize => _uiManager.SlotSize;
+    public float SlotSize => _uiManager.CellSize;
     //ItemDragger List?
     //test
     [SerializeField] private ItemDragHandler itemDragHandlerTest;
@@ -181,7 +181,9 @@ public class InventoryUIPresenter : MonoBehaviour
         var targetInven = _invenMap[matchRT];
         var originInven = _invenMap[originInvenRT];
         var itemSize = originInven.ItemDict[id].SizeVector;
-        targetInven.CheckSlot(mousePos, itemSize);
+        targetInven.CheckSlot(mousePos, itemSize, out var firstIdxPos);
+        var cell = new Vector2(itemSize.x, itemSize.y) * _uiManager.CellSize;
+        _uiManager.ShowSlotAvailable(true, firstIdxPos, cell);
     }
     
     private void HandleOnCheckGearSlot(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
@@ -281,20 +283,20 @@ public class InventoryUIPresenter : MonoBehaviour
             case GearType.ArmoredRig:
             case GearType.UnarmoredRig:    
                 inventory = _uiManager.SetRigSlot(inventoryPrefab);
-                inventory.Init(_uiManager.SlotSize);
+                inventory.Init(_uiManager.CellSize);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.RigInvenParent] = inventory;
                 break;
             case GearType.Backpack:
                 inventory = _uiManager.SetBackpackSlot(inventoryPrefab);
-                inventory.Init(_uiManager.SlotSize);
+                inventory.Init(_uiManager.CellSize);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.BackpackInvenParent] = inventory;
                 break;
             case GearType.None: //LootInventory
                 inventory = _uiManager.SetLootSlot(inventoryPrefab); 
                 //문제...새로 생성, 이미 생성됨...구분하기?? UI-Data 분리?
-                inventory.Init(_uiManager.SlotSize);
+                inventory.Init(_uiManager.CellSize);
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_uiManager.LootSlotParent] = inventory;
                 

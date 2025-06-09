@@ -70,8 +70,9 @@ public class Inventory: MonoBehaviour
         }
     }
 
-    public void CheckSlot(Vector2 mousePos, Vector2Int itemSize)
+    public void CheckSlot(Vector2 mousePos, Vector2Int itemSize, out Vector2 firstIdxPos)
     {
+        Vector3 cellPos = Vector3.zero;
         foreach (var slotData in slotDataList)
         {
             if (RectTransformUtility.RectangleContainsScreenPoint(slotData.slotRT, mousePos))
@@ -83,24 +84,37 @@ public class Inventory: MonoBehaviour
                 var cellsInfo = _slotDict[matchSlot];
                 var cells = cellsInfo.cells;
                 var slotSize = cellsInfo.size;
-                GetCellIdx(localPoint, slotSize, itemSize, out var idx);
+                GetCellIdx(localPoint, slotSize, itemSize, out var idx, out var firstPos);
+                //firstIdxPos = firstPos;//Idx가 안맞는듯...수정필요
+                if (idx >= 0)
+                {
+                   cellPos = cells[idx].CellRT.position;
+                   //firstIdxPos = cellPos;
+                }
+                
                 //localPoint, 
-                Debug.Log(this.name + ": " + matchSlot+ " local Point: " + localPoint +" idx: "+idx);
+                Debug.Log(this.name + ": " + matchSlot+ " firstPos: " + firstPos +" idx: "+idx);
                 //Firs.
             }
         }
+        //firstIdxPos = Vector2.zero;
+        firstIdxPos = cellPos;
     }
 
-    public void GetCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemSize ,out int idx)
+    public void GetCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemSize ,out int idx, out Vector2 firstPos)
     {
         int width = slotSize.x;
         int height = slotSize.y;
-        Vector2 firstPoint = localPoint - new Vector2(itemSize.x * _cellSize / 2f, -itemSize.y * _cellSize / 2f);
+        Vector2 firstPoint = localPoint - new Vector2(itemSize.x * _cellSize / 2f , -itemSize.y * _cellSize / 2f) 
+                             + new Vector2(_cellSize, -_cellSize)/2f;
+        Debug.Log("local: " + localPoint + " first: " + firstPoint); //기준을 어디로..?
         int x = (int) (firstPoint.x / _cellSize);
         int y = (int)(-firstPoint.y / _cellSize);//y는 음수
+       
         //기존 InventoryUI코드 참조... 아이템 중간 Pos -> MinCell MaxCell...
         idx = x + width * y;
         if (idx < 0 || idx > width * height) idx = -1;
+        firstPos = firstPoint;
     }
 
     public void MoveItem(Vector2 mousePos)

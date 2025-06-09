@@ -37,7 +37,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &92716353030869091
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -127,7 +127,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &1895854718929033920
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -689,7 +689,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &5607802585975636379
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -887,7 +887,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &6693834682077775545
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -993,12 +993,20 @@ MonoBehaviour:
   slotDataList:
   - slotRT: {fileID: 1748767899886667621}
     cellCount: {x: 1, y: 2}
+    isGearSlot: 0
+    gearType: 0
   - slotRT: {fileID: 8157742754635194765}
     cellCount: {x: 1, y: 2}
+    isGearSlot: 0
+    gearType: 0
   - slotRT: {fileID: 6677926550367674862}
     cellCount: {x: 1, y: 2}
+    isGearSlot: 0
+    gearType: 0
   - slotRT: {fileID: 3562113447155702431}
     cellCount: {x: 1, y: 2}
+    isGearSlot: 0
+    gearType: 0
   itemRT: {fileID: 6487667630912754281}
 --- !u!1 &6997378452655041209
 GameObject:
@@ -1213,7 +1221,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &7811785188734045816
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1303,7 +1311,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &7199303609520264537
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1393,7 +1401,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &7036661200324212187
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1558,7 +1566,7 @@ RectTransform:
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!222 &8104566988611112482
 CanvasRenderer:
   m_ObjectHideFlags: 0
