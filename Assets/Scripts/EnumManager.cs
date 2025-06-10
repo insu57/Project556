@@ -1,5 +1,12 @@
 using UnityEngine;
 
+public enum SlotStatus
+{
+    None = 0,
+    Available,
+    Unavailable,
+}
+
 public enum WeaponType
 {
     Pistol = 0,

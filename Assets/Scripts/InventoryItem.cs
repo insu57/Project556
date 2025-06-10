@@ -10,7 +10,7 @@ public class InventoryItem
     public Guid Id { get; }
     //public int Width => _itemData.ItemWidth;
     //public int Height => _itemData.ItemHeight;
-    public Vector2Int SizeVector => new(_itemData.ItemWidth, _itemData.ItemHeight);
+    public Vector2Int ItemCellCount => new(_itemData.ItemWidth, _itemData.ItemHeight);
     public RectTransform SlotRT => _slotRT;
     public int Idx => _idx;
     public IItemData ItemData => _itemData;

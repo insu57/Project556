@@ -77,8 +77,8 @@ public class UIManager : MonoBehaviour
     private ItemDragHandler _currentItemDragHandler;
     //아니면 슬롯 색상 변경?
     
-    public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckGearSlot;
-    public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckInventoryCell;
+    //public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckGearSlot;
+    //public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckInventoryCell;
     private readonly List<RectTransform> _panelsRT = new List<RectTransform>(); //패널
     private readonly List<RectTransform> _gearSlotRT = new List<RectTransform>();
     private readonly List<RectTransform> _inventoriesRT = new List<RectTransform>();
@@ -163,7 +163,7 @@ public class UIManager : MonoBehaviour
         slotAvailable.enabled = true;
         slotAvailable.color = slotColor;
         slotAvailable.rectTransform.position = position;
-        Debug.Log("ShowSlotAvailable: " + position);
+        //Debug.Log("ShowSlotAvailable: " + position);
         slotAvailable.rectTransform.sizeDelta = size;
     }
 
@@ -177,40 +177,19 @@ public class UIManager : MonoBehaviour
     {
         _currentItemDragHandler.SetTargetPosItemDragger(position, itemParentRT, inventoryRT, true);
     }
-
-    public RectTransform GetItemInventoryRT(Vector2 originPos)
-    {
-        foreach (var inventory in _inventoriesRT)
-        {
-            if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, originPos)) continue;
-            var matchSlot = inventory;
-            return matchSlot;
-        }
-        //Inventory->ItemDict(Inventories) or InventoryManager -> ItemDict(GearSlot...)
-        return null;
-    }
     
     public (RectTransform matchSlot, bool isGearSlot) CheckItemSlot(Vector2 mousePos)
     {
-        //RectTransform matchSlot;
-        //_currentItemDragHandler = draggingItem;
-
-        //var originInvenRT = draggingItem.InventoryRT;
         foreach (var slot in _gearSlotRT)
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(slot, mousePos)) continue;
-            //matchSlot = slot;
-            //OnCheckGearSlot?.Invoke(matchSlot, originInvenRT, mousePos, id); 
             return (slot, true);
         }
 
         foreach (var inventory in _inventoriesRT)
         {
             if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, mousePos)) continue;
-            //      Debug.Log(inventory.name);
-            //matchSlot = inventory;
-            //OnCheckInventoryCell?.Invoke(matchSlot,originInvenRT, mousePos, id); 
-            return (inventory, false); //(inventory, matchSlot)
+            return (inventory, false);
         }
         return (null,  false);
     }
@@ -224,7 +203,6 @@ public class UIManager : MonoBehaviour
 
         if (rigInvenPrefab)
         {
-            //Debug.Log("SetRigSlot");
             _rigSlotInstance = Instantiate(rigInvenPrefab, rigInvenParent);
             Inventory inventory = _rigSlotInstance.GetComponent<Inventory>(); //다른방식?
             float slotPrefabHeight = inventory.Height;
@@ -263,7 +241,6 @@ public class UIManager : MonoBehaviour
             {
                 backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
             }
-            //if()
             
             return inventory;
         }

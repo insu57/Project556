@@ -18,7 +18,7 @@ public class Inventory: MonoBehaviour
     [SerializeField, Space] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
-    private Dictionary<RectTransform, (List<CellData> cells, Vector2Int size)> _slotDict // Slot -> CellData List
+    private Dictionary<RectTransform, (List<CellData> cells, Vector2Int count)> _slotDict // Slot -> CellData List
         = new();
 
     public float Width { private set; get; }
@@ -70,51 +70,73 @@ public class Inventory: MonoBehaviour
         }
     }
 
-    public void CheckSlot(Vector2 mousePos, Vector2Int itemSize, out Vector2 firstIdxPos)
+    public (Vector2 firstIdxPos, SlotStatus status, Vector2 cellCount) CheckSlot(Vector2 mousePos, Vector2Int itemCellCount, Guid id)
     {
-        Vector3 cellPos = Vector3.zero;
         foreach (var slotData in slotDataList)
         {
-            if (RectTransformUtility.RectangleContainsScreenPoint(slotData.slotRT, mousePos))
-            {
-                var matchSlot = slotData.slotRT;
-                if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(matchSlot, mousePos, null,
-                        out var localPoint)) continue;
-                //Slot -> Pos...
-                var cellsInfo = _slotDict[matchSlot];
-                var cells = cellsInfo.cells;
-                var slotSize = cellsInfo.size;
-                GetCellIdx(localPoint, slotSize, itemSize, out var idx, out var firstPos);
-                //firstIdxPos = firstPos;//Idx가 안맞는듯...수정필요
-                if (idx >= 0)
-                {
-                   cellPos = cells[idx].CellRT.position;
-                   //firstIdxPos = cellPos;
-                }
-                
-                //localPoint, 
-                Debug.Log(this.name + ": " + matchSlot+ " firstPos: " + firstPos +" idx: "+idx);
-                //Firs.
-            }
-        }
-        //firstIdxPos = Vector2.zero;
-        firstIdxPos = cellPos;
-    }
+            if (!RectTransformUtility.RectangleContainsScreenPoint(slotData.slotRT, mousePos)) continue;
+            var matchSlot = slotData.slotRT;
+            
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(matchSlot, mousePos, null,
+                    out var localPoint)) continue;
+            
+            //Slot -> LocalPosition
+            var (cells, slotCount) = _slotDict[matchSlot];
+            GetFirstCellIdx(localPoint, slotCount, itemCellCount, out var firstIdx);
 
-    public void GetCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemSize ,out int idx, out Vector2 firstPos)
+            if (firstIdx < 0) continue; //-1: SlotIdx out of bounds
+            var firstX = firstIdx % slotCount.x;
+            var firstY = firstIdx / slotCount.x;
+            
+            var firstIdxPos = cells[firstIdx].CellRT.position; //아이템 첫번째 슬롯의 Position(World)
+            
+            for (int y = 0; y < itemCellCount.y; y++) //cell체크...
+            {
+                for (int x = 0; x < itemCellCount.x; x++)
+                {
+                    var idx = firstIdx + x + y * slotCount.x;
+                    if (firstX + x >= slotCount.x || firstY + y >= slotCount.y) //out of bounds
+                    {
+                        //Slot을 벗어난 아이템의 Cell을 계산
+                        var overCell = Vector2Int.zero;
+                        if (firstX + itemCellCount.x >= slotCount.x)
+                        {
+                            overCell.x = firstX + itemCellCount.x - slotCount.x;
+                        }
+
+                        if (firstY + itemCellCount.y >= slotCount.y)
+                        {
+                            overCell.y = firstY + itemCellCount.y - slotCount.y;
+                        }
+                        return (firstIdxPos, SlotStatus.Unavailable, itemCellCount - overCell);
+                        //넘어간 만큼 줄이기
+                    }
+                    
+                    if (!cells[idx].IsEmpty && cells[idx].Id != id) //empty가 아닐 때, ID가 동일하면 available.
+                    {
+                        return (firstIdxPos, SlotStatus.Unavailable, itemCellCount);
+                    }
+                }
+            }
+            return (firstIdxPos, SlotStatus.Available, itemCellCount);
+        }
+        return (Vector2.zero, SlotStatus.None, itemCellCount); //No Match Slot!
+    }
+    
+    private void GetFirstCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemCellCount , out int firstIdx)
     {
         int width = slotSize.x;
         int height = slotSize.y;
-        Vector2 firstPoint = localPoint - new Vector2(itemSize.x * _cellSize / 2f , -itemSize.y * _cellSize / 2f) 
+        Vector2 firstPos = localPoint - new Vector2(itemCellCount.x * _cellSize / 2f , -itemCellCount.y * _cellSize / 2f) 
                              + new Vector2(_cellSize, -_cellSize)/2f;
-        Debug.Log("local: " + localPoint + " first: " + firstPoint); //기준을 어디로..?
-        int x = (int) (firstPoint.x / _cellSize);
-        int y = (int)(-firstPoint.y / _cellSize);//y는 음수
-       
-        //기존 InventoryUI코드 참조... 아이템 중간 Pos -> MinCell MaxCell...
-        idx = x + width * y;
-        if (idx < 0 || idx > width * height) idx = -1;
-        firstPos = firstPoint;
+        // 중심(아이템)에서 좌상단 MinPosition(가로세로 절반)(좌상단Cell, 첫번째Cell) + 해당 Cell의 Center
+        // ***y하단 -> '-'(음수)
+        
+        int x = (int) (firstPos.x / _cellSize);
+        int y = (int)(-firstPos.y / _cellSize);//y는 음수
+        //x,y 체크...
+        firstIdx = x + width * y;
+        if (x < 0 || x >= slotSize.x || y < 0 || y >= slotSize.y) firstIdx = -1;
     }
 
     public void MoveItem(Vector2 mousePos)
