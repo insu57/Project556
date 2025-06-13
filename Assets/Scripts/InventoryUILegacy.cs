@@ -127,7 +127,7 @@ public class InventoryUILegacy : MonoBehaviour
         {
             for (int i = 0; i < _cellDataArray.Length; i++)
             {
-                Debug.Log($"CellData({i}): "+_cellDataArray[i].MinPosition + " "  + _cellDataArray[i].MaxPosition);
+                //Debug.Log($"CellData({i}): "+_cellDataArray[i].MinPosition + " "  + _cellDataArray[i].MaxPosition);
             }
         }
     }
@@ -195,10 +195,10 @@ public class InventoryUILegacy : MonoBehaviour
             }
 
             int targetEndIdx = targetFirstIdx + (width - 1) + (height - 1) * inventoryXSize;
-            Vector2 minPos = _cellDataArray[targetFirstIdx].MinPosition;
-            Vector2 maxPos = _cellDataArray[targetEndIdx].MaxPosition;
+            //Vector2 minPos = _cellDataArray[targetFirstIdx].MinPosition;
+            //Vector2 maxPos = _cellDataArray[targetEndIdx].MaxPosition;
             //dragItem.MoveItem(targetFirstIdx);
-            return (minPos + maxPos) / 2;
+            //return (minPos + maxPos) / 2;
             //return minPos;
         }
         return originPos;
@@ -234,12 +234,12 @@ public class InventoryUILegacy : MonoBehaviour
                 {
                     
                     Debug.Log("unavailable! - Index: " + slotIdx);
-                    ShowSlotAvailable(_cellDataArray[firstIdx].MinPosition, dragItem.ItemCellCount, false);
+                    //ShowSlotAvailable(_cellDataArray[firstIdx].MinPosition, dragItem.ItemCellCount, false);
                     return false;
                 }
             }
         }
-        ShowSlotAvailable(_cellDataArray[firstIdx].MinPosition, dragItem.ItemCellCount, true);
+        //ShowSlotAvailable(_cellDataArray[firstIdx].MinPosition, dragItem.ItemCellCount, true);
         
         return true;
     }

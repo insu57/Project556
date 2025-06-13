@@ -40,7 +40,6 @@ public class UIManager : MonoBehaviour
     public RectTransform BodyArmorSlotRT => bodyArmorSlot;
     public RectTransform PWeaponSlotRT => primaryWeaponSlot;
     public RectTransform SWeaponSlotRT => secondaryWeaponSlot;
-    public RectTransform LeftPanelItemParentRT => leftPanelItemParentRT;
     
     [Header("Middle Panel")]
     [SerializeField] private RectTransform middlePanel;
@@ -48,15 +47,17 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform chestRigSlot;
     [SerializeField] private RectTransform chestRigParent;
     [SerializeField] private RectTransform rigInvenParent;
+    [SerializeField] private RectTransform rigItemRT;
     private GameObject _rigSlotInstance;
     [SerializeField] private RectTransform backpackSlot;
     [SerializeField] private RectTransform backpackParent;
     [SerializeField] private RectTransform packInvenParent;
+    [SerializeField] private RectTransform backpackItemRT;
     private GameObject _backpackSlotInstance;
     [SerializeField] private float minMiddlePanelItemHeight = 250f;
     [SerializeField, Space] private RectTransform pocketsParent;
     [SerializeField] private List<RectTransform> pockets = new();
-    [SerializeField] private RectTransform midPanelItemRT;
+    [SerializeField] private RectTransform pocketsItemRT;
     
     public RectTransform RigSlotRT => chestRigSlot;
     public RectTransform BackpackSlotRT => backpackSlot;
@@ -73,51 +74,41 @@ public class UIManager : MonoBehaviour
     private GameObject _lootSlotInstance;
     
     [SerializeField, Space] private Image slotAvailable;
-    [FormerlySerializedAs("itemDraggerPrefab")] [SerializeField] private ItemDragHandler itemDragHandlerPrefab;
-    private ItemDragHandler _currentItemDragHandler;
-    //아니면 슬롯 색상 변경?
+    [SerializeField] private ItemDragHandler itemDragHandlerPrefab;
     
-    //public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckGearSlot;
-    //public event Action<RectTransform, RectTransform, Vector2, Guid> OnCheckInventoryCell;
-    private readonly List<RectTransform> _panelsRT = new List<RectTransform>(); //패널
-    private readonly List<RectTransform> _gearSlotRT = new List<RectTransform>();
-    private readonly List<RectTransform> _inventoriesRT = new List<RectTransform>();
-    
-    //test
-    [SerializeField, Space] private ItemDragHandler test01;
-    [SerializeField] private ItemDragHandler test02;
-    //[SerializeField] private BaseItemDataSO test01Data;
-    
+    private readonly List<RectTransform> _gearSlotRT = new();
+    private readonly List<RectTransform> _inventoriesRT = new();
+    public readonly Dictionary<RectTransform, RectTransform> SlotItemRT = new();
     private void Awake()
     {
         _panelSlotPadding = cellSize * 3;
         
-        _panelsRT.Add(leftPanel);
-        _panelsRT.Add(middlePanel);
-        _panelsRT.Add(rightPanel);
-        
+        //RectTransform Init
         _gearSlotRT.Add(headwearSlot);
         _gearSlotRT.Add(eyewearSlot);
         _gearSlotRT.Add(bodyArmorSlot);
         _gearSlotRT.Add(primaryWeaponSlot);
         _gearSlotRT.Add(secondaryWeaponSlot);
+        SlotItemRT[headwearSlot] = leftPanelItemParentRT;
+        SlotItemRT[eyewearSlot] = leftPanelItemParentRT;
+        SlotItemRT[bodyArmorSlot] = leftPanelItemParentRT;
+        SlotItemRT[primaryWeaponSlot] = leftPanelItemParentRT;
+        SlotItemRT[secondaryWeaponSlot] =  leftPanelItemParentRT;
+        
         _gearSlotRT.Add(chestRigSlot);
         _gearSlotRT.Add(backpackSlot);
+        SlotItemRT[chestRigSlot] = rigItemRT;
+        SlotItemRT[backpackSlot] = backpackSlot;
+        
         foreach (var pocketRT in pockets)
         {
             _gearSlotRT.Add(pocketRT);
+            SlotItemRT[pocketRT] = pocketsItemRT;
         }
         
         _inventoriesRT.Add(rigInvenParent);
         _inventoriesRT.Add(packInvenParent);
         _inventoriesRT.Add(lootSlotParent);
-    }
-
-    public ItemDragHandler InitItemDragger(InventoryItem item, RectTransform itemParentRT, RectTransform inventoryRT)
-    {
-        var itemDragger = Instantiate(itemDragHandlerPrefab, itemParentRT);
-        //itemDragger.Init(item, this, itemParentRT, inventoryRT, transform);
-        return itemDragger;
     }
 
     public void UpdateAmmoText(int currentAmmo)
@@ -170,12 +161,6 @@ public class UIManager : MonoBehaviour
     public void ClearShowAvailable()
     {
         slotAvailable.enabled = false;
-    }
-    
-    
-    public void MoveCurrentItemDragger(Vector2 position, RectTransform itemParentRT, RectTransform inventoryRT)
-    {
-        _currentItemDragHandler.SetTargetPosItemDragger(position, itemParentRT, inventoryRT, true);
     }
     
     public (RectTransform matchSlot, bool isGearSlot) CheckItemSlot(Vector2 mousePos)

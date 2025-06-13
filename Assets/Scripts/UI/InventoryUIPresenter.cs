@@ -12,7 +12,15 @@ public class InventoryUIPresenter : MonoBehaviour
     private readonly Dictionary<RectTransform, CellData> _gearSlotsMap = new();
     private readonly Dictionary<RectTransform, Inventory> _invenMap = new();
 
-    public float SlotSize => _uiManager.CellSize;
+    public float CellSize => _uiManager.CellSize;
+
+    private InventoryItem _currentDragItem; //현재 드래그 중인 아이템
+    private bool _targetIsAvailable;
+    private bool _targetIsGearSlot;
+    private RectTransform _matchRT;
+    private CellData _targetGearSlot;
+    private Inventory _targetInventory;
+    
     //ItemDragger List?
     //test
     [SerializeField] private ItemDragHandler itemDragHandlerTest;
@@ -75,6 +83,7 @@ public class InventoryUIPresenter : MonoBehaviour
 
     public void InitItemDragHandler(ItemDragHandler itemDrag)//아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
     {
+        itemDrag.OnPointerDownEvent += HandleOnPointerEnter;
         itemDrag.OnDragEvent += HandleOnDragItem;
         itemDrag.OnEndDragEvent += HandleOnEndDragItem;
     }
@@ -89,25 +98,53 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         
     }
+    //OnPointerEnter -> 해당 아이템, 기존 슬롯 정보 캐싱
+    //OnDrag -> 해당 슬롯 정보 캐싱
+    //OnEndDrag -> 이동/원복 처리
+    private void HandleOnPointerEnter(ItemDragHandler itemDrag, Guid itemID)
+    {
+        var originInvenRT = itemDrag.InventoryRT;
+        
+        InventoryItem item;
+        
+        if (!originInvenRT)//기존 위치 인벤토리 체크
+        {
+            if(!_inventoryManager.ItemDict.ContainsKey(itemID)) Debug.LogError("Item not found...!: " + itemID);
+            item = _inventoryManager.ItemDict[itemID]; //GearSlots Item Dict
+        }
+        else
+        {
+            if(!_invenMap.ContainsKey(originInvenRT)) Debug.LogError("Inventory not found...!: " + itemID);
+            var inventory = _invenMap[originInvenRT];
+            item = inventory.ItemDict[itemID]; //Inventory의 ItemDict
+        }
 
+        if (item != null)
+        {
+            _currentDragItem = item;
+        }
+    }
+    
     private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
         var slotInfo = _uiManager.CheckItemSlot(mousePos);
-        if (!slotInfo.matchSlot)
+        if (!slotInfo.matchSlot) //No Match Slot...
         {
             _uiManager.ClearShowAvailable();
             return;
         }
+        
+        _targetIsGearSlot = slotInfo.isGearSlot;
+        _matchRT = slotInfo.matchSlot;
+        
         if (slotInfo.isGearSlot)
         {
-            var isAvailable = 
-                CheckGearSlot(slotInfo.matchSlot, itemDrag.InventoryRT, itemID);
-            
-            _uiManager.ShowSlotAvailable(isAvailable, slotInfo.matchSlot.position, slotInfo.matchSlot.sizeDelta);
+            _targetIsAvailable = CheckGearSlot(slotInfo.matchSlot);
+            _uiManager.ShowSlotAvailable(_targetIsAvailable, slotInfo.matchSlot.position, slotInfo.matchSlot.sizeDelta);
         }
         else
         {
-            CheckInventory(slotInfo.matchSlot, itemDrag.InventoryRT, mousePos, itemID);
+            _targetIsAvailable = CheckInventory(slotInfo.matchSlot, itemDrag.InventoryRT, mousePos, itemID);
         }
     }
 
@@ -116,32 +153,52 @@ public class InventoryUIPresenter : MonoBehaviour
         Debug.Log("EndDragItem: " + itemDrag.name);
         _uiManager.ClearShowAvailable();
         //실제 아이템 이동...
-    }
-
-    private bool CheckGearSlot(RectTransform matchRT, RectTransform originInvenRT, Guid id)
-    {
-        if(!_gearSlotsMap[matchRT].IsEmpty) return false;
-        
-        InventoryItem item;
-        if (!originInvenRT)//기존 위치 인벤토리 체크
+        if (!_targetIsAvailable)
         {
-            if(!_inventoryManager.ItemDict.ContainsKey(id)) Debug.LogError("Item not found...!: " + id);
-            item = _inventoryManager.ItemDict[id]; //GearSlots Item Dict
+            itemDrag.ReturnItemDrag();
+            return;
+        }
+        
+        var originInvenRT = itemDrag.InventoryRT;
+        if (!originInvenRT)
+        {
+            if (_targetIsGearSlot)
+            {
+                //_inventoryManager.SetGear(_currentDragItem.GearType, _currentDragItem);
+                
+            }
+            else
+            {
+                
+            }
         }
         else
         {
-            if(!_invenMap.ContainsKey(originInvenRT)) Debug.LogError("Inventory not found...!: " + id);
-            var inventory = _invenMap[originInvenRT];
-            item = inventory.ItemDict[id]; //Inventory의 ItemDict
+            if (_targetIsGearSlot)
+            {
+                _invenMap[originInvenRT].ItemDict.Remove(itemID);
+                
+                
+                _inventoryManager.SetGearItem(_targetGearSlot, _currentDragItem);
+                var targetPos = _matchRT.position + new Vector3(_matchRT.sizeDelta.x, -_matchRT.sizeDelta.y, 0) / 4;
+                //왜 1/4??? 조정필요... ItemDrag 위치 설정...Local To World???
+                Debug.Log("TEST: " + _matchRT.position + " : " + targetPos);
+                itemDrag.SetItemDragPos(targetPos, _matchRT.sizeDelta, _uiManager.SlotItemRT[_matchRT],
+                    null);
+                
+            }
+            else
+            {
+                
+            }
         }
+    }
 
-        if (item == null)
-        {
-            Debug.LogError("Item not found...!: " + id);
-            return false;
-        }
-
-        GearType gearType = item.GearType; //드래그 중인 아이템의 타입
+    private bool CheckGearSlot(RectTransform matchRT)
+    {
+        if(!_gearSlotsMap[matchRT].IsEmpty) return false;
+        
+        GearType gearType = _currentDragItem.GearType; //드래그 중인 아이템의 타입
                 
         var slotCell = _gearSlotsMap[matchRT];  //체크 중인 슬롯의 Cell
         GearType slotGearType = slotCell.GearType; //슬롯의  타입
@@ -154,13 +211,17 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         else if (gearType is GearType.BodyArmor) //방탄복일 때
         {
-            if (_inventoryManager.ChestRigSlot.IsEmpty) return true; //Slot Available      
+            if (_inventoryManager.ChestRigSlot.IsEmpty)
+            { 
+                _targetGearSlot = _inventoryManager.BodyArmorSlot;
+                return true; //Slot Available      
+            }
             //장착된 리그가 방탄 리그면 불가.
             var rigID = _inventoryManager.ChestRigSlot.Id;
             var rigItemType =  _inventoryManager.ItemDict[rigID].GearType;
             if(rigItemType == GearType.ArmoredRig) return false;
         }
-
+        _targetGearSlot = _gearSlotsMap[matchRT];
         return true;//Slot Available      
     }
 
@@ -184,9 +245,15 @@ public class InventoryUIPresenter : MonoBehaviour
                 break;
         }
         _uiManager.ShowSlotAvailable(isAvailable, firstIdxPos, cell); //cell크기...??
+        if(isAvailable) _targetInventory = targetInven;
         return isAvailable;
     }
 
+    private void MoveItem(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
+    {
+        
+    }
+    
     private void HandleOnSetInventory(GameObject inventoryPrefab, GearType gearType)
     {
         Inventory inventory;

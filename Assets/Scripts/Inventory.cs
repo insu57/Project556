@@ -26,13 +26,14 @@ public class Inventory: MonoBehaviour
     private float _cellSize;
     public RectTransform InventoryRT => _inventoryRT;
     public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
+    private RectTransform _matchSlotRT;
     public Dictionary<Guid, InventoryItem> ItemDict { get; } = new();
 
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
 
-    public void Init(float slotSize)
+    public void Init(float cellSize)
     {
-        _cellSize = slotSize;
+        _cellSize = cellSize; //CellSize 개선... (UI/데이터 나누기...)
     }
     
     private void Awake()
@@ -44,8 +45,7 @@ public class Inventory: MonoBehaviour
         foreach (var slotData in slotDataList)
         {
             var slotRT = slotData.slotRT;
-
-            //CellData[] cellDataArray = slotDefinition.slotRT.
+            
             List<CellData> cellDataList = new List<CellData>();
             for (int i = 0; i < slotRT.childCount; i++)
             {
@@ -55,22 +55,16 @@ public class Inventory: MonoBehaviour
                 cellDataList.Add(cellData);
             }
             _slotDict[slotRT] = (cellDataList, slotData.cellCount);
-            //_slotDict.Add(slotRT,{cellDataList, slotData.cellCount});
-            
-            //CellData... slot - width&height
         }
     }
 
     private void Start()
     {
-        //Debug.Log(gameObject.name);
-        foreach (var slot in _slotDict)
-        {
-            //Debug.Log(slot.Key + " " + slot.Value);
-        }
+        
     }
 
-    public (Vector2 firstIdxPos, SlotStatus status, Vector2 cellCount) CheckSlot(Vector2 mousePos, Vector2Int itemCellCount, Guid id)
+    public (Vector2 firstIdxPos, SlotStatus status, Vector2 cellCount) CheckSlot
+        (Vector2 mousePos, Vector2Int itemCellCount, Guid id)
     {
         foreach (var slotData in slotDataList)
         {
@@ -118,6 +112,7 @@ public class Inventory: MonoBehaviour
                     }
                 }
             }
+            _matchSlotRT = slotData.slotRT;
             return (firstIdxPos, SlotStatus.Available, itemCellCount);
         }
         return (Vector2.zero, SlotStatus.None, itemCellCount); //No Match Slot!
@@ -146,9 +141,7 @@ public class Inventory: MonoBehaviour
     
     public void AddItem(InventoryItem item, RectTransform slotRT, int idx)
     {
-        
-        item.MoveItem(slotRT, idx);
-        //좌상단부터 슬롯의 빈 곳(가능한 위치)에 넣기 -> 추후 추가
+        //좌상단부터 슬롯의 빈 곳(가능한 위치)에 넣기 -> 추후 추가?
         
         
     }

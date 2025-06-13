@@ -25,13 +25,13 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private int _widthSize;
     private int _heightSize;
     private Guid _id;
-    //private GearType _gearType;
+   
     private int _idx;
-    //[SerializeField] private Image outline;
     private Image _itemImage;
     [SerializeField] private Image highlight;
-    private float _slotSize;
+    private float _cellSize;
     
+    public event Action<ItemDragHandler, Guid> OnPointerDownEvent;
     public event Action<ItemDragHandler, Vector2, Guid> OnDragEvent;
     public event Action<ItemDragHandler, Vector2, Guid> OnEndDragEvent;
     
@@ -65,15 +65,15 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         //_uiManager = uiManager;
         _inventoryUIPresenter = presenter;
         _inventoryUIPresenter.InitItemDragHandler(this);
-        _slotSize = presenter.SlotSize;
+        _cellSize = presenter.CellSize;
         //_inventoryRT = inventoryRT;
 
         var itemData = item.ItemData;
         //_gearType = itemData.GearType;
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
-        Debug.Log(_slotSize);
-        Vector2 imageSize = new Vector2(_widthSize * _slotSize, _heightSize * _slotSize);
+        //Debug.Log(_cellSize);
+        Vector2 imageSize = new Vector2(_widthSize * _cellSize, _heightSize * _cellSize);
         _itemRT.sizeDelta = imageSize;
         _itemImage.sprite = itemData.ItemSprite;
 
@@ -85,24 +85,18 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _isAvailable = false;
     }
     
-    public void SetTargetPosItemDragger(Vector2 targetPos, RectTransform itemParentRT,
-        RectTransform inventoryRT, bool isAvailable)//크기는??? GearSlot vs InvenSlot 
+    public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        //_itemRT.anchoredPosition = pos;
-        _isAvailable = isAvailable;
-        if (!isAvailable) return;
-        _targetPos = targetPos;
-        //이것도 EndDrag에서...
-        _targetItemParentRT = itemParentRT;
-        //transform.SetParent(_itemParentRT);//부모설정
-        _targetInventoryRT = inventoryRT; //null -> GearSlot
-        
+        _itemRT.position = targetPos;
+        _itemRT.SetParent(itemParentRT);
+        _itemRT.sizeDelta = size;
+        _inventoryRT = inventoryRT;
     }
     
     private (Vector2 pos, Guid id) GetFirstSlotPos(Vector2 mousePos)
     {
-        float x = mousePos.x + (-_slotSize * _widthSize + _slotSize) / 2f;
-        float y = mousePos.y - (-_slotSize * _heightSize + _slotSize) / 2f;//
+        float x = mousePos.x + (-_cellSize * _widthSize + _cellSize) / 2f;
+        float y = mousePos.y - (-_cellSize * _heightSize + _cellSize) / 2f;//
         return (new Vector2(x, y), _id);
     }
     
@@ -120,7 +114,14 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     {
         _canvasGroup.blocksRaycasts = false;
         _pointerDownPos = _itemRT.anchoredPosition;
-        transform.SetParent(_itemDraggingParent);
+        transform.SetParent(_itemDraggingParent); //Drag시 부모변경(RectMask때문에)
+        
+        if (RectTransformUtility.ScreenPointToWorldPointInRectangle(_itemRT, eventData.position,
+                eventData.pressEventCamera,
+                out var globalMousePos))
+        {
+            OnPointerDownEvent?.Invoke(this, _id);
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -130,30 +131,13 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         {
             _itemRT.position = globalMousePos;
         }
-        //_inventoryManager.CheckSlotAvailable(globalMousePos);
         
         //EVENT invoke
         OnDragEvent?.Invoke(this, globalMousePos, _id);
-        //_uiManager.CheckItemSlot(this,globalMousePos, _id);
-            
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos))
-        {
-            //다른 RT에서도 인벤토리 슬롯 구분... 위의 globalMouse로 check...-> 어떤 인벤인지...
-            //_inventoryUI
-            //Debug.Log(GetFirstSlotPos(localPos).Item1);
-            
-            //_inventoryUI.CheckSlotAvailable(GetFirstSlotPos(localPos));
-        }
-        
-        
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        transform.SetParent(_itemParentRT);
-        
-        
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                 _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
         {
@@ -162,31 +146,14 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         OnEndDragEvent?.Invoke(this, globalMousePos, _id);
         
-        if (_isAvailable) //현재 슬롯이 가능한경우
-        {
-            _itemParentRT = _targetItemParentRT;
-            transform.SetParent(_itemParentRT);
-            _itemRT.anchoredPosition = _targetPos;
-            _inventoryRT = _targetInventoryRT;
-        }
-        else //불가능하면 원래 위치로...
-        {
-            _itemRT.anchoredPosition = _pointerDownPos;
-        }
-        
-        //check position...
-        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _itemParentRT, eventData.position, eventData.pressEventCamera, out var localPos
-            )) return;
-        
-        
-        //var firstSlot = GetFirstSlotPos(localPos);
-        //_itemRT.anchoredPosition = _inventoryUI.ItemMove(_pointerDownPos, firstSlot.Item1, _id); //바꾸기...
-        //_inventoryUI.DisableSlotAvailable();
+        //
         
         _isAvailable = false; //다시 초기화
         _canvasGroup.blocksRaycasts = true;
     }
 
-    
+    public void ReturnItemDrag()
+    {
+        _itemRT.anchoredPosition = _pointerDownPos;
+    }
 }

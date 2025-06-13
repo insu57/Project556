@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd2243bc440acbe4d82f740ce3722053, type: 3}
   m_Name: M16A1
   m_EditorClassIdentifier: 
+  itemID: 
   weaponName: M16A1
   weaponType: 3
   ammoCaliber: 0
@@ -22,9 +23,9 @@ MonoBehaviour:
   fireRate: 0.1
   accuracy: 80
   bulletSpeed: 15
-  itemSprite: {fileID: 21300000, guid: 8588fd8cb30c4564fbf6a00044bf4491, type: 3}
+  itemSprite: {fileID: 552750388532680738, guid: 736d194ce29a29a4ea5a579844881654, type: 3}
   pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0.95, y: 0.44}
-  itemWidth: 2
-  itemHeight: 4
+  itemWidth: 4
+  itemHeight: 2
   muzzlePosition: {x: -0.4472, y: 0.0395, z: 0}
