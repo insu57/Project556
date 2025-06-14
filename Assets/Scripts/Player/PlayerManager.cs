@@ -97,7 +97,7 @@ public class PlayerManager : MonoBehaviour
             CanItemInteract = true;
             Vector2 pos = Camera.main.WorldToScreenPoint(other.transform.position);
             
-            _uiManager.ShowItemPickup(true, pos);
+            _uiManager.ShowItemPickup(true, pos); //이벤트로 수정 예정
             
             return;//임시 -> 인벤토리(가방)에 넣기(상호작용 키 누르면)
             ItemPickUp newItem = other.GetComponent<ItemPickUp>();

@@ -18,8 +18,8 @@ public class Inventory: MonoBehaviour
     [SerializeField, Space] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
-    private Dictionary<RectTransform, (List<CellData> cells, Vector2Int count)> _slotDict // Slot -> CellData List
-        = new();
+    private readonly Dictionary<RectTransform, (List<CellData> cells, Vector2Int cellCount)> _slotDict 
+        = new(); // Slot -> CellData List
 
     public float Width { private set; get; }
     public float Height { private set; get; }
@@ -133,17 +133,57 @@ public class Inventory: MonoBehaviour
         firstIdx = x + width * y;
         if (x < 0 || x >= slotSize.x || y < 0 || y >= slotSize.y) firstIdx = -1;
     }
-
-    public void MoveItem(Vector2 mousePos)
-    {
-        
-    }
     
-    public void AddItem(InventoryItem item, RectTransform slotRT, int idx)
+    //LootInven 아이템 초기화?
+    public (bool isAvailable, Vector2 pos) AddItem(InventoryItem item)
     {
-        //좌상단부터 슬롯의 빈 곳(가능한 위치)에 넣기 -> 추후 추가?
-        
-        
+        foreach (var slotData in slotDataList)
+        {
+            var slotCell = _slotDict[slotData.slotRT];
+            var cells = slotCell.cells;
+            var slotCount = slotCell.cellCount;
+            var itemCount = item.ItemCellCount;
+
+            for (int h = 0; h < slotCount.y; h++)
+            {
+                for (int w = 0; w < slotCount.x; w++)
+                {
+                    int firstIdx = w + h * slotCount.x; //빈 슬롯 체크 시작 Idx
+
+                    bool isAvailable = true;
+                    for (int y = 0; y < itemCount.x; y++)
+                    {
+                        for (int x = 0; x < itemCount.x; x++)
+                        {
+                            var idx = firstIdx + x + y * slotCount.x; //슬롯 체크 Idx
+                            if (idx < cells.Count && cells[idx].IsEmpty) continue; //out of bounds가 아닌지, Empty인지 검사
+                            isAvailable = false; //아니라면 unavailable
+                            break;
+                        }
+                        if(!isAvailable) break; //루프 벗어나기
+                    }
+                    
+                    
+                    if (isAvailable)
+                    {
+                        for (int y = 0; y < itemCount.y; y++)//배치
+                        {
+                            for (int x = 0; x < itemCount.x; x++)
+                            {
+                                var idx = firstIdx + x + y * slotCount.x;
+                                cells[idx].SetEmpty(false, item.Id);
+                            }
+                        }
+                        ItemDict[item.Id] = item;
+                        var minPos = cells[firstIdx].CellRT.position;
+                        
+                        return (true,minPos );
+                    }
+                }
+            }
+        }
+
+        return (false, Vector2.zero);
     }
     
 }

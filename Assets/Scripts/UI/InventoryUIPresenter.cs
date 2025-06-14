@@ -109,13 +109,21 @@ public class InventoryUIPresenter : MonoBehaviour
         
         if (!originInvenRT)//기존 위치 인벤토리 체크
         {
-            if(!_inventoryManager.ItemDict.ContainsKey(itemID)) Debug.LogError("Item not found...!: " + itemID);
-            item = _inventoryManager.ItemDict[itemID]; //GearSlots Item Dict
+            if (!_inventoryManager.ItemDict.TryGetValue(itemID, out var inventoryItem))
+            {
+                Debug.LogError("Item not found...!: " + itemID);
+                return;
+            }
+            item = inventoryItem; //GearSlots Item Dict
         }
         else
         {
-            if(!_invenMap.ContainsKey(originInvenRT)) Debug.LogError("Inventory not found...!: " + itemID);
-            var inventory = _invenMap[originInvenRT];
+            if (!_invenMap.TryGetValue(originInvenRT, out var inventory))
+            {
+                Debug.LogError("Inventory not found...!: " + itemID);
+                return;
+            }
+
             item = inventory.ItemDict[itemID]; //Inventory의 ItemDict
         }
 
@@ -150,11 +158,12 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnEndDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
-        Debug.Log("EndDragItem: " + itemDrag.name);
+        //Debug.Log("EndDragItem: " + itemDrag.name);
         _uiManager.ClearShowAvailable();
         //실제 아이템 이동...
         if (!_targetIsAvailable)
         {
+            Debug.Log("Target Is Not Available");
             itemDrag.ReturnItemDrag();
             return;
         }
@@ -177,15 +186,12 @@ public class InventoryUIPresenter : MonoBehaviour
             if (_targetIsGearSlot)
             {
                 _invenMap[originInvenRT].ItemDict.Remove(itemID);
-                
-                
                 _inventoryManager.SetGearItem(_targetGearSlot, _currentDragItem);
-                var targetPos = _matchRT.position + new Vector3(_matchRT.sizeDelta.x, -_matchRT.sizeDelta.y, 0) / 4;
-                //왜 1/4??? 조정필요... ItemDrag 위치 설정...Local To World???
-                Debug.Log("TEST: " + _matchRT.position + " : " + targetPos);
-                itemDrag.SetItemDragPos(targetPos, _matchRT.sizeDelta, _uiManager.SlotItemRT[_matchRT],
+                itemDrag.SetItemDragPos(Vector2.zero, _matchRT.sizeDelta, _matchRT,
                     null);
-                
+                var inventory = _invenMap[originInvenRT];
+                inventory.ItemDict.Remove(itemID);
+                //Cell Empty...
             }
             else
             {
@@ -282,10 +288,20 @@ public class InventoryUIPresenter : MonoBehaviour
                 
                 //test
                 pistolTest = new InventoryItem(pistolTestData);
-                itemDragHandlerTest.Init(pistolTest, this, _inventoryManager.LootInventory.ItemRT,
-                    _uiManager.LootSlotParent, _uiManager.transform);
-
-                inventory.ItemDict[pistolTest.Id] = pistolTest;
+                itemDragHandlerTest.Init(pistolTest, this, _uiManager.transform);
+                Vector2 size = new Vector2(pistolTest.ItemCellCount.x, pistolTest.ItemCellCount.y) * _uiManager.CellSize;
+                //Position???
+                var result = inventory.AddItem(pistolTest);
+                if (result.isAvailable)
+                {
+                    Debug.Log("POS:" + result.pos); //GearSlot InvenSLot 구분???
+                    //ItemDrag -> pivot 0.5 0.5 문제...(worldPos)
+                    //SetItemDragPos -> pivot 차이 문제 해결!!!!!!!!
+                    itemDragHandlerTest.SetItemDragPos(result.pos, size, inventory.ItemRT,
+                        _uiManager.LootSlotParent);
+                }
+                
+                //inventory.ItemDict[pistolTest.Id] = pistolTest;
                 //pistolTest.
                 //주웠을때... 
                 //Inventory -> itemRT

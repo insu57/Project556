@@ -81,7 +81,6 @@ public class InventoryManager : MonoBehaviour
         SetGearItem(ChestRigSlot, rig01TestItem);
         //SetLootInventory(crate01Test);
         SetInventorySlot(crate01Test, GearType.None);
-        
     }
     
     public void Init()
@@ -91,18 +90,6 @@ public class InventoryManager : MonoBehaviour
 
     //Presenter 이벤트 처리...
     
-    public bool CheckSlotAvailable(Vector2 position) //가능 여부...
-    {
-        //좌측 인벤토리(장비 슬롯)
-        //중간 인벤토리(리그, 가방 인벤토리, 주머니 슬롯 4개)
-        //우측 인벤토리(적 시체, 상자)
-        //1. 어떤 인벤토리인지...
-   
-        //_uiManager.CheckRectTransform(position);
-        return false;
-    }
-
-
     private void SetInventorySlot(GameObject inventoryPrefab, GearType gearType)
     {
         OnSetInventory?.Invoke(inventoryPrefab, gearType); //인벤토리 프리팹 생성/초기화

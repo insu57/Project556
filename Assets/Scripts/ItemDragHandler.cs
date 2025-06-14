@@ -16,7 +16,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
     private Vector2 _targetPos;
-    private bool _isAvailable;
+   // private bool _isAvailable;
     
     private CanvasGroup _canvasGroup;
 
@@ -59,45 +59,35 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         }
     }
 
-    public void Init(InventoryItem item, InventoryUIPresenter presenter
-        , RectTransform itemParent, RectTransform inventoryRT, Transform uiParent)
+    public void Init(InventoryItem item, InventoryUIPresenter presenter, Transform uiParent)
     {
-        //_uiManager = uiManager;
         _inventoryUIPresenter = presenter;
         _inventoryUIPresenter.InitItemDragHandler(this);
         _cellSize = presenter.CellSize;
-        //_inventoryRT = inventoryRT;
 
         var itemData = item.ItemData;
-        //_gearType = itemData.GearType;
         _widthSize = itemData.ItemWidth;
         _heightSize = itemData.ItemHeight;
-        //Debug.Log(_cellSize);
+  
         Vector2 imageSize = new Vector2(_widthSize * _cellSize, _heightSize * _cellSize);
         _itemRT.sizeDelta = imageSize;
         _itemImage.sprite = itemData.ItemSprite;
 
         _id = item.Id;
         
-        _itemParentRT = itemParent;
+        //_itemParentRT = itemParent;
+        //_itemRT.SetParent(itemParent);
         _itemDraggingParent = uiParent;
-        _inventoryRT = inventoryRT;
-        _isAvailable = false;
+        //_inventoryRT = inventoryRT;
+        //_isAvailable = false;
     }
     
     public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        _itemRT.position = targetPos;
         _itemRT.SetParent(itemParentRT);
+        _itemRT.anchoredPosition = targetPos;
         _itemRT.sizeDelta = size;
         _inventoryRT = inventoryRT;
-    }
-    
-    private (Vector2 pos, Guid id) GetFirstSlotPos(Vector2 mousePos)
-    {
-        float x = mousePos.x + (-_cellSize * _widthSize + _cellSize) / 2f;
-        float y = mousePos.y - (-_cellSize * _heightSize + _cellSize) / 2f;//
-        return (new Vector2(x, y), _id);
     }
     
     public void OnPointerEnter(PointerEventData eventData)
@@ -138,6 +128,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                 _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
         {
@@ -146,14 +137,13 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         OnEndDragEvent?.Invoke(this, globalMousePos, _id);
         
-        //
-        
-        _isAvailable = false; //다시 초기화
+        //_isAvailable = false; //다시 초기화
         _canvasGroup.blocksRaycasts = true;
     }
 
     public void ReturnItemDrag()
     {
+        _itemRT.SetParent(_itemParentRT);
         _itemRT.anchoredPosition = _pointerDownPos;
     }
 }
