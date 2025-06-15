@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2038137530105478309}
   - component: {fileID: 7287345981307767159}
   m_Layer: 5
-  m_Name: SlotPrefab
+  m_Name: SlotPrefab (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -190,7 +190,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8157742754635194765}
   m_Layer: 5
-  m_Name: Slot (2)
+  m_Name: Slot (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 4699073415912567839}
   - component: {fileID: 3076912401510994884}
   m_Layer: 5
-  m_Name: InvenGrid (1)
+  m_Name: InvenGrid (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -410,7 +410,7 @@ GameObject:
   - component: {fileID: 2001553859819041891}
   - component: {fileID: 7933347391530933486}
   m_Layer: 5
-  m_Name: InvenGrid (1)
+  m_Name: InvenGrid (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -625,7 +625,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3562113447155702431}
   m_Layer: 5
-  m_Name: Slot (4)
+  m_Name: Slot (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -665,7 +665,7 @@ GameObject:
   - component: {fileID: 5824109782143479133}
   - component: {fileID: 3006809412844542095}
   m_Layer: 5
-  m_Name: SlotPrefab
+  m_Name: SlotPrefab (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -754,7 +754,7 @@ GameObject:
   - component: {fileID: 5864094023832861940}
   - component: {fileID: 7155242669899624844}
   m_Layer: 5
-  m_Name: InvenGrid (1)
+  m_Name: InvenGrid (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -823,7 +823,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6677926550367674862}
   m_Layer: 5
-  m_Name: Slot (3)
+  m_Name: Slot (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -992,19 +992,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slotDataList:
-  - slotRT: {fileID: 1748767899886667621}
+  - slotRT: {fileID: 58959199832922324}
     cellCount: {x: 1, y: 2}
     isGearSlot: 0
     gearType: 0
-  - slotRT: {fileID: 8157742754635194765}
+  - slotRT: {fileID: 12496631451955666}
     cellCount: {x: 1, y: 2}
     isGearSlot: 0
     gearType: 0
-  - slotRT: {fileID: 6677926550367674862}
+  - slotRT: {fileID: 4902943874934491721}
     cellCount: {x: 1, y: 2}
     isGearSlot: 0
     gearType: 0
-  - slotRT: {fileID: 3562113447155702431}
+  - slotRT: {fileID: 4215974157666603272}
     cellCount: {x: 1, y: 2}
     isGearSlot: 0
     gearType: 0
@@ -1033,7 +1033,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1748767899886667621}
   m_Layer: 5
-  m_Name: Slot (1)
+  m_Name: Slot (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1302,7 +1302,7 @@ GameObject:
   - component: {fileID: 9144733030784891295}
   - component: {fileID: 540906919609142349}
   m_Layer: 5
-  m_Name: SlotPrefab
+  m_Name: SlotPrefab (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1557,7 +1557,7 @@ GameObject:
   - component: {fileID: 7888260341595349732}
   - component: {fileID: 1446090040932030262}
   m_Layer: 5
-  m_Name: SlotPrefab
+  m_Name: SlotPrefab (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

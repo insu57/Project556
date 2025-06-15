@@ -9,21 +9,22 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private RectTransform _itemRT;
     private RectTransform _itemParentRT;
     private RectTransform _inventoryRT;
-    private RectTransform _targetItemParentRT;
-    private RectTransform _targetInventoryRT;
+    //private RectTransform _targetItemParentRT;
+    //private RectTransform _targetInventoryRT;
     public RectTransform InventoryRT => _inventoryRT;
     private Transform _itemDraggingParent;
     private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
     private Vector2 _targetPos;
+    private Vector2 _defaultImageSize;
    // private bool _isAvailable;
     
     private CanvasGroup _canvasGroup;
 
     private InventoryUIPresenter _inventoryUIPresenter;
     private UIManager _uiManager;
-    private int _widthSize;
-    private int _heightSize;
+    private int _widthCell;
+    private int _heightCell;
     private Guid _id;
    
     private int _idx;
@@ -65,29 +66,28 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _inventoryUIPresenter.InitItemDragHandler(this);
         _cellSize = presenter.CellSize;
 
-        var itemData = item.ItemData;
-        _widthSize = itemData.ItemWidth;
-        _heightSize = itemData.ItemHeight;
+        var itemData = item.ItemData; //CellCount
+        _widthCell = itemData.ItemWidth;
+        _heightCell = itemData.ItemHeight;
   
-        Vector2 imageSize = new Vector2(_widthSize * _cellSize, _heightSize * _cellSize);
-        _itemRT.sizeDelta = imageSize;
+        _defaultImageSize = new Vector2(_widthCell * _cellSize, _heightCell * _cellSize); //기본 크기
+        _itemRT.sizeDelta = _defaultImageSize;
         _itemImage.sprite = itemData.ItemSprite;
 
         _id = item.Id;
-        
-        //_itemParentRT = itemParent;
-        //_itemRT.SetParent(itemParent);
         _itemDraggingParent = uiParent;
-        //_inventoryRT = inventoryRT;
-        //_isAvailable = false;
     }
-    
     public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
-        _itemRT.SetParent(itemParentRT);
-        _itemRT.anchoredPosition = targetPos;
+        _itemParentRT = itemParentRT;
+        Vector2 pivotDelta = _itemParentRT.pivot - _itemRT.pivot; //pivot 차이
+        Vector2 parentSize = itemParentRT.sizeDelta; //부모의 사이즈(위치 보정용)
+        Vector2 offset = new Vector2(pivotDelta.x * parentSize.x, pivotDelta.y * parentSize.y); //pivot offest(위치보정)
+        
+        _itemRT.SetParent(itemParentRT); //부모 설정
+        _itemRT.anchoredPosition = targetPos + offset; //위치보정
         _itemRT.sizeDelta = size;
-        _inventoryRT = inventoryRT;
+        _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
     }
     
     public void OnPointerEnter(PointerEventData eventData)
@@ -106,6 +106,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _pointerDownPos = _itemRT.anchoredPosition;
         transform.SetParent(_itemDraggingParent); //Drag시 부모변경(RectMask때문에)
         
+        _itemRT.sizeDelta = _defaultImageSize;
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(_itemRT, eventData.position,
                 eventData.pressEventCamera,
                 out var globalMousePos))
@@ -137,7 +138,6 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         OnEndDragEvent?.Invoke(this, globalMousePos, _id);
         
-        //_isAvailable = false; //다시 초기화
         _canvasGroup.blocksRaycasts = true;
     }
 

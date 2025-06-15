@@ -226,7 +226,8 @@ public class InventoryUILegacy : MonoBehaviour
             for (int w = 0; w < itemSize.y; w++)
             {
                 //
-                Vector2 pos = _cellDataArray[firstIdx].CellRT.anchoredPosition + new Vector2(w * slotSize, h * -slotSize);
+                //Vector2 pos = _cellDataArray[firstIdx].CellRT.anchoredPosition + new Vector2(w * slotSize, h * -slotSize);
+                Vector2 pos = Vector2.zero;
                 //아이템크기만큼 슬롯 체크
                 int slotIdx = GetSlotIndex(pos);
                 

@@ -519,7 +519,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1280273300}
-  - {fileID: 219595516}
   - {fileID: 1082844599}
   - {fileID: 1659320358}
   - {fileID: 2013546668}
@@ -1685,6 +1684,7 @@ RectTransform:
   - {fileID: 1960239309}
   - {fileID: 169024591}
   - {fileID: 1686192076}
+  - {fileID: 219595516}
   m_Father: {fileID: 259694569}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -2346,6 +2346,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c0eea6650d2a3a349b9ef0dcdcf4bdb5, type: 3}
+--- !u!114 &712188870 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7716092572404661750, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
+  m_PrefabInstance: {fileID: 1544289696576165800}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec2c9a01411108c40810a80d9ce3efc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &753401119
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10506,6 +10517,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemDragHandlerTest: {fileID: 1686192079}
   pistolTestData: {fileID: 11400000, guid: 53960c62b9c69a14f8c913e94fe1e107, type: 2}
+  itemDragHandlerTest2: {fileID: 712188870}
+  itemDataTest: {fileID: 11400000, guid: 4edd6477f6f6ec343beb8a5c1db1d5ed, type: 2}
 --- !u!114 &1936378615
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12713,7 +12726,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 169024591}
+    m_TransformParent: {fileID: 453797358}
     m_Modifications:
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_Pivot.x
@@ -12725,19 +12738,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_SizeDelta.x
@@ -12765,23 +12778,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 50
+      value: -67.2
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50
+      value: -52.6
       objectReference: {fileID: 0}
     - target: {fileID: 144440511292222110, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -12801,7 +12814,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5930975178880390204, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

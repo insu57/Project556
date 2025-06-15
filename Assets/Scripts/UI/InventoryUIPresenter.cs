@@ -25,12 +25,13 @@ public class InventoryUIPresenter : MonoBehaviour
     //test
     [SerializeField] private ItemDragHandler itemDragHandlerTest;
     [SerializeField] private BaseItemDataSO pistolTestData;
-    private InventoryItem pistolTest;
+    [SerializeField] private ItemDragHandler itemDragHandlerTest2;
+    [SerializeField] private BaseItemDataSO itemDataTest;
+    //private InventoryItem pistolTest;
     private void Awake()
     {
         _inventoryManager = GetComponent<InventoryManager>();
         _uiManager = FindFirstObjectByType<UIManager>();
-        
     }
     
     private void Start()
@@ -124,7 +125,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 return;
             }
 
-            item = inventory.ItemDict[itemID]; //Inventory의 ItemDict
+            item = inventory.ItemDict[itemID].item; //Inventory의 ItemDict
         }
 
         if (item != null)
@@ -185,13 +186,18 @@ public class InventoryUIPresenter : MonoBehaviour
         {
             if (_targetIsGearSlot)
             {
-                _invenMap[originInvenRT].ItemDict.Remove(itemID);
+                var originInven = _invenMap[originInvenRT];
+                //originInven.ItemDict.Remove(itemID);
+                originInven.RemoveItem(itemID);
+                
                 _inventoryManager.SetGearItem(_targetGearSlot, _currentDragItem);
-                itemDrag.SetItemDragPos(Vector2.zero, _matchRT.sizeDelta, _matchRT,
+                Vector2 targetPos = new Vector2(_matchRT.sizeDelta.x, -_matchRT.sizeDelta.y) / 2;
+                itemDrag.SetItemDragPos(targetPos, _matchRT.sizeDelta, _matchRT, 
                     null);
-                var inventory = _invenMap[originInvenRT];
-                inventory.ItemDict.Remove(itemID);
-                //Cell Empty...
+                
+                //Cell 비우기...->좌상단 첫번째 인덱스만 알면 가능...
+                //기존 아이템 삭제........
+                //좌상단의 인덱스는 어떻게 저장?
             }
             else
             {
@@ -235,7 +241,7 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         var targetInven = _invenMap[matchRT];
         var originInven = _invenMap[originInvenRT];
-        var itemCount = originInven.ItemDict[id].ItemCellCount;
+        var itemCount = originInven.ItemDict[id].item.ItemCellCount;
         var (firstIdxPos, status, cellCount) = targetInven.CheckSlot(mousePos, itemCount, id);
         var cell = cellCount * _uiManager.CellSize;
         //cell의 크기...(MatchCell...)
@@ -287,24 +293,28 @@ public class InventoryUIPresenter : MonoBehaviour
                 
                 
                 //test
-                pistolTest = new InventoryItem(pistolTestData);
+                //ItemDrag초기화...? ItemDrag(아이템 주울 때, 퀘스트 보상 등 인벤으로 추가할때...)
+                var pistolTest = new InventoryItem(pistolTestData);
                 itemDragHandlerTest.Init(pistolTest, this, _uiManager.transform);
                 Vector2 size = new Vector2(pistolTest.ItemCellCount.x, pistolTest.ItemCellCount.y) * _uiManager.CellSize;
-                //Position???
                 var result = inventory.AddItem(pistolTest);
+                //itemDrag -> 크기 조절... 수정??
                 if (result.isAvailable)
                 {
-                    Debug.Log("POS:" + result.pos); //GearSlot InvenSLot 구분???
-                    //ItemDrag -> pivot 0.5 0.5 문제...(worldPos)
-                    //SetItemDragPos -> pivot 차이 문제 해결!!!!!!!!
                     itemDragHandlerTest.SetItemDragPos(result.pos, size, inventory.ItemRT,
                         _uiManager.LootSlotParent);
                 }
+
+                var test = new InventoryItem(itemDataTest);
+                itemDragHandlerTest2.Init(test, this, _uiManager.transform);
+                size = new Vector2(test.ItemCellCount.x, test.ItemCellCount.y) * _uiManager.CellSize;
+                result = inventory.AddItem(test);
+                if (result.isAvailable)
+                {
+                    itemDragHandlerTest2.SetItemDragPos(result.pos, size, inventory.ItemRT, 
+                        _uiManager.LootSlotParent); 
+                }
                 
-                //inventory.ItemDict[pistolTest.Id] = pistolTest;
-                //pistolTest.
-                //주웠을때... 
-                //Inventory -> itemRT
                 break;
         }
     }

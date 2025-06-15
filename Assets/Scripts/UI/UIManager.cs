@@ -154,7 +154,6 @@ public class UIManager : MonoBehaviour
         slotAvailable.enabled = true;
         slotAvailable.color = slotColor;
         slotAvailable.rectTransform.position = position;
-        //Debug.Log("ShowSlotAvailable: " + position);
         slotAvailable.rectTransform.sizeDelta = size;
     }
 

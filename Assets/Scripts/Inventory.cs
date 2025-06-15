@@ -18,8 +18,10 @@ public class Inventory: MonoBehaviour
     [SerializeField, Space] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
-    private readonly Dictionary<RectTransform, (List<CellData> cells, Vector2Int cellCount)> _slotDict 
+    private readonly Dictionary<RectTransform, (List<CellData> cells, Vector2Int slotCount)> _slotDict 
         = new(); // Slot -> CellData List
+    //Slot 리팩터링????? class??? 단순하게 SlotRT, idx DragHandler에...
+    //드래그할 때 기존 슬롯 정보에 접근해서 비워야함....
 
     public float Width { private set; get; }
     public float Height { private set; get; }
@@ -27,8 +29,8 @@ public class Inventory: MonoBehaviour
     public RectTransform InventoryRT => _inventoryRT;
     public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
     private RectTransform _matchSlotRT;
-    public Dictionary<Guid, InventoryItem> ItemDict { get; } = new();
-
+    public Dictionary<Guid, (InventoryItem item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
+    //기존 슬롯->아이템 정보...
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
 
     public void Init(float cellSize)
@@ -62,7 +64,7 @@ public class Inventory: MonoBehaviour
     {
         
     }
-
+    
     public (Vector2 firstIdxPos, SlotStatus status, Vector2 cellCount) CheckSlot
         (Vector2 mousePos, Vector2Int itemCellCount, Guid id)
     {
@@ -121,7 +123,7 @@ public class Inventory: MonoBehaviour
     private void GetFirstCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemCellCount , out int firstIdx)
     {
         int width = slotSize.x;
-        int height = slotSize.y;
+        //int height = slotSize.y;
         Vector2 firstPos = localPoint - new Vector2(itemCellCount.x * _cellSize / 2f , -itemCellCount.y * _cellSize / 2f) 
                              + new Vector2(_cellSize, -_cellSize)/2f;
         // 중심(아이템)에서 좌상단 MinPosition(가로세로 절반)(좌상단Cell, 첫번째Cell) + 해당 Cell의 Center
@@ -137,11 +139,13 @@ public class Inventory: MonoBehaviour
     //LootInven 아이템 초기화?
     public (bool isAvailable, Vector2 pos) AddItem(InventoryItem item)
     {
+        //중첩for문 개선???
+        Canvas.ForceUpdateCanvases();
         foreach (var slotData in slotDataList)
         {
             var slotCell = _slotDict[slotData.slotRT];
             var cells = slotCell.cells;
-            var slotCount = slotCell.cellCount;
+            var slotCount = slotCell.slotCount;
             var itemCount = item.ItemCellCount;
 
             for (int h = 0; h < slotCount.y; h++)
@@ -171,19 +175,44 @@ public class Inventory: MonoBehaviour
                             for (int x = 0; x < itemCount.x; x++)
                             {
                                 var idx = firstIdx + x + y * slotCount.x;
-                                cells[idx].SetEmpty(false, item.Id);
+                                cells[idx].SetEmpty(false, item.Id);//Cell 채우기
                             }
                         }
-                        ItemDict[item.Id] = item;
-                        var minPos = cells[firstIdx].CellRT.position;
-                        
-                        return (true,minPos );
+
+                        ItemDict[item.Id] = (item, slotData.slotRT, firstIdx);
+                        Debug.Log(ItemDict[item.Id] + " id: " + item.Id);
+                        var minPos = cells[firstIdx].CellRT.anchoredPosition;
+                        var maxPos = cells[firstIdx + itemCount.x -1 + slotCount.x * (itemCount.y - 1)]
+                            .MaxPos; //아이템 우하단의 인덱스(최대)
+                        var targetPos = (minPos + maxPos) / 2;
+                        return (true, targetPos);
                     }
                 }
             }
         }
 
         return (false, Vector2.zero);
+    }
+
+    public void RemoveItem(Guid id)
+    {
+        Debug.Log($"Removing item {id}");
+        Debug.Log(ItemDict[id]);
+        var slotRT = ItemDict[id].slotRT;
+        var firstIdx = ItemDict[id].firstIdx;
+        var itemCount = ItemDict[id].item.ItemCellCount;
+        var slotData = _slotDict[slotRT];
+
+        for (int y = 0; y < itemCount.y; y++)
+        {
+            for (int x = 0; x < itemCount.x; x++)
+            {
+                var idx = firstIdx + x + y * slotData.slotCount.x;
+                slotData.cells[idx].SetEmpty(true, id);
+            }
+        }
+        
+        ItemDict.Remove(id);
     }
     
 }
