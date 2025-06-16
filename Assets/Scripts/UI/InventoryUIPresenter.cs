@@ -20,6 +20,8 @@ public class InventoryUIPresenter : MonoBehaviour
     private RectTransform _matchRT;
     private CellData _targetGearSlot;
     private Inventory _targetInventory;
+    private RectTransform _targetSlotRT;
+    private int _targetFirstIdx;
     
     //ItemDragger List?
     //test
@@ -27,7 +29,7 @@ public class InventoryUIPresenter : MonoBehaviour
     [SerializeField] private BaseItemDataSO pistolTestData;
     [SerializeField] private ItemDragHandler itemDragHandlerTest2;
     [SerializeField] private BaseItemDataSO itemDataTest;
-    //private InventoryItem pistolTest;
+    
     private void Awake()
     {
         _inventoryManager = GetComponent<InventoryManager>();
@@ -91,14 +93,11 @@ public class InventoryUIPresenter : MonoBehaviour
 
     public void OnDisableItemDragHandler(ItemDragHandler itemDrag)
     {
+        itemDrag.OnPointerDownEvent -= HandleOnPointerEnter;
         itemDrag.OnDragEvent -= HandleOnDragItem;
         itemDrag.OnEndDragEvent -= HandleOnEndDragItem;
     }
     
-    private void GetItemRectTransform(Vector2 originPos)
-    {
-        
-    }
     //OnPointerEnter -> 해당 아이템, 기존 슬롯 정보 캐싱
     //OnDrag -> 해당 슬롯 정보 캐싱
     //OnEndDrag -> 이동/원복 처리
@@ -115,7 +114,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 Debug.LogError("Item not found...!: " + itemID);
                 return;
             }
-            item = inventoryItem; //GearSlots Item Dict
+            item = inventoryItem.item; //GearSlots Item Dict
         }
         else
         {
@@ -136,7 +135,7 @@ public class InventoryUIPresenter : MonoBehaviour
     
     private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
-        var slotInfo = _uiManager.CheckItemSlot(mousePos);
+        var slotInfo = _uiManager.GetItemSlotRT(mousePos); 
         if (!slotInfo.matchSlot) //No Match Slot...
         {
             _uiManager.ClearShowAvailable();
@@ -159,7 +158,6 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnEndDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
-        //Debug.Log("EndDragItem: " + itemDrag.name);
         _uiManager.ClearShowAvailable();
         //실제 아이템 이동...
         if (!_targetIsAvailable)
@@ -172,36 +170,43 @@ public class InventoryUIPresenter : MonoBehaviour
         var originInvenRT = itemDrag.InventoryRT;
         if (!originInvenRT)
         {
+            var gearSlot = _inventoryManager.ItemDict[itemID];
+            _inventoryManager.RemoveGearItem(gearSlot.cell, gearSlot.item.Id);
+            
             if (_targetIsGearSlot)
             {
-                //_inventoryManager.SetGear(_currentDragItem.GearType, _currentDragItem);
-                
-            }
-            else
-            {
-                
-            }
-        }
-        else
-        {
-            if (_targetIsGearSlot)
-            {
-                var originInven = _invenMap[originInvenRT];
-                //originInven.ItemDict.Remove(itemID);
-                originInven.RemoveItem(itemID);
-                
                 _inventoryManager.SetGearItem(_targetGearSlot, _currentDragItem);
                 Vector2 targetPos = new Vector2(_matchRT.sizeDelta.x, -_matchRT.sizeDelta.y) / 2;
                 itemDrag.SetItemDragPos(targetPos, _matchRT.sizeDelta, _matchRT, 
                     null);
-                
-                //Cell 비우기...->좌상단 첫번째 인덱스만 알면 가능...
-                //기존 아이템 삭제........
-                //좌상단의 인덱스는 어떻게 저장?
             }
             else
             {
-                
+                var targetPos = _targetInventory.MoveItem(gearSlot.item, _targetFirstIdx, _targetSlotRT);
+                var itemSize = new Vector2(gearSlot.item.ItemCellCount.x, gearSlot.item.ItemCellCount.y)
+                               * _uiManager.CellSize;
+                itemDrag.SetItemDragPos(targetPos, itemSize, _targetInventory.ItemRT, _matchRT );
+            }
+        }
+        else
+        {
+            var originInven = _invenMap[originInvenRT];
+            var item = originInven.ItemDict[itemID].item;
+            originInven.RemoveItem(itemID);
+
+            if (_targetIsGearSlot)
+            {
+
+                _inventoryManager.SetGearItem(_targetGearSlot, item);
+                Vector2 targetPos = new Vector2(_matchRT.sizeDelta.x, -_matchRT.sizeDelta.y) / 2;
+                itemDrag.SetItemDragPos(targetPos, _matchRT.sizeDelta, _matchRT, 
+                    null);
+            }
+            else
+            {
+                var targetPos = _targetInventory.MoveItem(item, _targetFirstIdx, _targetSlotRT);
+                var itemSize = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * _uiManager.CellSize;
+                itemDrag.SetItemDragPos(targetPos, itemSize, _targetInventory.ItemRT, _matchRT );
             }
         }
     }
@@ -230,7 +235,7 @@ public class InventoryUIPresenter : MonoBehaviour
             }
             //장착된 리그가 방탄 리그면 불가.
             var rigID = _inventoryManager.ChestRigSlot.Id;
-            var rigItemType =  _inventoryManager.ItemDict[rigID].GearType;
+            var rigItemType =  _inventoryManager.ItemDict[rigID].item.GearType;
             if(rigItemType == GearType.ArmoredRig) return false;
         }
         _targetGearSlot = _gearSlotsMap[matchRT];
@@ -240,12 +245,26 @@ public class InventoryUIPresenter : MonoBehaviour
     private bool CheckInventory(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
     {
         var targetInven = _invenMap[matchRT];
-        var originInven = _invenMap[originInvenRT];
-        var itemCount = originInven.ItemDict[id].item.ItemCellCount;
-        var (firstIdxPos, status, cellCount) = targetInven.CheckSlot(mousePos, itemCount, id);
+        
+        Vector2Int itemCount;
+        
+        if (originInvenRT)
+        {
+            var originInven = _invenMap[originInvenRT];
+            itemCount = originInven.ItemDict[id].item.ItemCellCount;
+        }
+        else
+        {
+            itemCount = _inventoryManager.ItemDict[id].item.ItemCellCount;
+        }
+        
+        var (firstIdx, firstIdxPos, mathSlotRT ,status, cellCount) = 
+            targetInven.CheckSlot(mousePos, itemCount, id);
         var cell = cellCount * _uiManager.CellSize;
         //cell의 크기...(MatchCell...)
+        
         bool isAvailable = false;
+        
         switch (status)
         {
             case SlotStatus.None: //No Match Slot
@@ -257,13 +276,13 @@ public class InventoryUIPresenter : MonoBehaviour
                 break;
         }
         _uiManager.ShowSlotAvailable(isAvailable, firstIdxPos, cell); //cell크기...??
-        if(isAvailable) _targetInventory = targetInven;
+        if (isAvailable)
+        {
+            _targetInventory = targetInven;
+            _targetFirstIdx = firstIdx;
+            _targetSlotRT = mathSlotRT;
+        }
         return isAvailable;
-    }
-
-    private void MoveItem(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
-    {
-        
     }
     
     private void HandleOnSetInventory(GameObject inventoryPrefab, GearType gearType)

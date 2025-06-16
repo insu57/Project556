@@ -37,8 +37,8 @@ public class InventoryManager : MonoBehaviour
 
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
     //private Dictionary<Guid, CellData> _pocketItemDict = new();
-    public Dictionary<Guid, InventoryItem> ItemDict { get; } = new();
-    public Dictionary<CellData, InventoryItem> GearDict { get; } = new();
+    public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
+    // public Dictionary<CellData, InventoryItem> GearDict { get; } = new();
     
     //private UIManager _uiManager;
 
@@ -61,13 +61,13 @@ public class InventoryManager : MonoBehaviour
             PocketSlots[i] = new CellData(GearType.None);
         }
         
-        GearDict.Add(HeadwearSlot, _headwearData);
-        GearDict.Add(EyewearSlot, _eyewearData);
-        GearDict.Add(BodyArmorSlot, _bodyArmorData);
-        GearDict.Add(PrimaryWeaponSlot, _primaryWeaponData);
-        GearDict.Add(SecondaryWeaponSlot, _secondaryWeaponData);
-        GearDict.Add(ChestRigSlot, _chestRigData);
-        GearDict.Add(BackpackSlot, _backpackData); //Gear-Data Dictionary Init
+        //GearDict.Add(HeadwearSlot, _headwearData);
+        //GearDict.Add(EyewearSlot, _eyewearData);
+        //GearDict.Add(BodyArmorSlot, _bodyArmorData);
+        //GearDict.Add(PrimaryWeaponSlot, _primaryWeaponData);
+        //GearDict.Add(SecondaryWeaponSlot, _secondaryWeaponData);
+        //GearDict.Add(ChestRigSlot, _chestRigData);
+        //GearDict.Add(BackpackSlot, _backpackData); //Gear-Data Dictionary Init
         
         PistolTest = new InventoryItem(pistol1Test);
     }
@@ -79,7 +79,6 @@ public class InventoryManager : MonoBehaviour
         SetGearItem(BackpackSlot, raidPackItem);
         InventoryItem rig01TestItem = new InventoryItem(rig01Test);
         SetGearItem(ChestRigSlot, rig01TestItem);
-        //SetLootInventory(crate01Test);
         SetInventorySlot(crate01Test, GearType.None);
     }
     
@@ -97,9 +96,10 @@ public class InventoryManager : MonoBehaviour
 
     public void SetInventoryData(Inventory inventory, GearType gearType)
     {
+        //인벤토리 설정
         switch (gearType)
         {
-            case GearType.ArmoredRig:
+            case GearType.ArmoredRig: 
             case GearType.UnarmoredRig:
                 RigInventory = inventory;
                 break;
@@ -114,8 +114,8 @@ public class InventoryManager : MonoBehaviour
 
     public void SetGearItem(CellData gearSlot, InventoryItem item)
     {
-        GearDict[gearSlot] = item; //아이템을 제거할 때는?
-        ItemDict[item.Id] = item;
+        //GearDict[gearSlot] = item; //아이템을 제거할 때는?
+        ItemDict[item.Id] = (item, gearSlot);
         gearSlot.SetEmpty(false, item.Id);
 
         GearData gearData;
@@ -129,6 +129,14 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
         //장비 능력치, 무기 설정
+    }
+
+    public void RemoveGearItem(CellData gearSlot, Guid itemID)
+    {
+        ItemDict.Remove(itemID);
+        gearSlot.SetEmpty(true, itemID);
+        //Inventory있는 경우...처리
+        //장비 능력치 등 처리
     }
     
 }

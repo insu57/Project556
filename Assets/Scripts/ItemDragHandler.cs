@@ -9,15 +9,11 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private RectTransform _itemRT;
     private RectTransform _itemParentRT;
     private RectTransform _inventoryRT;
-    //private RectTransform _targetItemParentRT;
-    //private RectTransform _targetInventoryRT;
+
     public RectTransform InventoryRT => _inventoryRT;
     private Transform _itemDraggingParent;
-    private Vector2 _pointerOffset;
     private Vector2 _pointerDownPos;
-    private Vector2 _targetPos;
     private Vector2 _defaultImageSize;
-   // private bool _isAvailable;
     
     private CanvasGroup _canvasGroup;
 
@@ -39,7 +35,6 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private void Awake()
     {
         _itemRT = GetComponent<RectTransform>();
-        //_rootCanvas = GetComponentInParent<Canvas>();
         _canvasGroup = GetComponent<CanvasGroup>();
         _itemImage = GetComponent<Image>();
     }
@@ -106,13 +101,9 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _pointerDownPos = _itemRT.anchoredPosition;
         transform.SetParent(_itemDraggingParent); //Drag시 부모변경(RectMask때문에)
         
-        _itemRT.sizeDelta = _defaultImageSize;
-        if (RectTransformUtility.ScreenPointToWorldPointInRectangle(_itemRT, eventData.position,
-                eventData.pressEventCamera,
-                out var globalMousePos))
-        {
-            OnPointerDownEvent?.Invoke(this, _id);
-        }
+        _itemRT.sizeDelta = _defaultImageSize; //사이즈 조정.. 어떻게?
+        
+        OnPointerDownEvent?.Invoke(this, _id);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -120,7 +111,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                 _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
         {
-            _itemRT.position = globalMousePos;
+            _itemRT.position = globalMousePos; //item Drag Handler 위치 -> GlobalMousePos
         }
         
         //EVENT invoke
@@ -133,7 +124,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                 _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
         {
-            _itemRT.position = globalMousePos;
+            _itemRT.position = globalMousePos; 
         }
         
         OnEndDragEvent?.Invoke(this, globalMousePos, _id);

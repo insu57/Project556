@@ -162,7 +162,7 @@ public class UIManager : MonoBehaviour
         slotAvailable.enabled = false;
     }
     
-    public (RectTransform matchSlot, bool isGearSlot) CheckItemSlot(Vector2 mousePos)
+    public (RectTransform matchSlot, bool isGearSlot) GetItemSlotRT(Vector2 mousePos)
     {
         foreach (var slot in _gearSlotRT)
         {
