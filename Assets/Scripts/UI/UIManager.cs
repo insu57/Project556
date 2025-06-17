@@ -20,8 +20,8 @@ public class UIManager : MonoBehaviour
     [SerializeField, Space] private float cellSize = 50f;
     private float _panelSlotPadding; //slotSize * 3
     public float CellSize => cellSize;
-    public Vector2 GearSlotSize => new Vector2(cellSize, cellSize) * 2;
-    public Vector2 WeaponSlotSize => new Vector2(cellSize * 4, cellSize) * 2;
+    //public Vector2 GearSlotSize => new Vector2(cellSize, cellSize) * 2;
+    //public Vector2 WeaponSlotSize => new Vector2(cellSize * 4, cellSize) * 2;
     [SerializeField] private Color availableColor;
     [SerializeField] private Color unavailableColor;
     

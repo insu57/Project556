@@ -26,9 +26,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private Vector2 pickUpColliderSize;
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
-    //[SerializeField] private GameObject itemPrefab;//임시
     [SerializeField] private Vector3 muzzlePosition;
-    //[SerializeField] private Vector2 itemSize;
     
     public override string ItemID => itemID;
     public override string ItemName => weaponName;
@@ -49,8 +47,7 @@ public class WeaponData : BaseItemDataSO
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.Weapon;
-
-    //public override GameObject ItemPrefab => itemPrefab;//임시
     public Vector3 MuzzlePosition => muzzlePosition;
-    //public override Vector2 ItemSize => itemSize;
+    public override bool IsStackable => false;
+    public override int MaxStackAmount => 1;
 }

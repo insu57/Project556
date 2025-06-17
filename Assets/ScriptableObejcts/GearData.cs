@@ -18,6 +18,9 @@ public class GearData : BaseItemDataSO
     
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private bool isPartitioned;
+    
+    //[SerializeField] private bool isStackable = false;
+    
     public override string ItemID => itemID;
     public override string ItemName => itemName;
     public override GearType GearType => gearType;
@@ -31,5 +34,6 @@ public class GearData : BaseItemDataSO
     
     public GameObject SlotPrefab => slotPrefab;
     public bool IsPartitioned => isPartitioned;
-    
+    public override bool IsStackable => false;
+    public override int MaxStackAmount => 1;
 }

@@ -11,6 +11,8 @@ public interface IItemData
     public int ItemWidth { get; }
     public int ItemHeight { get; }
     public GearType GearType { get; }
+    public bool IsStackable { get; }
+    public int MaxStackAmount { get; }
     //public Vector2 ItemSize { get; }
 }
  

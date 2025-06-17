@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private Transform _itemDraggingParent;
     private Vector2 _pointerDownPos;
     private Vector2 _defaultImageSize;
+    private Vector2 _slotImageSize;
     
     private CanvasGroup _canvasGroup;
 
@@ -26,7 +28,8 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private int _idx;
     private Image _itemImage;
     [SerializeField] private Image highlight;
-    private float _cellSize;
+    [SerializeField] private TMP_Text stackText;
+    //private float _cellSize;
     
     public event Action<ItemDragHandler, Guid> OnPointerDownEvent;
     public event Action<ItemDragHandler, Vector2, Guid> OnDragEvent;
@@ -59,18 +62,20 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     {
         _inventoryUIPresenter = presenter;
         _inventoryUIPresenter.InitItemDragHandler(this);
-        _cellSize = presenter.CellSize;
+        var cellSize = presenter.CellSize;
 
         var itemData = item.ItemData; //CellCount
         _widthCell = itemData.ItemWidth;
         _heightCell = itemData.ItemHeight;
   
-        _defaultImageSize = new Vector2(_widthCell * _cellSize, _heightCell * _cellSize); //기본 크기
+        _defaultImageSize = new Vector2(_widthCell * cellSize, _heightCell * cellSize); //기본 크기
         _itemRT.sizeDelta = _defaultImageSize;
         _itemImage.sprite = itemData.ItemSprite;
 
         _id = item.Id;
         _itemDraggingParent = uiParent;
+        
+        
     }
     public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
@@ -82,6 +87,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.SetParent(itemParentRT); //부모 설정
         _itemRT.anchoredPosition = targetPos + offset; //위치보정
         _itemRT.sizeDelta = size;
+        _slotImageSize = size;
         _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
     }
     
@@ -136,5 +142,6 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     {
         _itemRT.SetParent(_itemParentRT);
         _itemRT.anchoredPosition = _pointerDownPos;
+        _itemRT.sizeDelta = _slotImageSize;
     }
 }

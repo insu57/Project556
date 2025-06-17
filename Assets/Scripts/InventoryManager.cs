@@ -8,9 +8,6 @@ using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    //[SerializeField] private float slotSize = 50f;
-    //public float SlotSize => slotSize;
-    
     //Left Panel
     private InventoryItem _headwearData;
     public CellData HeadwearSlot { get; } = new(GearType.HeadWear);
@@ -29,21 +26,15 @@ public class InventoryManager : MonoBehaviour
     private InventoryItem _backpackData;
     public CellData BackpackSlot { get; } = new(GearType.Backpack);
     public Inventory BackpackInventory { get; private set; }
-
     public Inventory RigInventory { get; private set; }
 
     //Right Panel
     public Inventory LootInventory { get; private set; }
 
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
-    //private Dictionary<Guid, CellData> _pocketItemDict = new();
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
-    // public Dictionary<CellData, InventoryItem> GearDict { get; } = new();
-    
-    //private UIManager _uiManager;
-
-    //public event Action<Vector2> OnCheckSlot;
-    public event Action<GameObject, GearType> OnSetInventory; 
+    public event Action<GameObject, GearType> OnSetInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분)
+    public event Action<GearType, Vector2, InventoryItem> OnAddItemToInventory; //인벤토리 타입, ItemPos, 아이템데이터
     
     //test
     [SerializeField] private GearData raidPack01Test;
@@ -61,14 +52,6 @@ public class InventoryManager : MonoBehaviour
             PocketSlots[i] = new CellData(GearType.None);
         }
         
-        //GearDict.Add(HeadwearSlot, _headwearData);
-        //GearDict.Add(EyewearSlot, _eyewearData);
-        //GearDict.Add(BodyArmorSlot, _bodyArmorData);
-        //GearDict.Add(PrimaryWeaponSlot, _primaryWeaponData);
-        //GearDict.Add(SecondaryWeaponSlot, _secondaryWeaponData);
-        //GearDict.Add(ChestRigSlot, _chestRigData);
-        //GearDict.Add(BackpackSlot, _backpackData); //Gear-Data Dictionary Init
-        
         PistolTest = new InventoryItem(pistol1Test);
     }
 
@@ -76,9 +59,9 @@ public class InventoryManager : MonoBehaviour
     {
         //test
         InventoryItem raidPackItem = new InventoryItem(raidPack01Test);
-        SetGearItem(BackpackSlot, raidPackItem);
+        //SetGearItem(BackpackSlot, raidPackItem);
         InventoryItem rig01TestItem = new InventoryItem(rig01Test);
-        SetGearItem(ChestRigSlot, rig01TestItem);
+        //SetGearItem(ChestRigSlot, rig01TestItem);
         SetInventorySlot(crate01Test, GearType.None);
     }
     
@@ -138,5 +121,36 @@ public class InventoryManager : MonoBehaviour
         //Inventory있는 경우...처리
         //장비 능력치 등 처리
     }
-    
+
+    public void AddItemToInventory(InventoryItem item)
+    {
+        //item따라...
+        //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
+        //DragHandler -> inventoryUIPresenter에서
+        //Inventory...없으면 null, backpack -> rig 순. 
+        //LootInventory -> 맵 초기화에서...일괄
+        
+        if (BackpackInventory)
+        {
+            var (isAvailable, pos) = BackpackInventory.AddItem(item);
+            if (isAvailable)
+            {
+                OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, item);
+                return;
+            }
+        }
+
+        if (RigInventory)
+        {
+            var (isAvailable, pos) = RigInventory.AddItem(item);
+            if (isAvailable)
+            {
+                OnAddItemToInventory?.Invoke(GearType.Backpack, pos, item);
+                return;
+            }
+        }
+        
+        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, item);
+        //unavailable 표시... -> UI?
+    }
 }

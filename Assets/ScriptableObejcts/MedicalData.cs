@@ -8,12 +8,14 @@ public class MedicalData : BaseItemDataSO
     
     [SerializeField] private int healAmount;
     
-    
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private Vector2 pickUpColliderOffset;
     [SerializeField] private Vector2 pickUpColliderSize;
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
+
+    [SerializeField] private bool isStackable = false;
+    [SerializeField] private int maxStackAmount = 1;
     
     public override string ItemID => itemID;
     public override string ItemName => itemName;
@@ -25,4 +27,6 @@ public class MedicalData : BaseItemDataSO
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.None;
+    public override bool IsStackable => isStackable;
+    public override int MaxStackAmount => maxStackAmount;
 }

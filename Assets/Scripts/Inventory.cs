@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public record InventorySlotCheckResult()
+{
+    
+}
+
 public class Inventory: MonoBehaviour
 {
     [Serializable]
@@ -28,7 +33,7 @@ public class Inventory: MonoBehaviour
     public float Width { private set; get; }
     public float Height { private set; get; }
     private float _cellSize;
-    public RectTransform InventoryRT => _inventoryRT;
+    //public RectTransform InventoryRT => _inventoryRT;
     public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
     public Dictionary<Guid, (InventoryItem item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
     //기존 슬롯->아이템 정보...
@@ -90,6 +95,9 @@ public class Inventory: MonoBehaviour
             var firstY = firstIdx / slotCount.x;
             
             var firstIdxPos = cells[firstIdx].CellRT.position; //아이템 첫번째 슬롯의 Position(World)
+            
+            //아이템 스택 검사...? id, 어떤 inven인지만 알면,,
+            // targetInven에 뭐가 있는지...
             
             for (int y = 0; y < itemCellCount.y; y++) //cell체크...
             {
@@ -197,6 +205,13 @@ public class Inventory: MonoBehaviour
         return (false, Vector2.zero);
     }
 
+    public InventoryItem GetItemData(Guid id)
+    {
+        var (item, slotRT, firstIdx) = ItemDict[id];
+        
+        return item;
+    }
+    
     public void RemoveItem(Guid id)
     {
         //아이템 제거

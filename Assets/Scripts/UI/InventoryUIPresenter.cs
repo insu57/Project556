@@ -14,6 +14,7 @@ public class InventoryUIPresenter : MonoBehaviour
 
     public float CellSize => _uiManager.CellSize;
 
+    [SerializeField] private ItemDragHandler itemDragHandlerPrefab;
     private InventoryItem _currentDragItem; //현재 드래그 중인 아이템
     private bool _targetIsAvailable;
     private bool _targetIsGearSlot;
@@ -29,6 +30,10 @@ public class InventoryUIPresenter : MonoBehaviour
     [SerializeField] private BaseItemDataSO pistolTestData;
     [SerializeField] private ItemDragHandler itemDragHandlerTest2;
     [SerializeField] private BaseItemDataSO itemDataTest;
+    [SerializeField] private ItemDragHandler itemDragHandlerTest3;
+    [SerializeField] private ItemDragHandler itemDragHandlerTest4;
+    [SerializeField] private BaseItemDataSO backpackTestData;
+    [SerializeField] private BaseItemDataSO rigTestData;
     
     private void Awake()
     {
@@ -75,13 +80,15 @@ public class InventoryUIPresenter : MonoBehaviour
         //Event
         //InventoryManager
         _inventoryManager.OnSetInventory += HandleOnSetInventory;
-       
+        _inventoryManager.OnAddItemToInventory += HandleOnAddItemToInventory;
+
     }
 
     private void OnDestroy()
     {
         //Event unsubscribe
         _inventoryManager.OnSetInventory -= HandleOnSetInventory;
+        _inventoryManager.OnAddItemToInventory -= HandleOnAddItemToInventory;
     }
 
     public void InitItemDragHandler(ItemDragHandler itemDrag)//아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
@@ -145,7 +152,7 @@ public class InventoryUIPresenter : MonoBehaviour
         _targetIsGearSlot = slotInfo.isGearSlot;
         _matchRT = slotInfo.matchSlot;
         
-        if (slotInfo.isGearSlot)
+        if (slotInfo.isGearSlot)//GearSlot인지 확인
         {
             _targetIsAvailable = CheckGearSlot(slotInfo.matchSlot);
             _uiManager.ShowSlotAvailable(_targetIsAvailable, slotInfo.matchSlot.position, slotInfo.matchSlot.sizeDelta);
@@ -159,16 +166,22 @@ public class InventoryUIPresenter : MonoBehaviour
     private void HandleOnEndDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid itemID)
     {
         _uiManager.ClearShowAvailable();
-        //실제 아이템 이동...
-        if (!_targetIsAvailable)
+       
+        //가방, 리그 등 이동할 때 고려(아이템 하위 인벤토리 관련).
+        //내용물은 어떻게????? Inventory(Mono) InventoryItem(not mono) ItemDragHandler(Mono)
+        //ItemDragHandler -> Inventory 자식
+        //InventoryItem (Inventory.ItemDict 의 value 중 하나...)
+        //특히 가방 인벤토리에 가방 자신이 이동 -> 막기
+        
+        if (!_targetIsAvailable) //unavailable itemDrag 원래대로
         {
             Debug.Log("Target Is Not Available");
             itemDrag.ReturnItemDrag();
             return;
         }
         
-        var originInvenRT = itemDrag.InventoryRT;
-        if (!originInvenRT)
+        var originInvenRT = itemDrag.InventoryRT; 
+        if (!originInvenRT) //인벤토리에서 이동한 경우
         {
             var gearSlot = _inventoryManager.ItemDict[itemID];
             _inventoryManager.RemoveGearItem(gearSlot.cell, gearSlot.item.Id);
@@ -188,7 +201,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 itemDrag.SetItemDragPos(targetPos, itemSize, _targetInventory.ItemRT, _matchRT );
             }
         }
-        else
+        else //GearSlot에서 이동한 경우
         {
             var originInven = _invenMap[originInvenRT];
             var item = originInven.ItemDict[itemID].item;
@@ -245,23 +258,33 @@ public class InventoryUIPresenter : MonoBehaviour
     private bool CheckInventory(RectTransform matchRT, RectTransform originInvenRT, Vector2 mousePos, Guid id)
     {
         var targetInven = _invenMap[matchRT];
-        
+
+        InventoryItem item;
         Vector2Int itemCount;
         
         if (originInvenRT)
         {
             var originInven = _invenMap[originInvenRT];
+            item =  originInven.ItemDict[id].item;
             itemCount = originInven.ItemDict[id].item.ItemCellCount;
         }
         else
         {
+            item = _inventoryManager.ItemDict[id].item;
             itemCount = _inventoryManager.ItemDict[id].item.ItemCellCount;
         }
         
+        //간소화?
         var (firstIdx, firstIdxPos, mathSlotRT ,status, cellCount) = 
             targetInven.CheckSlot(mousePos, itemCount, id);
         var cell = cellCount * _uiManager.CellSize;
         //cell의 크기...(MatchCell...)
+        
+        //Stackable 검사...
+        if (item.IsStackable)
+        {
+            //var targetInvenSlotItem = targetInven.GetItemData()
+        }
         
         bool isAvailable = false;
         
@@ -313,6 +336,11 @@ public class InventoryUIPresenter : MonoBehaviour
                 
                 //test
                 //ItemDrag초기화...? ItemDrag(아이템 주울 때, 퀘스트 보상 등 인벤으로 추가할때...)
+                //초기화 어떻게...?
+                //itemData-> DragHandler...(init, 배치)
+                //InventoryManager -> ?
+                //Stackable Item....
+                
                 var pistolTest = new InventoryItem(pistolTestData);
                 itemDragHandlerTest.Init(pistolTest, this, _uiManager.transform);
                 Vector2 size = new Vector2(pistolTest.ItemCellCount.x, pistolTest.ItemCellCount.y) * _uiManager.CellSize;
@@ -333,7 +361,46 @@ public class InventoryUIPresenter : MonoBehaviour
                     itemDragHandlerTest2.SetItemDragPos(result.pos, size, inventory.ItemRT, 
                         _uiManager.LootSlotParent); 
                 }
+                var backpack = new InventoryItem(backpackTestData);
+                itemDragHandlerTest3.Init(backpack, this, _uiManager.transform);
+                size = _uiManager.BackpackSlotRT.sizeDelta;
+                Vector2 pos =
+                    new Vector2(_uiManager.BackpackSlotRT.sizeDelta.x, -_uiManager.BackpackSlotRT.sizeDelta.y) / 2;
+                itemDragHandlerTest3.SetItemDragPos(pos, size,
+                    _uiManager.BackpackSlotRT, null);
+                _inventoryManager.SetGearItem(_inventoryManager.BackpackSlot, backpack);
                 
+                var rig = new InventoryItem(rigTestData);
+                itemDragHandlerTest4.Init(rig, this, _uiManager.transform);
+                size = _uiManager.RigSlotRT.sizeDelta;
+                pos = new Vector2(_uiManager.RigSlotRT.sizeDelta.x, -_uiManager.RigSlotRT.sizeDelta.y) / 2;
+                itemDragHandlerTest4.SetItemDragPos(pos, size,
+                    _uiManager.RigSlotRT, null);
+                _inventoryManager.SetGearItem(_inventoryManager.ChestRigSlot, rig);
+                
+                break;
+        }
+    }
+
+    private void HandleOnAddItemToInventory(GearType inventoryType, Vector2 pos, InventoryItem item)
+    {
+        var itemDragHandlerInstance = Instantiate(itemDragHandlerPrefab);
+        Vector2 size = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * _uiManager.CellSize;
+        itemDragHandlerInstance.Init(item, this, _uiManager.transform);
+        
+        switch (inventoryType)
+        {
+            case GearType.ArmoredRig: 
+            case GearType.UnarmoredRig:
+                itemDragHandlerInstance.SetItemDragPos(pos, size, 
+                    _inventoryManager.RigInventory.ItemRT, _uiManager.RigInvenParent);
+                break;
+            case GearType.Backpack:
+                itemDragHandlerInstance.SetItemDragPos(pos, size, 
+                    _inventoryManager.BackpackInventory.ItemRT, _uiManager.BackpackInvenParent);
+                break;
+            case GearType.None:
+                //Unavailable 표시 -> UI Manager
                 break;
         }
     }
