@@ -28,7 +28,7 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private int itemHeight;
     [SerializeField] private Vector3 muzzlePosition;
     
-    public override string ItemID => itemID;
+    public override string ItemDataID => itemID;
     public override string ItemName => weaponName;
     public WeaponType WeaponType => weaponType;
     public AmmoCaliber AmmoCaliber => ammoCaliber;

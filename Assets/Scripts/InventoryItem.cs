@@ -6,7 +6,7 @@ public class InventoryItem
     private readonly IItemData _itemData;
     private RectTransform _slotRT;
 
-    public Guid Id { get; }
+    public Guid InstanceID { get; }
     public Vector2Int ItemCellCount => new(_itemData.ItemWidth, _itemData.ItemHeight);
 
     public IItemData ItemData => _itemData;
@@ -19,7 +19,8 @@ public class InventoryItem
     public InventoryItem(IItemData itemData) //new...Init
     {
         this._itemData = itemData;
-        Id = Guid.NewGuid();
+        InstanceID = Guid.NewGuid();
+        CurrentStackAmount = IsStackable ? 0 : 1; //Stackable 이면 0부터
         //초기화따로...? pickUp 아이템 따로?
     }
 

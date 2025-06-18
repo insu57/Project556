@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class BaseItemDataSO : ScriptableObject, IItemData
 {
-    public abstract string ItemID { get; }
+    public abstract string ItemDataID { get; }
     public abstract string ItemName { get; }
     public abstract Sprite ItemSprite { get; }
     public abstract Vector2 PickUpColliderOffset { get; }

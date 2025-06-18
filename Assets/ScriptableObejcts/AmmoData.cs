@@ -22,7 +22,7 @@ public class AmmoData : BaseItemDataSO
     public AmmoCategory AmmoCategory => ammoCategory;
     public GameObject BulletPrefab => bulletPrefab;
     
-    public override string ItemID => itemID;
+    public override string ItemDataID => itemID;
     public override string ItemName => itemName;
     public override Sprite ItemSprite => itemSprite;
     public override Vector2 PickUpColliderOffset => pickUpColliderOffset;

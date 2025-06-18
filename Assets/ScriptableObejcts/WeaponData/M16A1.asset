@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd2243bc440acbe4d82f740ce3722053, type: 3}
   m_Name: M16A1
   m_EditorClassIdentifier: 
-  itemID: 
+  itemID: ar_01
   weaponName: M16A1
   weaponType: 3
   ammoCaliber: 0

@@ -58,10 +58,6 @@ public class InventoryManager : MonoBehaviour
     private void Start()
     {
         //test
-        InventoryItem raidPackItem = new InventoryItem(raidPack01Test);
-        //SetGearItem(BackpackSlot, raidPackItem);
-        InventoryItem rig01TestItem = new InventoryItem(rig01Test);
-        //SetGearItem(ChestRigSlot, rig01TestItem);
         SetInventorySlot(crate01Test, GearType.None);
     }
     
@@ -98,8 +94,8 @@ public class InventoryManager : MonoBehaviour
     public void SetGearItem(CellData gearSlot, InventoryItem item)
     {
         //GearDict[gearSlot] = item; //아이템을 제거할 때는?
-        ItemDict[item.Id] = (item, gearSlot);
-        gearSlot.SetEmpty(false, item.Id);
+        ItemDict[item.InstanceID] = (item, gearSlot);
+        gearSlot.SetEmpty(false, item.InstanceID);
 
         GearData gearData;
         switch (item.GearType)
@@ -112,6 +108,7 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
         //장비 능력치, 무기 설정
+        //inventory -> player??
     }
 
     public void RemoveGearItem(CellData gearSlot, Guid itemID)

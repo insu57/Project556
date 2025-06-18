@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6081b0486af0a9c43af90081dd4bab44, type: 3}
   m_Name: ArmorVest01
   m_EditorClassIdentifier: 
-  itemID: 
+  itemID: body_armor_01
   itemName: NPP Korund-VM
   gearType: 2
   itemSprite: {fileID: 6204356872171817343, guid: 01f49a6374bc63845a6a9c8cab6efc5b, type: 3}

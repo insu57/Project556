@@ -3,7 +3,7 @@ using UnityEngine;
 public interface IItemData
 {
     //SO
-    public string ItemID { get; }
+    public string ItemDataID { get; }
     public string ItemName { get; }
     public Sprite ItemSprite { get; }
     public Vector2 PickUpColliderOffset { get; }

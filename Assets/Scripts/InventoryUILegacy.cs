@@ -231,7 +231,7 @@ public class InventoryUILegacy : MonoBehaviour
                 //아이템크기만큼 슬롯 체크
                 int slotIdx = GetSlotIndex(pos);
                 
-                if (slotIdx < 0 || (!_cellDataArray[slotIdx].IsEmpty && _cellDataArray[slotIdx].Id != dragItem.Id ))
+                if (slotIdx < 0 || (!_cellDataArray[slotIdx].IsEmpty && _cellDataArray[slotIdx].InstanceID != dragItem.InstanceID ))
                 {
                     
                     Debug.Log("unavailable! - Index: " + slotIdx);

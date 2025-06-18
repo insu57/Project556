@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
@@ -26,8 +27,9 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private Guid _id;
    
     private int _idx;
-    private Image _itemImage;
-    [SerializeField] private Image highlight;
+    [SerializeField] private Image itemImage;
+    [SerializeField] private Image backgroundImage;
+    [FormerlySerializedAs("highlight")] [SerializeField] private Image highlightImage;
     [SerializeField] private TMP_Text stackText;
     //private float _cellSize;
     
@@ -39,7 +41,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     {
         _itemRT = GetComponent<RectTransform>();
         _canvasGroup = GetComponent<CanvasGroup>();
-        _itemImage = GetComponent<Image>();
+        //itemImage = GetComponent<Image>();
     }
 
     private void OnEnable()
@@ -70,12 +72,12 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
   
         _defaultImageSize = new Vector2(_widthCell * cellSize, _heightCell * cellSize); //기본 크기
         _itemRT.sizeDelta = _defaultImageSize;
-        _itemImage.sprite = itemData.ItemSprite;
+        itemImage.sprite = itemData.ItemSprite;
 
-        _id = item.Id;
+        _id = item.InstanceID;
         _itemDraggingParent = uiParent;
         
-        
+        if(item.IsStackable) stackText.enabled = true; //Stack 표시용 TMP Text
     }
     public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
@@ -89,16 +91,22 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.sizeDelta = size;
         _slotImageSize = size;
         _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
+        Debug.Log(inventoryRT);
+    }
+
+    public void SetStackAmountText(int amount)
+    {
+        stackText.text = amount.ToString();
     }
     
     public void OnPointerEnter(PointerEventData eventData)
     {
-        highlight.enabled = true;
+        highlightImage.enabled = true;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        highlight.enabled = false;
+        highlightImage.enabled = false;
     }
     
     public void OnPointerDown(PointerEventData eventData)
@@ -107,8 +115,8 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _pointerDownPos = _itemRT.anchoredPosition;
         transform.SetParent(_itemDraggingParent); //Drag시 부모변경(RectMask때문에)
         
-        _itemRT.sizeDelta = _defaultImageSize; //사이즈 조정.. 어떻게?
-        
+        _itemRT.sizeDelta = _defaultImageSize; // 클릭 시 원래 아이템 사이즈로
+        backgroundImage.enabled = false; //배경 끄기
         OnPointerDownEvent?.Invoke(this, _id);
     }
 
@@ -134,7 +142,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         }
         
         OnEndDragEvent?.Invoke(this, globalMousePos, _id);
-        
+        backgroundImage.enabled = true; //배경 다시 키기
         _canvasGroup.blocksRaycasts = true;
     }
 
@@ -142,6 +150,6 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     {
         _itemRT.SetParent(_itemParentRT);
         _itemRT.anchoredPosition = _pointerDownPos;
-        _itemRT.sizeDelta = _slotImageSize;
+        _itemRT.sizeDelta = _slotImageSize; //현재 슬롯에 따라 크기 조절(GearSlot의 고정 이미지 사이즈 때문에)
     }
 }

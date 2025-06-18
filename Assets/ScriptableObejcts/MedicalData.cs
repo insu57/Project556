@@ -17,7 +17,7 @@ public class MedicalData : BaseItemDataSO
     [SerializeField] private bool isStackable = false;
     [SerializeField] private int maxStackAmount = 1;
     
-    public override string ItemID => itemID;
+    public override string ItemDataID => itemID;
     public override string ItemName => itemName;
     public int HealAmount => healAmount;
     //

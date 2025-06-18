@@ -10,8 +10,8 @@ public class GearData : BaseItemDataSO
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private Vector2 pickUpColliderOffset;
     [SerializeField] private Vector2 pickUpColliderSize;
-    [SerializeField] private int itemWidth;
-    [SerializeField] private int itemHeight;
+    [SerializeField] private int itemWidth = 1;
+    [SerializeField] private int itemHeight = 1;
    
     [SerializeField] private int slotWidth;
     [SerializeField] private int slotHeight;
@@ -21,7 +21,7 @@ public class GearData : BaseItemDataSO
     
     //[SerializeField] private bool isStackable = false;
     
-    public override string ItemID => itemID;
+    public override string ItemDataID => itemID;
     public override string ItemName => itemName;
     public override GearType GearType => gearType;
     public override Sprite ItemSprite => itemSprite;

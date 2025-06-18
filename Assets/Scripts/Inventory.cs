@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public record InventorySlotCheckResult()
+
+namespace System.Runtime.CompilerServices //c# 9.0 {init} 키워드 때문에
 {
-    
+    // internal 또는 public 상관없음
+    public static class IsExternalInit { }
 }
+
+
 
 public class Inventory: MonoBehaviour
 {
@@ -74,9 +78,18 @@ public class Inventory: MonoBehaviour
         
     }
     
-    //record 사용?
-    public (int firstIdx, Vector2 firstIdxPos, RectTransform mathSlotRT, SlotStatus status, Vector2 cellCount) 
-        CheckSlot(Vector2 mousePos, Vector2Int itemCellCount, Guid id)
+    //record 타입.(생성자와 프로퍼티 선언을 동시에, Positioning Record.
+    //init-only 프로퍼티 때문에 상단의 선언이 필요(IsExternalInit { })
+    public record InventorySlotCheckResult(
+        int FirstIdx, 
+        Vector2 FirstIdxPos,
+        RectTransform MatchSlotRT,
+        SlotStatus SlotStatus,
+        Vector2 CellCount,
+        Guid TargetCellItemID
+    );
+    
+    public InventorySlotCheckResult CheckSlot(Vector2 mousePos, Vector2Int itemCellCount, InventoryItem item)
     {
         foreach (var slotData in slotDataList)
         {
@@ -95,7 +108,7 @@ public class Inventory: MonoBehaviour
             var firstY = firstIdx / slotCount.x;
             
             var firstIdxPos = cells[firstIdx].CellRT.position; //아이템 첫번째 슬롯의 Position(World)
-            
+            var targetCellItemID = cells[firstIdx].InstanceID;
             //아이템 스택 검사...? id, 어떤 inven인지만 알면,,
             // targetInven에 뭐가 있는지...
             
@@ -117,20 +130,33 @@ public class Inventory: MonoBehaviour
                         {
                             overCell.y = firstY + itemCellCount.y - slotCount.y;
                         }
-                        return (-1, firstIdxPos, slotData.slotRT, 
-                            SlotStatus.Unavailable, itemCellCount - overCell);
+                        return new InventorySlotCheckResult(-1, firstIdxPos, slotData.slotRT, 
+                            SlotStatus.Unavailable, itemCellCount - overCell, Guid.Empty);
                         //넘어간 만큼 줄이기
                     }
-                    
-                    if (!cells[idx].IsEmpty && cells[idx].Id != id) //empty가 아닐 때, ID가 동일하면 available.
+
+                    //추가 검토 필요... max amount 등
+                    if (cells[idx].IsEmpty) continue; //Empty면 continue
+                    if (cells[idx].InstanceID == item.InstanceID) continue; //ID가 동일하면 (같은 아이템 인스턴스)
+                    if (item.IsStackable && item.ItemData.ItemDataID ==
+                        ItemDict[cells[idx].InstanceID].item.ItemData.ItemDataID) 
+                        //Stackable일 때 같은 아이템 데이터면 -> 개선점???
                     {
-                        return (-1, firstIdxPos, slotData.slotRT, SlotStatus.Unavailable, itemCellCount);
+                        continue;
                     }
+                    
+                    //위 조건에 걸리면 unavailable
+                    return new InventorySlotCheckResult(-1, firstIdxPos, slotData.slotRT, 
+                        SlotStatus.Unavailable, itemCellCount, Guid.Empty);
                 }
             }
-            return (firstIdx, firstIdxPos, slotData.slotRT, SlotStatus.Available, itemCellCount);
+            //조건에 문제가 없다면
+            return new InventorySlotCheckResult (firstIdx, firstIdxPos, slotData.slotRT, 
+                SlotStatus.Available, itemCellCount, targetCellItemID);
         }
-        return (-1, Vector2.zero, null, SlotStatus.None, itemCellCount); //No Match Slot!
+        //해당되는 SlotRT가 없다면 none.
+        return new InventorySlotCheckResult (-1, Vector2.zero, null, 
+            SlotStatus.None, itemCellCount, Guid.Empty); //No Match Slot!
     }
     
     private void GetFirstCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemCellCount , out int firstIdx)
@@ -186,12 +212,12 @@ public class Inventory: MonoBehaviour
                             for (int x = 0; x < itemCount.x; x++)
                             {
                                 var idx = firstIdx + x + y * slotCount.x;
-                                cells[idx].SetEmpty(false, item.Id);//Cell 채우기
+                                cells[idx].SetEmpty(false, item.InstanceID);//Cell 채우기
                             }
                         }
 
-                        ItemDict[item.Id] = (item, slotData.slotRT, firstIdx);
-                        Debug.Log(ItemDict[item.Id] + " id: " + item.Id);
+                        ItemDict[item.InstanceID] = (item, slotData.slotRT, firstIdx);
+                        Debug.Log(ItemDict[item.InstanceID] + " id: " + item.InstanceID);
                         var minPos = cells[firstIdx].CellRT.anchoredPosition;
                         var maxPos = cells[firstIdx + itemCount.x -1 + slotCount.x * (itemCount.y - 1)]
                             .MaxPos; //아이템 우하단의 인덱스(최대)
@@ -232,11 +258,12 @@ public class Inventory: MonoBehaviour
         ItemDict.Remove(id);
     }
 
+    //MoveItem -> 해당 Cell이 available 일 때만 호출
     public Vector2 MoveItem(InventoryItem item, int firstIdx, RectTransform targetSlot)
     {
         //아이템 이동
-        Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.Id}");
-        var id = item.Id;
+        Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.InstanceID}");
+        var id = item.InstanceID;
         ItemDict.Add(id, (item, targetSlot, firstIdx));
         
         var (cells, slotCount) = _slotDict[targetSlot];

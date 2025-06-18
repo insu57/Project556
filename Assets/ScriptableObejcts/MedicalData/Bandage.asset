@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93bf96cc84e8325499e058ff14765e57, type: 3}
   m_Name: Bandage
   m_EditorClassIdentifier: 
+  itemID: medical_health_01
   itemName: "\uBD95\uB300"
   healAmount: 30
   itemSprite: {fileID: 21300000, guid: f92d162190d5d644cad84ed3378ca43c, type: 3}
@@ -19,3 +20,5 @@ MonoBehaviour:
   pickUpColliderSize: {x: 0, y: 0}
   itemWidth: 1
   itemHeight: 1
+  isStackable: 0
+  maxStackAmount: 1

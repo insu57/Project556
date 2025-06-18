@@ -12,7 +12,7 @@ public class CellData
     //public Vector2 ImagePosition => CellRT.position + CellOffset;
     public Vector2 CenterPos => CellRT.anchoredPosition + new Vector2(CellRT.sizeDelta.x, -CellRT.sizeDelta.y) / 2;
     public Vector2 MaxPos => CellRT.anchoredPosition + new Vector2(CellRT.sizeDelta.x, -CellRT.sizeDelta.y);
-    public Guid Id { private set; get; }
+    public Guid InstanceID { private set; get; }
     public bool IsGearSlot { private set; get; }
     public GearType GearType { private set; get; }
 
@@ -20,7 +20,7 @@ public class CellData
     {
         IsEmpty = true;
         //CellRT = cellRT;
-        Id = Guid.Empty;
+        InstanceID = Guid.Empty;
         IsGearSlot = gearType != GearType.None;//none이면 일반 Cell
         GearType = gearType;
     }
@@ -33,6 +33,6 @@ public class CellData
     public void SetEmpty(bool isEmpty, Guid id)
     {
         IsEmpty = isEmpty;
-        Id = id;
+        InstanceID = id;
     }
 }

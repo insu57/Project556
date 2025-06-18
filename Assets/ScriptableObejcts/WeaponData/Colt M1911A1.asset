@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd2243bc440acbe4d82f740ce3722053, type: 3}
   m_Name: Colt M1911A1
   m_EditorClassIdentifier: 
+  itemID: pistol_01
   weaponName: M1911A1
   weaponType: 0
   ammoCaliber: 3

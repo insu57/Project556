@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6081b0486af0a9c43af90081dd4bab44, type: 3}
   m_Name: Backpack01
   m_EditorClassIdentifier: 
-  itemID: 
+  itemID: backpack_01
   itemName: "\uAD70\uC6A9\uBC30\uB0AD01"
   gearType: 1
   itemSprite: {fileID: 6013620646928456158, guid: e955b58657ea4aa4ba01f05402d3666e, type: 3}
