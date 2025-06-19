@@ -213,6 +213,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotDataList:
   - slotRT: {fileID: 3270350777214519499}
+    itemRT: {fileID: 1103497682456341225}
     cellCount: {x: 8, y: 8}
     isGearSlot: 0
     gearType: 0

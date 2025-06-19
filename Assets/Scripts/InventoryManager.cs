@@ -34,7 +34,8 @@ public class InventoryManager : MonoBehaviour
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
     public event Action<GameObject, GearType> OnSetInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분)
-    public event Action<GearType, Vector2, InventoryItem> OnAddItemToInventory; //인벤토리 타입, ItemPos, 아이템데이터
+    public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory; 
+    //인벤토리 타입, ItemPos, ItemRT(ItemDragHandler의 부모) ,아이템데이터
     
     //test
     [SerializeField] private GearData raidPack01Test;
@@ -129,25 +130,25 @@ public class InventoryManager : MonoBehaviour
         
         if (BackpackInventory)
         {
-            var (isAvailable, pos) = BackpackInventory.AddItem(item);
+            var (isAvailable, pos, itemRT) = BackpackInventory.AddItem(item);
             if (isAvailable)
             {
-                OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, item);
+                OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
                 return;
             }
         }
 
         if (RigInventory)
         {
-            var (isAvailable, pos) = RigInventory.AddItem(item);
+            var (isAvailable, pos, itemRT) = RigInventory.AddItem(item);
             if (isAvailable)
             {
-                OnAddItemToInventory?.Invoke(GearType.Backpack, pos, item);
+                OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT,item);
                 return;
             }
         }
         
-        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, item);
+        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null ,item);
         //unavailable 표시... -> UI?
     }
 }

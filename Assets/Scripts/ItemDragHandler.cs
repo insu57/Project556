@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -31,11 +32,13 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private Image backgroundImage;
     [FormerlySerializedAs("highlight")] [SerializeField] private Image highlightImage;
     [SerializeField] private TMP_Text stackText;
-    //private float _cellSize;
     
+    private InputAction _rotateItemAction;
+    private bool _isDragging;
     public event Action<ItemDragHandler, Guid> OnPointerDownEvent;
     public event Action<ItemDragHandler, Vector2, Guid> OnDragEvent;
-    public event Action<ItemDragHandler, Vector2, Guid> OnEndDragEvent;
+    public event Action<ItemDragHandler> OnEndDragEvent;
+    public event Action<ItemDragHandler> OnRotateItemEvent;
     
     private void Awake()
     {
@@ -46,21 +49,22 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     private void OnEnable()
     {
-        if (_inventoryUIPresenter)
-        {
-            _inventoryUIPresenter.InitItemDragHandler(this);
-        }
+        if (!_inventoryUIPresenter) return;
+        _inventoryUIPresenter.InitItemDragHandler(this);
+        _rotateItemAction.performed += OnRotateItemAction;
+        _rotateItemAction.Enable();
     }
 
     private void OnDisable()
     {
-        if (_inventoryUIPresenter)
-        {
-            _inventoryUIPresenter.OnDisableItemDragHandler(this);
-        }
+        if (!_inventoryUIPresenter) return;
+        _inventoryUIPresenter.OnDisableItemDragHandler(this);
+        _rotateItemAction.performed -= OnRotateItemAction;
+        _rotateItemAction.Disable();
     }
 
-    public void Init(InventoryItem item, InventoryUIPresenter presenter, Transform uiParent)
+    public void Init(InventoryItem item, InventoryUIPresenter presenter, InputAction itemRotateAction, 
+        Transform uiParent)
     {
         _inventoryUIPresenter = presenter;
         _inventoryUIPresenter.InitItemDragHandler(this);
@@ -78,6 +82,10 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemDraggingParent = uiParent;
         
         if(item.IsStackable) stackText.enabled = true; //Stack 표시용 TMP Text
+        
+        _rotateItemAction = itemRotateAction;
+        _rotateItemAction.performed += OnRotateItemAction;
+        _rotateItemAction.Enable();
     }
     public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
@@ -91,7 +99,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.sizeDelta = size;
         _slotImageSize = size;
         _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
-        Debug.Log(inventoryRT);
+        //Debug.Log(inventoryRT);
     }
 
     public void SetStackAmountText(int amount)
@@ -118,6 +126,8 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.sizeDelta = _defaultImageSize; // 클릭 시 원래 아이템 사이즈로
         backgroundImage.enabled = false; //배경 끄기
         OnPointerDownEvent?.Invoke(this, _id);
+        _isDragging = true;
+        Debug.Log("Started dragging, isDragging: " + _isDragging);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -141,11 +151,26 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
             _itemRT.position = globalMousePos; 
         }
         
-        OnEndDragEvent?.Invoke(this, globalMousePos, _id);
+        OnEndDragEvent?.Invoke(this);
         backgroundImage.enabled = true; //배경 다시 키기
         _canvasGroup.blocksRaycasts = true;
+        
+        _isDragging = false;
+        Debug.Log("Stopped dragging, isDragging: " + _isDragging);
     }
 
+    private void OnRotateItemAction(InputAction.CallbackContext context)
+    {
+        if (_isDragging)
+        {
+            Debug.Log("Rotate R");
+            //Rotate
+            //_itemRT.Rotate(new Vector3(0, 0, 90));
+            //Presenter에서?
+            OnRotateItemEvent?.Invoke(this);
+        }
+    }
+    
     public void ReturnItemDrag()
     {
         _itemRT.SetParent(_itemParentRT);

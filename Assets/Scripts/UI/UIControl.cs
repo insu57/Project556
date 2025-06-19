@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 public class UIControl : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class UIControl : MonoBehaviour
     
     private InputAction _closeAction;
     private InputAction _closeUIAction;
+
+    public InputAction ItemRotateAction {private set; get;}
     private void Awake()
     {
         _uiManager = GetComponent<UIManager>();
@@ -23,6 +26,7 @@ public class UIControl : MonoBehaviour
         var map = _playerInput.actions.FindActionMap("UI");
         _closeAction = map.FindAction("Close");
         _closeUIAction = map.FindAction("CloseUI");
+        ItemRotateAction = map.FindAction("Rotate");
         
         _closeAction.performed += OnClose;
         _closeUIAction.performed += OnCloseUI;

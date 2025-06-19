@@ -141,6 +141,18 @@ MonoBehaviour:
   backgroundImage: {fileID: 5333960683542170365}
   highlightImage: {fileID: 8871443052328100409}
   stackText: {fileID: 8034020973859007287}
+  rotateAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Rotate
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: a8ba1570-cbd7-4ef1-9a6f-9ec142c3ad4c
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
 --- !u!225 &5205590070267574599
 CanvasGroup:
   m_ObjectHideFlags: 0
