@@ -18,6 +18,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private Vector2 _pointerDownPos;
     private Vector2 _defaultImageSize;
     private Vector2 _slotImageSize;
+    private bool _isRotated;
     
     private CanvasGroup _canvasGroup;
 
@@ -77,6 +78,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _defaultImageSize = new Vector2(_widthCell * cellSize, _heightCell * cellSize); //기본 크기
         _itemRT.sizeDelta = _defaultImageSize;
         itemImage.sprite = itemData.ItemSprite;
+        itemImage.rectTransform.sizeDelta = _defaultImageSize;
 
         _id = item.InstanceID;
         _itemDraggingParent = uiParent;
@@ -98,8 +100,29 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.anchoredPosition = targetPos + offset; //위치보정
         _itemRT.sizeDelta = size;
         _slotImageSize = size;
+        backgroundImage.rectTransform.sizeDelta = Vector2.zero;
+        itemImage.rectTransform.sizeDelta = !_isRotated ? size : new Vector2(size.y, size.x); //회전된 상태면 size 반대로
         _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
-        //Debug.Log(inventoryRT);
+    }
+    
+    //뒤에 있는 Cell이 반응... -> 코드 변경?
+    //회전할 때 Available 관련 다시 계산...
+    public void SetItemDragRotate(bool isRotated, Vector2 size, bool isOriginGearSlot)
+    {
+        //제대로 안되는데...
+        _itemRT.sizeDelta = size;
+        _defaultImageSize = size;
+         //*GearSlot은 Rotate 불가.
+         //invenSlot은 저장...
+         if (!isOriginGearSlot)
+         {
+             _slotImageSize = size;
+         }
+        
+        backgroundImage.rectTransform.sizeDelta = Vector2.zero;
+        _isRotated = isRotated;
+        float rotateZ = !isRotated ? 0 : 90;
+        itemImage.rectTransform.rotation = Quaternion.Euler(0, 0, rotateZ);
     }
 
     public void SetStackAmountText(int amount)
@@ -125,6 +148,9 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         _itemRT.sizeDelta = _defaultImageSize; // 클릭 시 원래 아이템 사이즈로
         backgroundImage.enabled = false; //배경 끄기
+         itemImage.rectTransform.sizeDelta = !_isRotated ? _defaultImageSize 
+             :new Vector2(_defaultImageSize.y, _defaultImageSize.x);
+        
         OnPointerDownEvent?.Invoke(this, _id);
         _isDragging = true;
         Debug.Log("Started dragging, isDragging: " + _isDragging);
@@ -176,5 +202,8 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.SetParent(_itemParentRT);
         _itemRT.anchoredPosition = _pointerDownPos;
         _itemRT.sizeDelta = _slotImageSize; //현재 슬롯에 따라 크기 조절(GearSlot의 고정 이미지 사이즈 때문에)
+        
+        backgroundImage.rectTransform.sizeDelta = Vector2.zero;
+        itemImage.rectTransform.sizeDelta = _slotImageSize;
     }
 }

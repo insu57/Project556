@@ -24,22 +24,15 @@ public class Inventory: MonoBehaviour
         public GearType gearType;
     }
     
-    //public class Check
-    
     [SerializeField] private List<SlotData> slotDataList = new();
-    //[SerializeField, Space] private RectTransform itemRT;
     private RectTransform _inventoryRT;
     
     private readonly Dictionary<RectTransform, (List<CellData> cells, Vector2Int slotCount, RectTransform slotItemRT)> 
         _slotDict = new(); // Slot -> CellData List
-    //Slot 리팩터링????? class??? 단순하게 SlotRT, idx DragHandler에...
-    //드래그할 때 기존 슬롯 정보에 접근해서 비워야함....
 
     public float Width { private set; get; }
     public float Height { private set; get; }
     private float _cellSize;
-    //public RectTransform InventoryRT => _inventoryRT;
-    // public RectTransform ItemRT => itemRT; //아이템 배치 RectTransform
     public Dictionary<Guid, (InventoryItem item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
     //기존 슬롯->아이템 정보...
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
@@ -68,7 +61,7 @@ public class Inventory: MonoBehaviour
                 var child = slotRT.GetChild(i) as RectTransform;
                 CellData cellData = new CellData(GearType.None); //초기화
                 cellData.SetCellRT(child); //RT설정
-                cellDataList.Add(cellData);
+                cellDataList.Add(cellData); //리스트에 추가
             }
             _slotDict[slotRT] = (cellDataList, slotData.cellCount, slotData.itemRT); //Dictionary 설정
         }
@@ -81,7 +74,7 @@ public class Inventory: MonoBehaviour
     
     //record 타입.(생성자와 프로퍼티 선언을 동시에, Positioning Record.
     //init-only 프로퍼티 때문에 상단의 선언이 필요(IsExternalInit { })
-    public record InventorySlotCheckResult(
+    public record InventorySlotCheckResult( //CheckSlot의 result
         int FirstIdx, 
         Vector2 FirstIdxPos,
         RectTransform MatchSlotRT,
@@ -94,7 +87,7 @@ public class Inventory: MonoBehaviour
     {
         var itemCellCount = item.ItemCellCount;//아이템 칸 크기
         
-        foreach (var slotData in slotDataList)
+        foreach (var slotData in slotDataList) //slot 
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(slotData.slotRT, mousePos)) continue;
             var matchSlot = slotData.slotRT; //Mouse -> 인벤토리의 Slot
@@ -102,10 +95,10 @@ public class Inventory: MonoBehaviour
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(matchSlot, mousePos, null,
                     out var localPoint)) continue; //Slot Local point
             
-            var (cells, slotCount, _) = _slotDict[matchSlot];
+            var (cells, slotCount, _) = _slotDict[matchSlot]; //슬롯의 정보
             
             GetFirstCellIdx(localPoint, slotCount, itemCellCount, out var firstIdx);
-            //FirstIdx
+            //FirstIdx(해당 슬롯의 local Point로 아이템의 첫번째 인덱스(좌상단)
 
             if (firstIdx < 0) continue; //-1: SlotIdx out of bounds
             var firstX = firstIdx % slotCount.x;
@@ -115,8 +108,8 @@ public class Inventory: MonoBehaviour
             
             if (!cells[firstIdx].IsEmpty && item.IsStackable) //빈 상태가 아닐 때 stackable 아이템이라면
             {
-                var targetCellItemID = cells[firstIdx].InstanceID;
-                var targetCellItem = ItemDict[targetCellItemID];
+                var targetCellItemID = cells[firstIdx].InstanceID; //해당 Cell에 있는 아이템 ID
+                var targetCellItem = ItemDict[targetCellItemID]; 
                 
                 if (targetCellItem.item.ItemData.ItemDataID == item.ItemData.ItemDataID)//타겟 CellItem과 ItemDataID 비교
                 {
@@ -141,7 +134,7 @@ public class Inventory: MonoBehaviour
                 for (int x = 0; x < itemCellCount.x; x++)
                 {
                     var idx = firstIdx + x + y * slotCount.x;
-                    if (firstX + x >= slotCount.x || firstY + y >= slotCount.y) //out of bounds
+                    if (firstX + x >= slotCount.x || firstY + y >= slotCount.y) //out of bounds 슬롯을 벗어남
                     {
                         //Slot을 벗어난 아이템의 Cell을 계산
                         var overCell = Vector2Int.zero;
@@ -200,7 +193,7 @@ public class Inventory: MonoBehaviour
         Canvas.ForceUpdateCanvases();
         foreach (var slotData in slotDataList)
         {
-            var (cells, slotCount, slotItemRT) = _slotDict[slotData.slotRT];
+            var (cells, slotCount, slotItemRT) = _slotDict[slotData.slotRT]; //슬롯정보
             var itemCount = item.ItemCellCount;
 
             for (int h = 0; h < slotCount.y; h++)
@@ -270,33 +263,34 @@ public class Inventory: MonoBehaviour
             for (int x = 0; x < itemCount.x; x++)
             {
                 var idx = firstIdx + x + y * slotData.slotCount.x;
-                slotData.cells[idx].SetEmpty(true, id);
+                slotData.cells[idx].SetEmpty(true, id); //empty로 변경
             }
         }
-        ItemDict.Remove(id);
+        ItemDict.Remove(id); //Dict에서 제거
     }
 
     //MoveItem -> 해당 Cell이 available 일 때만 호출
-    public (Vector2 targetPos, RectTransform itemRT) MoveItem(InventoryItem item, int firstIdx, RectTransform targetSlot)
+    public (Vector2 targetPos, RectTransform itemRT) 
+        MoveItem(InventoryItem item, int firstIdx, RectTransform targetSlot)
     {
         //아이템 이동
         Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.InstanceID}");
         var id = item.InstanceID;
-        ItemDict.Add(id, (item, targetSlot, firstIdx));
+        ItemDict.Add(id, (item, targetSlot, firstIdx));//Dict에 추가
         
-        var (cells, slotCount, slotItemRT) = _slotDict[targetSlot];
+        var (cells, slotCount, slotItemRT) = _slotDict[targetSlot]; //slot정보
         var itemCount = item.ItemCellCount;
         for (int y = 0; y < itemCount.y; y++)
         {
             for (int x = 0; x < itemCount.x; x++)
             {
                 var idx = firstIdx + x + y * slotCount.x;
-                cells[idx].SetEmpty(false, id);
+                cells[idx].SetEmpty(false, id); //해당 Cell들을 isEmpty false로(id는 Drag(옮기기) 중인 아이템)
             }
         }
         var minPos = cells[firstIdx].CellRT.anchoredPosition;
         var maxPos = cells[firstIdx + itemCount.x - 1 + slotCount.x * (itemCount.y - 1)].MaxPos;
-        //버그있음...
+        // 아이템의 중앙 Pos
         return ((minPos + maxPos) / 2, slotItemRT);
     }
     
