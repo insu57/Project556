@@ -20,7 +20,7 @@ public class InventoryUIPresenter : MonoBehaviour
 
     [SerializeField] private ItemDragHandler itemDragHandlerPrefab; 
     private InventoryItem _currentDragItem; //현재 드래그 중인 아이템
-    private bool _rotatedOnClick;
+    private bool _rotatedOnClick; //클릭 시 회전 상태
     private bool _targetIsAvailable; //타겟 슬롯(Cell)이 유효한지?
     private bool _targetIsGearSlot; //타겟이 GearSlot인지
     private RectTransform _matchRT; //해당 Match Slot의 RectTransform
@@ -260,8 +260,9 @@ public class InventoryUIPresenter : MonoBehaviour
         else
         {
             var originInven = _invenMap[originInvenRT];
-            
-            originInven.RemoveItem(_currentDragItem.InstanceID);//기존 Inven에서 제거
+
+            bool hasRotated = _rotatedOnClick != _currentDragItem.IsRotated; //드래그 중에 회전했는지 체크
+            originInven.RemoveItem(_currentDragItem.InstanceID, hasRotated);//기존 Inven에서 제거
         }
 
         

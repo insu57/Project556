@@ -7,7 +7,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler, 
+    IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler
 {
     private RectTransform _itemRT;
     private RectTransform _itemParentRT;
@@ -31,7 +32,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private int _idx;
     [SerializeField] private Image itemImage;
     [SerializeField] private Image backgroundImage;
-    [FormerlySerializedAs("highlight")] [SerializeField] private Image highlightImage;
+    [SerializeField] private Image highlightImage;
     [SerializeField] private TMP_Text stackText;
     
     private InputAction _rotateItemAction;
@@ -101,28 +102,25 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemRT.sizeDelta = size;
         _slotImageSize = size;
         backgroundImage.rectTransform.sizeDelta = Vector2.zero;
+        
         itemImage.rectTransform.sizeDelta = !_isRotated ? size : new Vector2(size.y, size.x); //회전된 상태면 size 반대로
         _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
     }
     
-    //뒤에 있는 Cell이 반응... -> 코드 변경?
-    //회전할 때 Available 관련 다시 계산...
     public void SetItemDragRotate(bool isRotated, Vector2 size, bool isOriginGearSlot)
     {
-        //제대로 안되는데...
         _itemRT.sizeDelta = size;
-        _defaultImageSize = size;
-         //*GearSlot은 Rotate 불가.
-         //invenSlot은 저장...
-         if (!isOriginGearSlot)
+        _defaultImageSize = size; //아이템 크기와 기본 이미지 사이즈 변경.(가로세로가 바뀌기 때문에 갱신)
+         if (_inventoryRT) //회전할 때 원래 GearSlot이 아니면
          {
-             _slotImageSize = size;
+             _slotImageSize = size; //slot에서의 크기 변경(GearSlot은 Rotate가 안되기때문에 제외)
          }
         
-        backgroundImage.rectTransform.sizeDelta = Vector2.zero;
+        backgroundImage.rectTransform.sizeDelta = Vector2.zero; //stretch 이미지 갱신
+        
         _isRotated = isRotated;
         float rotateZ = !isRotated ? 0 : 90;
-        itemImage.rectTransform.rotation = Quaternion.Euler(0, 0, rotateZ);
+        itemImage.rectTransform.rotation = Quaternion.Euler(0, 0, rotateZ); 
     }
 
     public void SetStackAmountText(int amount)
@@ -148,14 +146,19 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         _itemRT.sizeDelta = _defaultImageSize; // 클릭 시 원래 아이템 사이즈로
         backgroundImage.enabled = false; //배경 끄기
-         itemImage.rectTransform.sizeDelta = !_isRotated ? _defaultImageSize 
+        
+        itemImage.rectTransform.sizeDelta = !_isRotated ? _defaultImageSize 
              :new Vector2(_defaultImageSize.y, _defaultImageSize.x);
         
         OnPointerDownEvent?.Invoke(this, _id);
         _isDragging = true;
-        Debug.Log("Started dragging, isDragging: " + _isDragging);
+        
     }
 
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        _canvasGroup.blocksRaycasts = true;
+    }
     public void OnDrag(PointerEventData eventData)
     {
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
@@ -179,31 +182,29 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         OnEndDragEvent?.Invoke(this);
         backgroundImage.enabled = true; //배경 다시 키기
+        
         _canvasGroup.blocksRaycasts = true;
         
         _isDragging = false;
-        Debug.Log("Stopped dragging, isDragging: " + _isDragging);
     }
 
     private void OnRotateItemAction(InputAction.CallbackContext context)
     {
         if (_isDragging)
         {
-            Debug.Log("Rotate R");
-            //Rotate
-            //_itemRT.Rotate(new Vector3(0, 0, 90));
-            //Presenter에서?
             OnRotateItemEvent?.Invoke(this);
         }
     }
     
-    public void ReturnItemDrag()
+    public void ReturnItemDrag() //회전된 상태 return -> 작음
     {
         _itemRT.SetParent(_itemParentRT);
         _itemRT.anchoredPosition = _pointerDownPos;
-        _itemRT.sizeDelta = _slotImageSize; //현재 슬롯에 따라 크기 조절(GearSlot의 고정 이미지 사이즈 때문에)
         
+        _itemRT.sizeDelta = _slotImageSize; //현재 슬롯에 따라 크기 조절(GearSlot의 고정 이미지 사이즈 때문에)
         backgroundImage.rectTransform.sizeDelta = Vector2.zero;
-        itemImage.rectTransform.sizeDelta = _slotImageSize;
+        
+        itemImage.rectTransform.sizeDelta = 
+            !_isRotated ? _slotImageSize : new Vector2(_slotImageSize.y, _slotImageSize.x);
     }
 }

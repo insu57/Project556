@@ -249,13 +249,17 @@ public class Inventory: MonoBehaviour
         return item;
     }
     
-    public void RemoveItem(Guid id)
+    public void RemoveItem(Guid id, bool hasRotated)
     {
         //아이템 제거
         Debug.Log($"Removing item {id}");
         var slotRT = ItemDict[id].slotRT; //아이템의 SlotRT
         var firstIdx = ItemDict[id].firstIdx; //아이템의 첫번째 인덱스
         var itemCount = ItemDict[id].item.ItemCellCount; //아이템 Cell개수
+        
+        if(hasRotated) //중간에 회전했다면 원래 상태에서의 Cell로
+            itemCount = new Vector2Int(ItemDict[id].item.ItemCellCount.y, ItemDict[id].item.ItemCellCount.x);
+        
         var slotData = _slotDict[slotRT];
 
         for (int y = 0; y < itemCount.y; y++)
@@ -264,7 +268,7 @@ public class Inventory: MonoBehaviour
             {
                 var idx = firstIdx + x + y * slotData.slotCount.x;
                 slotData.cells[idx].SetEmpty(true, id); //empty로 변경
-            }
+            } //회전된 아이템에서 버그... -> 들고있을때 회전 후 옮기기(회전 전 기준으로 비워야함....)
         }
         ItemDict.Remove(id); //Dict에서 제거
     }
