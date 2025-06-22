@@ -1,4 +1,5 @@
 using System;
+using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -22,26 +23,31 @@ public class UIControl : MonoBehaviour
     {
         _playerControl = playerControl;
         _playerInput = _playerControl.GetComponent<PlayerInput>();
-        
         var map = _playerInput.actions.FindActionMap("UI");
+        
         _closeAction = map.FindAction("Close");
         _closeUIAction = map.FindAction("CloseUI");
         ItemRotateAction = map.FindAction("Rotate");
+        var testAction = map.FindAction("Ctrl Test");
+        testAction.performed += OnTest;
         
         _closeAction.performed += OnClose;
         _closeUIAction.performed += OnCloseUI;
-        _closeAction.Enable();
-        _closeUIAction.Enable();
+        
+        //_playerInput.inputIsActive
     }
 
+    private void OnTest(InputAction.CallbackContext context)
+    {
+        Debug.Log("L Ctrl");
+    }
+    
     private void OnEnable()
     {
         if (_playerControl)
         {
             _closeAction.performed += OnClose;
             _closeUIAction.performed += OnCloseUI;
-            _closeAction.Enable();
-            _closeUIAction.Enable();
         }
     }
 
@@ -49,10 +55,9 @@ public class UIControl : MonoBehaviour
     {
         _closeAction.performed -= OnClose;
         _closeUIAction.performed -= OnCloseUI;
-        _closeAction.Disable();
-        _closeUIAction.Disable();
-    }
-
+    }   
+    
+    // 오류??? UI열기 버그
     public void OnOpenUI()
     {
         _uiManager.OpenPlayerUI(true);
@@ -60,17 +65,19 @@ public class UIControl : MonoBehaviour
         Debug.Log(_playerInput.currentActionMap);
     }
     
-    private void OnClose(InputAction.CallbackContext context)
+    private void OnClose(InputAction.CallbackContext context) //esc
     {
+        Debug.Log("OnClose: UI,Esc");
         _uiManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
-        Debug.Log("OnCloseUI");
+        
     }
 
     private void OnCloseUI(InputAction.CallbackContext context) //Tab key
     {
-        //
+        Debug.Log("OnCloseUI: UI,Tab");
         _uiManager.OpenPlayerUI(false);
+        _playerControl.BlockControl(false);
     }
 
     

@@ -761,6 +761,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Ctrl Test"",
+                    ""type"": ""Button"",
+                    ""id"": ""f59e9233-f932-4ce0-9cbb-194c02b1ac57"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -1214,6 +1223,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""action"": ""Rotate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""632f1120-3a3c-4a3a-90ba-df190e5a7527"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Ctrl Test"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -1311,6 +1331,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_UI_Close = m_UI.FindAction("Close", throwIfNotFound: true);
         m_UI_CloseUI = m_UI.FindAction("CloseUI", throwIfNotFound: true);
         m_UI_Rotate = m_UI.FindAction("Rotate", throwIfNotFound: true);
+        m_UI_CtrlTest = m_UI.FindAction("Ctrl Test", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
@@ -1633,6 +1654,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Close;
     private readonly InputAction m_UI_CloseUI;
     private readonly InputAction m_UI_Rotate;
+    private readonly InputAction m_UI_CtrlTest;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -1696,6 +1718,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "UI/Rotate".
         /// </summary>
         public InputAction @Rotate => m_Wrapper.m_UI_Rotate;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/CtrlTest".
+        /// </summary>
+        public InputAction @CtrlTest => m_Wrapper.m_UI_CtrlTest;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1761,6 +1787,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Rotate.started += instance.OnRotate;
             @Rotate.performed += instance.OnRotate;
             @Rotate.canceled += instance.OnRotate;
+            @CtrlTest.started += instance.OnCtrlTest;
+            @CtrlTest.performed += instance.OnCtrlTest;
+            @CtrlTest.canceled += instance.OnCtrlTest;
         }
 
         /// <summary>
@@ -1811,6 +1840,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Rotate.started -= instance.OnRotate;
             @Rotate.performed -= instance.OnRotate;
             @Rotate.canceled -= instance.OnRotate;
+            @CtrlTest.started -= instance.OnCtrlTest;
+            @CtrlTest.performed -= instance.OnCtrlTest;
+            @CtrlTest.canceled -= instance.OnCtrlTest;
         }
 
         /// <summary>
@@ -2106,5 +2138,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRotate(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Ctrl Test" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCtrlTest(InputAction.CallbackContext context);
     }
 }

@@ -44,8 +44,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     
     private void Awake()
     {
-        _itemRT = GetComponent<RectTransform>();
-        _canvasGroup = GetComponent<CanvasGroup>();
+        
         //itemImage = GetComponent<Image>();
     }
 
@@ -72,11 +71,18 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _inventoryUIPresenter.InitItemDragHandler(this);
         var cellSize = presenter.CellSize;
 
+        _itemRT = GetComponent<RectTransform>();
+        _canvasGroup = GetComponent<CanvasGroup>();
+        
         var itemData = item.ItemData; //CellCount
         _widthCell = itemData.ItemWidth;
         _heightCell = itemData.ItemHeight;
   
         _defaultImageSize = new Vector2(_widthCell * cellSize, _heightCell * cellSize); //기본 크기
+        if (!_itemRT)
+        {
+            Debug.Log("itemRT is null");
+        }
         _itemRT.sizeDelta = _defaultImageSize;
         itemImage.sprite = itemData.ItemSprite;
         itemImage.rectTransform.sizeDelta = _defaultImageSize;

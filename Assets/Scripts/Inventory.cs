@@ -40,11 +40,8 @@ public class Inventory: MonoBehaviour
     public void Init(float cellSize)
     {
         _cellSize = cellSize; //CellSize 개선... (UI/데이터 나누기...)
-    }
-    
-    private void Awake()
-    {
-        _inventoryRT = GetComponent<RectTransform>();
+        
+        TryGetComponent(out _inventoryRT);
         Width = _inventoryRT.rect.width;
         Height = _inventoryRT.rect.height;
 
@@ -65,6 +62,11 @@ public class Inventory: MonoBehaviour
             }
             _slotDict[slotRT] = (cellDataList, slotData.cellCount, slotData.itemRT); //Dictionary 설정
         }
+    }
+    
+    private void Awake()
+    {
+       
     }
 
     private void Start()

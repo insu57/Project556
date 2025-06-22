@@ -20,15 +20,13 @@ public class UIManager : MonoBehaviour
     [SerializeField, Space] private float cellSize = 50f;
     private float _panelSlotPadding; //slotSize * 3
     public float CellSize => cellSize;
-    //public Vector2 GearSlotSize => new Vector2(cellSize, cellSize) * 2;
-    //public Vector2 WeaponSlotSize => new Vector2(cellSize * 4, cellSize) * 2;
+
     [SerializeField] private Color availableColor;
     [SerializeField] private Color unavailableColor;
     
     [Header("Player Inventory")]
     [Header("Left Panel")]
     [SerializeField] private RectTransform leftPanel;
-    //[SerializeField] private Inventory leftInventory;
     [SerializeField] private RectTransform headwearSlot;
     [SerializeField] private RectTransform eyewearSlot;
     [SerializeField] private RectTransform bodyArmorSlot;
@@ -43,7 +41,6 @@ public class UIManager : MonoBehaviour
     
     [Header("Middle Panel")]
     [SerializeField] private RectTransform middlePanel;
-    //[SerializeField] private Inventory midInventory;
     [SerializeField] private RectTransform chestRigSlot;
     [SerializeField] private RectTransform chestRigParent;
     [SerializeField] private RectTransform rigInvenParent;
@@ -119,6 +116,7 @@ public class UIManager : MonoBehaviour
     public void OpenPlayerUI(bool isOpen) //PlayerUI
     {
         //
+        Debug.Log("OpenPlayerUI, isOpen: "  + isOpen);
         playerUI.SetActive(isOpen);
     }
     
