@@ -115,8 +115,6 @@ public class UIManager : MonoBehaviour
 
     public void OpenPlayerUI(bool isOpen) //PlayerUI
     {
-        //
-        Debug.Log("OpenPlayerUI, isOpen: "  + isOpen);
         playerUI.SetActive(isOpen);
     }
     
@@ -175,84 +173,72 @@ public class UIManager : MonoBehaviour
         }
         return (null,  false);
     }
-    
-    public Inventory SetRigSlot(GameObject rigInvenPrefab)
+
+    public Inventory SetInventorySlot(GameObject inventoryPrefab, GearType itemType, Guid instanceID)
     {
-        if (_rigSlotInstance)
-        {
-            Destroy(_rigSlotInstance);
-        }
+        //초기화...
 
-        if (rigInvenPrefab)
-        {
-            _rigSlotInstance = Instantiate(rigInvenPrefab, rigInvenParent);
-            Inventory inventory = _rigSlotInstance.GetComponent<Inventory>(); //다른방식?
-            float slotPrefabHeight = inventory.Height;
-            rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-            if (slotPrefabHeight > minMiddlePanelItemHeight)
-            {
-                chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
-            }
-            else
-            {
-                chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
-            }
-
-            return inventory;
-        }
-        return null;
-    }
-    public Inventory SetBackpackSlot(GameObject backpackInvenPrefab)
-    {
-        if (_backpackSlotInstance)
-        {
-            Destroy(_backpackSlotInstance);
-        }
-
-        if (backpackInvenPrefab)
-        {
-            _backpackSlotInstance = Instantiate(backpackInvenPrefab, packInvenParent);
-            Inventory inventory = _backpackSlotInstance.GetComponent<Inventory>();
-            float slotPrefabHeight = inventory.Height;
-            packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-            if (slotPrefabHeight > minMiddlePanelItemHeight)
-            {
-                backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
-            }
-            else
-            {
-                backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
-            }
+        if (!inventoryPrefab) return null;
+        
+        Inventory inventory = null;
+        float slotPrefabHeight;
             
-            return inventory;
-        }
-        return null;
-    }
-
-    public Inventory SetLootSlot(GameObject lootInventoryPrefab)
-    {
-        if (_lootSlotInstance)
+        switch (itemType)
         {
-            Destroy(_lootSlotInstance); //오브젝트 풀링처럼 관리? (한 스테이지에서는 루팅 인벤토리관련 메모리에?)
+            case GearType.ArmoredRig:
+            case GearType.UnarmoredRig: 
+                _rigSlotInstance = Instantiate(inventoryPrefab, rigInvenParent);
+                _rigSlotInstance.TryGetComponent(out inventory);
+                inventory.Init(CellSize, instanceID);
+                slotPrefabHeight = inventory.Height;
+                    
+                rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
+                if (slotPrefabHeight > minMiddlePanelItemHeight)
+                {
+                    chestRigParent.sizeDelta = 
+                        new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+                }
+                else
+                {
+                    chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
+                }
+                break;
+            case GearType.Backpack:
+                _backpackSlotInstance = Instantiate(inventoryPrefab, packInvenParent);
+                _backpackSlotInstance.TryGetComponent(out inventory);
+                inventory.Init(CellSize, instanceID);
+                slotPrefabHeight = inventory.Height;
+                    
+                packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
+                if (slotPrefabHeight > minMiddlePanelItemHeight)
+                {
+                    backpackParent.sizeDelta = 
+                        new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+                }
+                else
+                {
+                    backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
+                }
+                break;
+            case GearType.None:
+                _lootSlotInstance = Instantiate(inventoryPrefab, lootSlotParent);
+                _lootSlotInstance.TryGetComponent(out inventory);
+                inventory.Init(CellSize, instanceID);
+                slotPrefabHeight = inventory.Height + _panelSlotPadding;
+                    
+                lootSlotParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
+                if (slotPrefabHeight > minLootSlotHeight)
+                {
+                    lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
+                }
+                else
+                {
+                    lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
+                }
+                break;
         }
-
-        if (lootInventoryPrefab)
-        {
-            _lootSlotInstance = Instantiate(lootInventoryPrefab, lootSlotParent);
-            Inventory inventory = _lootSlotInstance.GetComponent<Inventory>();
-            float slotPrefabHeight = inventory.Height + _panelSlotPadding;
-            lootSlotParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-            if (slotPrefabHeight > minLootSlotHeight)
-            {
-                lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
-            }
-            else
-            {
-                lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
-            }
-            return inventory;
-        }
-        return null;
+        return inventory;
     }
+    
     
 }

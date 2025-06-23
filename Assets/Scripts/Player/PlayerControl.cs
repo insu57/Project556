@@ -50,8 +50,8 @@ namespace Player
    
       private void Awake()
       {
-         _playerManager = GetComponent<PlayerManager>();
-         _rigidbody = GetComponent<Rigidbody2D>();
+         TryGetComponent(out _playerManager);
+         TryGetComponent(out _rigidbody);
       
          _playerInput = GetComponent<PlayerInput>(); //PlayerInput - Player Action Map
          _playerInput.actions.Disable();
@@ -77,7 +77,7 @@ namespace Player
          _climbMask = LayerMask.GetMask("Climbing");
          
          _playerInput.SwitchCurrentActionMap("Player");
-         //Project-Wide Actions 비활성? UI Input Module 사용?
+         //Project-Wide Actions 비활성..., UI Input Module 사용?
       }
 
       private void OnEnable()
@@ -225,7 +225,6 @@ namespace Player
 
       public void BlockControl(bool isBlock)
       {
-         Debug.Log("BlockControl, isBlock: " + isBlock);
          _canRotateArm = !isBlock; //팔 회전 - block상태면 false
          if (isBlock) //ActionMap 교체로 캐릭터 컨트롤 제한
          {
@@ -235,12 +234,10 @@ namespace Player
          {
             _playerInput.SwitchCurrentActionMap("Player");
          }
-         Debug.Log("PlayerInput: "+_playerInput);
       }
    
       private void OnOpenUI(InputAction.CallbackContext context) //플레이어 정보(인벤토리 창), Default Tab키
       {
-         Debug.Log("OnOpenUI - Tab");
          //_openUIAction.Reset();
          BlockControl(true); //컨트롤 입력 제한
          _uiControl.OnOpenUI();

@@ -11,6 +11,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private SpriteRenderer twoHandSprite;
     [SerializeField] private Transform twoHandMuzzleTransform;
     
+    private Camera _mainCamera;
     private UIManager _uiManager;
     private PlayerWeapon _playerWeapon;
     private PlayerAnimation _playerAnimation;
@@ -25,6 +26,7 @@ public class PlayerManager : MonoBehaviour
         _uiManager = FindFirstObjectByType<UIManager>();
         _playerAnimation = GetComponent<PlayerAnimation>();
         _playerWeapon = GetComponent<PlayerWeapon>();
+        _mainCamera = Camera.main;
         //_inventoryManager = GetComponent<InventoryManager>();
         //_inventoryManager.Init();
         
@@ -95,7 +97,7 @@ public class PlayerManager : MonoBehaviour
         {
             //pick up ui
             CanItemInteract = true;
-            Vector2 pos = Camera.main.WorldToScreenPoint(other.transform.position);
+            Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
             
             _uiManager.ShowItemPickup(true, pos); //이벤트로 수정 예정
             

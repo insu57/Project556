@@ -15,7 +15,7 @@ public class InventoryItem
     public int MaxStackAmount => _itemData.MaxStackAmount;
     public int CurrentStackAmount { get; private set; }
     public bool IsRotated { get; private set; }
-    //private Inventory _itemInventory;
+    public Inventory ItemInventory {get; private set;}
     
     public InventoryItem(IItemData itemData) //new...Init
     {
@@ -26,6 +26,12 @@ public class InventoryItem
         //초기화따로...? pickUp 아이템 따로?
     }
 
+    public void SetItemInventory(Inventory itemInventory)
+    {
+        if(InstanceID != itemInventory.ItemInstanceID) return;
+        ItemInventory = itemInventory;
+    }
+    
     public void AddStackAmount(int stackAmount)
     {
         CurrentStackAmount += stackAmount;

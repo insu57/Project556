@@ -10,56 +10,42 @@ public class InventoryManager : MonoBehaviour
 {
     //Left Panel
     private InventoryItem _headwearData;
-    public CellData HeadwearSlot { get; } = new(GearType.HeadWear);
+    public CellData HeadwearSlot { get; } = new(GearType.HeadWear, Vector2.zero);
     private InventoryItem _eyewearData;
-    public CellData EyewearSlot { get; } = new(GearType.EyeWear);
+    public CellData EyewearSlot { get; } = new(GearType.EyeWear, Vector2.zero);
     private InventoryItem _bodyArmorData;
-    public CellData BodyArmorSlot { get; } = new(GearType.BodyArmor);
+    public CellData BodyArmorSlot { get; } = new(GearType.BodyArmor, Vector2.zero);
     private InventoryItem _primaryWeaponData;
-    public CellData PrimaryWeaponSlot { get; } = new(GearType.Weapon);
+    public CellData PrimaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
     private InventoryItem _secondaryWeaponData;
-    public CellData SecondaryWeaponSlot { get; } = new(GearType.Weapon);
+    public CellData SecondaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
 
     //Middle Panel
     private InventoryItem _chestRigData;
-    public CellData ChestRigSlot { get; } = new(GearType.ArmoredRig);
+    public CellData ChestRigSlot { get; } = new(GearType.ArmoredRig, Vector2.zero);
+    public CellData[] PocketSlots { get; private set; } = new CellData[4];
     private InventoryItem _backpackData;
-    public CellData BackpackSlot { get; } = new(GearType.Backpack);
+    public CellData BackpackSlot { get; } = new(GearType.Backpack, Vector2.zero);
     public Inventory BackpackInventory { get; private set; }
     public Inventory RigInventory { get; private set; }
 
     //Right Panel
     public Inventory LootInventory { get; private set; }
-
-    public CellData[] PocketSlots { get; private set; } = new CellData[4];
+    
+    
+    
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
-    public event Action<GameObject, GearType> OnSetInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분)
+    public event Action<GameObject, InventoryItem> OnSetInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분)
     public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory; 
     //인벤토리 타입, ItemPos, ItemRT(ItemDragHandler의 부모) ,아이템데이터
-    
-    //test
-    [SerializeField] private GearData raidPack01Test;
-    [SerializeField] private GearData rig01Test;
-    [SerializeField] private GameObject crate01Test;
-    [SerializeField] private BaseItemDataSO pistol1Test;
-    [SerializeField] private BaseItemDataSO bandageTest;
-    [SerializeField] private ItemDragHandler itemDragger01;
-    public InventoryItem PistolTest { get; private set; }
 
     private void Awake()
     {
         for (int i = 0; i < 4; i++) //PocketSlot 4
         {
-            PocketSlots[i] = new CellData(GearType.None);
+            PocketSlots[i] = new CellData(GearType.None, Vector2.zero);
         }
         
-        PistolTest = new InventoryItem(pistol1Test);
-    }
-
-    private void Start()
-    {
-        //test
-        SetInventorySlot(crate01Test, GearType.None);
     }
     
     public void Init()
@@ -69,9 +55,9 @@ public class InventoryManager : MonoBehaviour
 
     //Presenter 이벤트 처리...
     
-    private void SetInventorySlot(GameObject inventoryPrefab, GearType gearType)
+    private void SetInventorySlot(GameObject inventoryPrefab, InventoryItem item)
     {
-        OnSetInventory?.Invoke(inventoryPrefab, gearType); //인벤토리 프리팹 생성/초기화
+        OnSetInventory?.Invoke(inventoryPrefab, item); //인벤토리 프리팹 생성/초기화
     }
 
     public void SetInventoryData(Inventory inventory, GearType gearType)
@@ -94,7 +80,6 @@ public class InventoryManager : MonoBehaviour
 
     public void SetGearItem(CellData gearSlot, InventoryItem item)
     {
-        //GearDict[gearSlot] = item; //아이템을 제거할 때는?
         ItemDict[item.InstanceID] = (item, gearSlot);
         gearSlot.SetEmpty(false, item.InstanceID);
 
@@ -105,7 +90,7 @@ public class InventoryManager : MonoBehaviour
             case GearType.UnarmoredRig:
             case GearType.Backpack:
                 gearData = item.ItemData as GearData;
-                if(gearData) if (gearData) SetInventorySlot(gearData.SlotPrefab, item.GearType);
+                if(gearData) SetInventorySlot(gearData.SlotPrefab, item);
                 break;
         }
         //장비 능력치, 무기 설정

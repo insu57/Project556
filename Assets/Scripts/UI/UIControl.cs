@@ -57,17 +57,14 @@ public class UIControl : MonoBehaviour
         _closeUIAction.performed -= OnCloseUI;
     }   
     
-    // 오류??? UI열기 버그
+    //개선?
     public void OnOpenUI()
     {
         _uiManager.OpenPlayerUI(true);
-        Debug.Log("OnOpenUI - UIControl");
-        Debug.Log(_playerInput.currentActionMap);
     }
     
     private void OnClose(InputAction.CallbackContext context) //esc
     {
-        Debug.Log("OnClose: UI,Esc");
         _uiManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
         
@@ -75,7 +72,6 @@ public class UIControl : MonoBehaviour
 
     private void OnCloseUI(InputAction.CallbackContext context) //Tab key
     {
-        Debug.Log("OnCloseUI: UI,Tab");
         _uiManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
     }
