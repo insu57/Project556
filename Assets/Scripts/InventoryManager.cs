@@ -35,7 +35,8 @@ public class InventoryManager : MonoBehaviour
     
     
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
-    public event Action<GameObject, InventoryItem> OnSetInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분)
+    public event Action<GameObject, InventoryItem> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
+    public event Action<InventoryItem> OnShowInventory;
     public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory; 
     //인벤토리 타입, ItemPos, ItemRT(ItemDragHandler의 부모) ,아이템데이터
 
@@ -57,7 +58,7 @@ public class InventoryManager : MonoBehaviour
     
     private void SetInventorySlot(GameObject inventoryPrefab, InventoryItem item)
     {
-        OnSetInventory?.Invoke(inventoryPrefab, item); //인벤토리 프리팹 생성/초기화
+        OnInitInventory?.Invoke(inventoryPrefab, item); //인벤토리 프리팹 생성/초기화
     }
 
     public void SetInventoryData(Inventory inventory, GearType gearType)
@@ -89,8 +90,15 @@ public class InventoryManager : MonoBehaviour
             case GearType.ArmoredRig:
             case GearType.UnarmoredRig:
             case GearType.Backpack:
+                if (item.ItemInventory)
+                {
+                    OnShowInventory?.Invoke(item);
+                    return;
+                }
                 gearData = item.ItemData as GearData;
-                if(gearData) SetInventorySlot(gearData.SlotPrefab, item);
+                if(gearData) OnInitInventory?.Invoke(gearData.SlotPrefab, item); 
+                //SetInventorySlot(gearData.SlotPrefab, item);
+                //인벤토리 초기화 여부... 어떻게?
                 break;
         }
         //장비 능력치, 무기 설정
@@ -99,9 +107,20 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveGearItem(CellData gearSlot, Guid itemID)
     {
+        
+        var gearType = ItemDict[itemID].item.GearType;
+        Debug.Log($"Removing item : {ItemDict[itemID].item.ItemData.ItemName}, {itemID}");
+        if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack)
+        {
+            var inventory = ItemDict[itemID].item.ItemInventory;
+            inventory.gameObject.SetActive(false); //비활성
+        }
+        
         ItemDict.Remove(itemID);
-        gearSlot.SetEmpty(true, itemID);
+        gearSlot.SetEmpty(true, Guid.Empty);
         //Inventory있는 경우...처리
+        //리그, 가방 -> 무조건 있음... 단순 비활성?
+        
         //장비 능력치 등 처리
     }
 

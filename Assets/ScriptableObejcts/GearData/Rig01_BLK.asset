@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6081b0486af0a9c43af90081dd4bab44, type: 3}
+  m_Name: Rig01_BLK
+  m_EditorClassIdentifier: 
+  itemID: unarmored_rig_01
+  itemName: Mil Tactical Rig
+  gearType: 4
+  itemSprite: {fileID: 6711170157627041271, guid: 6427b476737c63148a95a020bddc45f6, type: 3}
+  pickUpColliderOffset: {x: 0, y: 0}
+  pickUpColliderSize: {x: 0, y: 0}
+  itemWidth: 3
+  itemHeight: 2
+  slotWidth: 0
+  slotHeight: 0
+  slotPrefab: {fileID: 6727324567785916444, guid: df611c2ee5c65b04ab1dc07e754040ce, type: 3}
+  isPartitioned: 1

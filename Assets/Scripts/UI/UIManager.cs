@@ -174,22 +174,34 @@ public class UIManager : MonoBehaviour
         return (null,  false);
     }
 
-    public Inventory SetInventorySlot(GameObject inventoryPrefab, GearType itemType, Guid instanceID)
+    //변형...
+    public Inventory SetInventorySlot(GameObject inventoryGO, GearType itemType, Guid instanceID, bool isInit)
     {
         //초기화...
 
-        if (!inventoryPrefab) return null;
+        if (!inventoryGO) return null;
         
         Inventory inventory = null;
         float slotPrefabHeight;
-            
+        
         switch (itemType)
         {
             case GearType.ArmoredRig:
-            case GearType.UnarmoredRig: 
-                _rigSlotInstance = Instantiate(inventoryPrefab, rigInvenParent);
-                _rigSlotInstance.TryGetComponent(out inventory);
-                inventory.Init(CellSize, instanceID);
+            case GearType.UnarmoredRig:
+                if (isInit)
+                {
+                    _rigSlotInstance = Instantiate(inventoryGO, rigInvenParent);
+                    _rigSlotInstance.TryGetComponent(out inventory);
+                    inventory.Init(CellSize, instanceID);
+                }
+                else
+                {
+                    _rigSlotInstance = inventoryGO;
+                    _rigSlotInstance.TryGetComponent(out inventory);
+                    _rigSlotInstance.SetActive(true);
+                    _rigSlotInstance.transform.SetParent(rigInvenParent);
+                }
+                
                 slotPrefabHeight = inventory.Height;
                     
                 rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
@@ -204,7 +216,7 @@ public class UIManager : MonoBehaviour
                 }
                 break;
             case GearType.Backpack:
-                _backpackSlotInstance = Instantiate(inventoryPrefab, packInvenParent);
+                _backpackSlotInstance = Instantiate(inventoryGO, packInvenParent);
                 _backpackSlotInstance.TryGetComponent(out inventory);
                 inventory.Init(CellSize, instanceID);
                 slotPrefabHeight = inventory.Height;
@@ -221,7 +233,7 @@ public class UIManager : MonoBehaviour
                 }
                 break;
             case GearType.None:
-                _lootSlotInstance = Instantiate(inventoryPrefab, lootSlotParent);
+                _lootSlotInstance = Instantiate(inventoryGO, lootSlotParent);
                 _lootSlotInstance.TryGetComponent(out inventory);
                 inventory.Init(CellSize, instanceID);
                 slotPrefabHeight = inventory.Height + _panelSlotPadding;

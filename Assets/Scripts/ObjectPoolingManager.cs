@@ -14,8 +14,9 @@ public class ObjectPoolingManager : MonoBehaviour
         public int initialSize;
         public int maxSize;
     }
-    [SerializeField] private BulletPoolSetting[] bulletPoolSettings;
-    private readonly Dictionary<AmmoCategory, ObjectPool<Bullet>> _bulletPool = new Dictionary<AmmoCategory, ObjectPool<Bullet>>();
+    [SerializeField] private BulletPoolSetting[] bulletPoolSettings; //추후변경...
+    private readonly Dictionary<AmmoCategory, ObjectPool<Bullet>> _bulletPool = new();
+    //ItemDragHandler -> 오브젝트 풀링 관리...
     private void Start()
     {
         InitBulletPools();
