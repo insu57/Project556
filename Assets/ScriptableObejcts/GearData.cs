@@ -8,7 +8,6 @@ public class GearData : BaseItemDataSO
     [SerializeField] private GearType gearType;
     
     [SerializeField] private Sprite itemSprite;
-    [SerializeField] private Vector2 pickUpColliderOffset;
     [SerializeField] private Vector2 pickUpColliderSize;
     [SerializeField] private int itemWidth = 1;
     [SerializeField] private int itemHeight = 1;
@@ -25,7 +24,6 @@ public class GearData : BaseItemDataSO
     public override string ItemName => itemName;
     public override GearType GearType => gearType;
     public override Sprite ItemSprite => itemSprite;
-    public override Vector2 PickUpColliderOffset => pickUpColliderOffset;
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;

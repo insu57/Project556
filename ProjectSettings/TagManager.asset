@@ -9,6 +9,7 @@ TagManager:
   - Bullet
   - Item
   - Climbing
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -58,8 +59,14 @@ TagManager:
   - name: Character
     uniqueID: 3624751437
     locked: 0
+  - name: Projectile
+    uniqueID: 790381519
+    locked: 0
   - name: Item
     uniqueID: 665260857
+    locked: 0
+  - name: Effect
+    uniqueID: 2584171807
     locked: 0
   m_RenderingLayers:
   - Default

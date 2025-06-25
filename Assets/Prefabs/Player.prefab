@@ -713,13 +713,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1242060514799690636}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.007440194, y: -0.004577352, z: -0.00078558904, w: 0.99996156}
-  m_LocalPosition: {x: -0.56452763, y: -0.039778855, z: -0.0037654242}
+  m_LocalRotation: {x: 0.002456578, y: -0.008380502, z: 0.6694074, w: 0.7428443}
+  m_LocalPosition: {x: 0.022, y: -0.394, z: -0.006}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4543722082484327334}
-  - {fileID: 400114863970099428}
   m_Father: {fileID: 8227170365004224605}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 60}
 --- !u!1 &1282097587625371972
@@ -1488,12 +1487,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3041560861983266539}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: 9.3132246e-10, z: -0.000000065654596, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6675477042620622441}
+  m_Father: {fileID: 4543722082484327334}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3101857713131088898
 GameObject:
@@ -3966,7 +3965,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upperAnimator: {fileID: 6411596332340496012}
   lowerAnimator: {fileID: 5517906110973613965}
-  test: 0
   unarmedController:
     upperController: {fileID: 22100000, guid: 60fd4ae07fde67347987619b9e4e26cd, type: 2}
     lowerController: {fileID: 22100000, guid: c99445c733c8adc44bbbda173f370d22, type: 2}
@@ -4909,7 +4907,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 400114863970099428}
   m_Father: {fileID: 6675477042620622441}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7509388812552137820
@@ -5481,8 +5480,8 @@ SortingGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8957759039995085862}
   m_Enabled: 1
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -670215859
+  m_SortingLayer: 4
   m_SortingOrder: 5
   m_SortAtRoot: 0
 --- !u!95 &6411596332340496012

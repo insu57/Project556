@@ -22,11 +22,11 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private float bulletSpeed; //Bullet에 따로?
     
     [SerializeField] private Sprite itemSprite;
-    [SerializeField] private Vector2 pickUpColliderOffset;
     [SerializeField] private Vector2 pickUpColliderSize;
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
     [SerializeField] private Vector3 muzzlePosition;
+    [SerializeField] private WeaponSetup weaponSetup;
     
     public override string ItemDataID => itemID;
     public override string ItemName => weaponName;
@@ -42,12 +42,11 @@ public class WeaponData : BaseItemDataSO
     [ShowInInspector] private float RPM => 1 / FireRate * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
 
     public override Sprite ItemSprite => itemSprite;
-    public override Vector2 PickUpColliderOffset => pickUpColliderOffset;
     public override Vector2 PickUpColliderSize => pickUpColliderSize;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.Weapon;
-    public Vector3 MuzzlePosition => muzzlePosition;
+    public Vector3 MuzzlePosition => weaponSetup.MuzzleOffset;
     public override bool IsStackable => false;
     public override int MaxStackAmount => 1;
 }
