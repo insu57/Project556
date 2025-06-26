@@ -20,17 +20,18 @@ public class PlayerManager : MonoBehaviour
     
     private int _currentHealth;
     public bool CanItemInteract { get; private set; }
+    private ItemPickUp _currentItemPickUp;
     
     private void Awake()
     {
         _uiManager = FindFirstObjectByType<UIManager>();
-        _playerAnimation = GetComponent<PlayerAnimation>();
-        _playerWeapon = GetComponent<PlayerWeapon>();
-        _mainCamera = Camera.main;
-        //_inventoryManager = GetComponent<InventoryManager>();
-        //_inventoryManager.Init();
+        //_playerAnimation = GetComponent<PlayerAnimation>();
+        TryGetComponent(out _playerAnimation);
+        //_playerWeapon = GetComponent<PlayerWeapon>();
+        TryGetComponent(out _playerWeapon);
         
-        //_inventoryUIPresenter = new InventoryUIPresenter(_inventoryManager, _uiManager);
+        _mainCamera = Camera.main;
+        _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
         
     }
 
@@ -88,6 +89,7 @@ public class PlayerManager : MonoBehaviour
 
     public void ScrollItemPickup(float y)
     {
+        //
         _uiManager.ScrollItemPickup(y);//ItemPickup UI 스크롤(획득/장착 등...)
     }
     
@@ -100,6 +102,13 @@ public class PlayerManager : MonoBehaviour
             Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
             
             _uiManager.ShowItemPickup(true, pos); //이벤트로 수정 예정
+            
+            
+            other.TryGetComponent<ItemPickUp>(out var itemPickUp);
+            _currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
+            //아이템 타입에 따라
+            //
+            
             
             return;//임시 -> 인벤토리(가방)에 넣기(상호작용 키 누르면)
             ItemPickUp newItem = other.GetComponent<ItemPickUp>();
@@ -122,5 +131,10 @@ public class PlayerManager : MonoBehaviour
             CanItemInteract = false;
             _uiManager.ShowItemPickup(false, Vector2.zero);
         }
+    }
+
+    public void GetFieldItem()
+    {
+        
     }
 }

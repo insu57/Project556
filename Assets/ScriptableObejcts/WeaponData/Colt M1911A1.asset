@@ -24,8 +24,7 @@ MonoBehaviour:
   accuracy: 70
   bulletSpeed: 10
   itemSprite: {fileID: 3612897601756222204, guid: 007f4cb0b2211ac4088450706eb81205, type: 3}
-  pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0.5, y: 0.4}
   itemWidth: 2
   itemHeight: 1
-  muzzlePosition: {x: -0.254, y: 0.056, z: 0}
+  weaponSetup: {fileID: 3063553813133086745, guid: b7c7655962c7aa14ea26b98b21f3d789, type: 3}

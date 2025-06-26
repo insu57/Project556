@@ -21,6 +21,7 @@ namespace Player
       private InputAction _jumpAction;
       private InputAction _shootAction;
       private InputAction _reloadAction;
+      private InputAction _interactAction;
       private InputAction _openUIAction;
       private InputAction _openSettingAction;
       private InputAction _scrollWheelAction;
@@ -60,6 +61,7 @@ namespace Player
          _jumpAction = playerMap.FindAction("Jump");
          _shootAction = playerMap.FindAction("Shoot");
          _reloadAction = playerMap.FindAction("Reload");
+         _interactAction = playerMap.FindAction("Interact");
          _openUIAction = playerMap.FindAction("OpenUI");
          _openSettingAction = playerMap.FindAction("OpenSetting");
          _scrollWheelAction = playerMap.FindAction("ScrollWheel");
@@ -88,6 +90,7 @@ namespace Player
          _shootAction.started += OnShoot;
          _shootAction.canceled += OnShoot;
          _reloadAction.performed += OnReload;
+         _interactAction.performed += OnInteract;
          _openUIAction.performed += OnOpenUI;
          _openSettingAction.performed += OnOpenSetting;
          _scrollWheelAction.performed += OnScrollWheel;
@@ -101,6 +104,7 @@ namespace Player
          _shootAction.started -= OnShoot;
          _shootAction.canceled -= OnShoot;
          _reloadAction.performed -= OnReload;
+         _interactAction.performed -= OnInteract;
          _openUIAction.performed -= OnOpenUI;
          _openSettingAction.performed -= OnOpenSetting;
          _scrollWheelAction.performed -= OnScrollWheel;
@@ -233,6 +237,14 @@ namespace Player
          else
          {
             _playerInput.SwitchCurrentActionMap("Player");
+         }
+      }
+
+      private void OnInteract(InputAction.CallbackContext context)
+      {
+         if (_playerManager.CanItemInteract) //현재 어떤것에 따라?
+         {
+            //_playerManager.GetFieldItem(); //아이템 줍기
          }
       }
    

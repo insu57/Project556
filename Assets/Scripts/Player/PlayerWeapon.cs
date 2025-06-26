@@ -43,7 +43,6 @@ public class PlayerWeapon : MonoBehaviour
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy); //탄퍼짐 각도 편차
     }
     
-    //장전시 사격 제한 추가 필요!!
     public void Shoot(bool isFlipped, float shootAngle)
     {
         if(!_canShoot) return;
