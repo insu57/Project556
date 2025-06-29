@@ -107,7 +107,6 @@ public class InventoryUIPresenter : MonoBehaviour
 
     public void InitItemDragHandler(ItemDragHandler itemDrag) //아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
     {
-        //초기화 오류 해결(UI창 inactive로 시작할때... 비활성된 오브젝트에서 참조해서 생긴것으로 추정)
         itemDrag.OnPointerDownEvent += HandleOnPointerEnter;
         itemDrag.OnDragEvent += HandleOnDragItem;
         itemDrag.OnEndDragEvent += HandleOnEndDragItem;
@@ -304,15 +303,16 @@ public class InventoryUIPresenter : MonoBehaviour
     private void HandleOnRotateItem(ItemDragHandler itemDrag)
     {
         //ROTATE...pivot 위치 생각
+        
         if (_currentDragItem == null) return;
-
+        Debug.Log("Rotate Item"); // 두 번 돌 아 감
         _uiManager.ClearShowAvailable();
         _targetIsAvailable = false; //CellCheck 다시
         _currentDragItem.RotateItem();
 
         var size = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y) * CellSize;
         var isOriginGearSlot = !itemDrag.InventoryRT; //InventoryRT가 없으면 GearSlot에서 움직이는 것
-        itemDrag.SetItemDragRotate(_currentDragItem.IsRotated, size, isOriginGearSlot);
+        itemDrag.SetItemDragRotate(_currentDragItem.IsRotated, size);
         //GearSlot rotate 해제...
     }
 
@@ -469,31 +469,34 @@ public class InventoryUIPresenter : MonoBehaviour
 //임시?
     private void SetItem(BaseItemDataSO itemData, ItemDragHandler itemDrag)
     {
+        var inventory = _inventoryManager.LootInventory;
+        var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
+        
+        if(!isAvailable) return;
+        
         var invenItem = new InventoryItem(itemData);
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _uiManager.transform);
         var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _uiManager.CellSize;
-        var inventory = _inventoryManager.LootInventory;
-        var result = inventory.AddItem(invenItem);
-        if (result.isAvailable)
-        {
-            itemDrag.SetItemDragPos(result.pos, size, result.slotItemRT,_uiManager.LootSlotParent);
-        }
+        
+        var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);;
+        itemDrag.SetItemDragPos(pos, size,itemRT,_uiManager.LootSlotParent);
         _itemDragHandlers.Add(invenItem.InstanceID, itemDrag);
     }
 
     private void SetStackableItem(BaseItemDataSO itemData, ItemDragHandler itemDrag, int stackAmount)
     {
-        var invenItem = new InventoryItem(itemData);
         if(!itemData.IsStackable) return;
         
+        var inventory = _inventoryManager.LootInventory;
+        var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
+        
+        if(!isAvailable) return;
+        var invenItem = new InventoryItem(itemData);
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _uiManager.transform);
         var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _uiManager.CellSize;
-        var inventory = _inventoryManager.LootInventory;
-        var result = inventory.AddItem(invenItem);
-        if (result.isAvailable)
-        {
-            itemDrag.SetItemDragPos(result.pos, size, result.slotItemRT,_uiManager.LootSlotParent);
-        }
+        
+        var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);
+        itemDrag.SetItemDragPos(pos, size, itemRT,_uiManager.LootSlotParent);
         invenItem.AddStackAmount(stackAmount);
         _itemDragHandlers.Add(invenItem.InstanceID, itemDrag);
         itemDrag.SetStackAmountText(stackAmount);

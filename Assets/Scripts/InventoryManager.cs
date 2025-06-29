@@ -56,11 +56,6 @@ public class InventoryManager : MonoBehaviour
 
     //Presenter 이벤트 처리...
     
-    private void SetInventorySlot(GameObject inventoryPrefab, InventoryItem item)
-    {
-        OnInitInventory?.Invoke(inventoryPrefab, item); //인벤토리 프리팹 생성/초기화
-    }
-
     public void SetInventoryData(Inventory inventory, GearType gearType)
     {
         //인벤토리 설정
@@ -77,6 +72,49 @@ public class InventoryManager : MonoBehaviour
                 LootInventory = inventory;
                 break;
         }
+    }
+
+    public CellData CheckCanEquipItem(GearType gearType)
+    {
+        switch (gearType)
+        {
+            case GearType.ArmoredRig:
+                if(!BodyArmorSlot.IsEmpty || !ChestRigSlot.IsEmpty) return null;
+                return ChestRigSlot; 
+            case GearType.UnarmoredRig:
+                return ChestRigSlot.IsEmpty ? ChestRigSlot : null;
+            case GearType.BodyArmor:
+                if (ChestRigSlot.IsEmpty) return BodyArmorSlot.IsEmpty ? BodyArmorSlot : null;
+               
+                var rigID = ChestRigSlot.InstanceID;
+                var rigItemType = ItemDict[rigID].item.GearType;
+                if (rigItemType is GearType.ArmoredRig) return null;
+                return BodyArmorSlot.IsEmpty ? BodyArmorSlot : null;
+            case GearType.Backpack:
+                return BackpackSlot.IsEmpty ? BackpackSlot : null;
+            case GearType.HeadWear:
+                return HeadwearSlot.IsEmpty ? HeadwearSlot : null;
+            case GearType.EyeWear:
+                return EyewearSlot.IsEmpty ? EyewearSlot : null;
+            case GearType.Weapon:
+                if (PrimaryWeaponSlot.IsEmpty)
+                {
+                    return PrimaryWeaponSlot;
+                }
+                if (SecondaryWeaponSlot.IsEmpty)
+                {
+                    return SecondaryWeaponSlot;
+                }
+                return null;
+            case GearType.None:
+                //if()
+                for (int i = 0; i < 4; i++)
+                {
+                    if (PocketSlots[i].IsEmpty) return PocketSlots[i];
+                }
+                return null;
+        }
+        return null;
     }
 
     public void SetGearItem(CellData gearSlot, InventoryItem item)
@@ -124,7 +162,7 @@ public class InventoryManager : MonoBehaviour
         //장비 능력치 등 처리
     }
 
-    public void AddItemToInventory(InventoryItem item)
+    public void AddItemToInventory(IItemData itemData)
     {
         //item따라...
         //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
@@ -134,9 +172,11 @@ public class InventoryManager : MonoBehaviour
         
         if (BackpackInventory)
         {
-            var (isAvailable, pos, itemRT) = BackpackInventory.AddItem(item);
+            var (isAvailable, firstIdx, sloRT ) = BackpackInventory.CheckCanAddItem(itemData);
             if (isAvailable)
             {
+                var item = new InventoryItem(itemData);
+                var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, sloRT);
                 OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
                 return;
             }
@@ -144,15 +184,18 @@ public class InventoryManager : MonoBehaviour
 
         if (RigInventory)
         {
-            var (isAvailable, pos, itemRT) = RigInventory.AddItem(item);
+            var (isAvailable, firstIdx, sloRT ) = RigInventory.CheckCanAddItem(itemData);
+            
             if (isAvailable)
             {
+                var item = new InventoryItem(itemData);
+                var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, sloRT);
                 OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT,item);
                 return;
             }
         }
-        
-        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null ,item);
+
+        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
         //unavailable 표시... -> UI?
     }
 }

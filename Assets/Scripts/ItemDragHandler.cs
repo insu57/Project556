@@ -47,10 +47,14 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         //itemImage = GetComponent<Image>();
     }
-
+    
+    //이벤트 구독 이슈 
     private void OnEnable()
     {
         if (!_inventoryUIPresenter) return;
+        _inventoryUIPresenter.OnDisableItemDragHandler(this);//이벤트 중복 구독 방지
+        _rotateItemAction.performed -= OnRotateItemAction;
+        
         _inventoryUIPresenter.InitItemDragHandler(this);
         _rotateItemAction.performed += OnRotateItemAction;
         _rotateItemAction.Enable();
@@ -68,7 +72,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         Transform uiParent)
     {
         _inventoryUIPresenter = presenter;
-        _inventoryUIPresenter.InitItemDragHandler(this);
+        _inventoryUIPresenter.InitItemDragHandler(this); //Enable인데 시작하면 안됨/disable이면 enable될 때 한번 더 -> 두번 호출
         var cellSize = presenter.CellSize;
 
         _itemRT = GetComponent<RectTransform>();
@@ -79,11 +83,8 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _heightCell = itemData.ItemHeight;
   
         _defaultImageSize = new Vector2(_widthCell * cellSize, _heightCell * cellSize); //기본 크기
-        if (!_itemRT)
-        {
-            Debug.Log("itemRT is null");
-        }
-        _itemRT.sizeDelta = _defaultImageSize;
+      
+        _itemRT.sizeDelta = _defaultImageSize; //이미지 스프라이트 설정
         itemImage.sprite = itemData.ItemSprite;
         itemImage.rectTransform.sizeDelta = _defaultImageSize;
 
@@ -94,7 +95,6 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         
         _rotateItemAction = itemRotateAction;
         _rotateItemAction.performed += OnRotateItemAction;
-        _rotateItemAction.Enable();
     }
     public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
     {
@@ -113,8 +113,9 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _inventoryRT = inventoryRT; //인벤토리의 RectTransform. null이면 GearSlot.
     }
     
-    public void SetItemDragRotate(bool isRotated, Vector2 size, bool isOriginGearSlot)
+    public void SetItemDragRotate(bool isRotated, Vector2 size)
     {
+        Debug.Log("SetItemDragRotate");
         _itemRT.sizeDelta = size;
         _defaultImageSize = size; //아이템 크기와 기본 이미지 사이즈 변경.(가로세로가 바뀌기 때문에 갱신)
          if (_inventoryRT) //회전할 때 원래 GearSlot이 아니면

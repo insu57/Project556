@@ -9,12 +9,18 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text ammoText;
     [SerializeField] private GameObject playerUI;
-    [SerializeField] private RectTransform pickupUI;
     
-    [SerializeField] private TMP_Text pickupText;
+    [SerializeField, Space] private RectTransform pickupUI;
     [SerializeField] private TMP_Text equipText;
+    [SerializeField] private TMP_Text pickupText;
     [SerializeField] private float pickupTextSize = 50f;
     [SerializeField] private RectTransform itemInteractUI;
+    [SerializeField] private Image pickupHighlight;
+    [SerializeField] private Color pickupHighlightAvailableColor;
+    [SerializeField] private Color pickupHighlightUnavailableColor;
+    private List<(TMP_Text text, bool isAvailable)> _pickupTextList = new();
+    private int _pickupTextListCount;
+    private int _pickupCurrentIdx;
     
     [Header("Slot")]
     [SerializeField, Space] private float cellSize = 50f;
@@ -75,7 +81,7 @@ public class UIManager : MonoBehaviour
     
     private readonly List<RectTransform> _gearSlotRT = new();
     private readonly List<RectTransform> _inventoriesRT = new();
-    public readonly Dictionary<RectTransform, RectTransform> SlotItemRT = new();
+    //public readonly Dictionary<RectTransform, RectTransform> SlotItemRT = new();
     private void Awake()
     {
         _panelSlotPadding = cellSize * 3;
@@ -86,21 +92,21 @@ public class UIManager : MonoBehaviour
         _gearSlotRT.Add(bodyArmorSlot);
         _gearSlotRT.Add(primaryWeaponSlot);
         _gearSlotRT.Add(secondaryWeaponSlot);
-        SlotItemRT[headwearSlot] = leftPanelItemParentRT;
-        SlotItemRT[eyewearSlot] = leftPanelItemParentRT;
-        SlotItemRT[bodyArmorSlot] = leftPanelItemParentRT;
-        SlotItemRT[primaryWeaponSlot] = leftPanelItemParentRT;
-        SlotItemRT[secondaryWeaponSlot] =  leftPanelItemParentRT;
+        //SlotItemRT[headwearSlot] = leftPanelItemParentRT;
+        //SlotItemRT[eyewearSlot] = leftPanelItemParentRT;
+        //SlotItemRT[bodyArmorSlot] = leftPanelItemParentRT;
+        //SlotItemRT[primaryWeaponSlot] = leftPanelItemParentRT;
+        //SlotItemRT[secondaryWeaponSlot] =  leftPanelItemParentRT;
         
         _gearSlotRT.Add(chestRigSlot);
         _gearSlotRT.Add(backpackSlot);
-        SlotItemRT[chestRigSlot] = rigItemRT;
-        SlotItemRT[backpackSlot] = backpackSlot;
+        //SlotItemRT[chestRigSlot] = rigItemRT;
+        //SlotItemRT[backpackSlot] = backpackSlot;
         
         foreach (var pocketRT in pockets)
         {
             _gearSlotRT.Add(pocketRT);
-            SlotItemRT[pocketRT] = pocketsItemRT;
+            //SlotItemRT[pocketRT] = pocketsItemRT;
         }
         
         _inventoriesRT.Add(rigInvenParent);
@@ -118,29 +124,57 @@ public class UIManager : MonoBehaviour
         playerUI.SetActive(isOpen);
     }
     
-    public void ShowItemPickup(bool show, Vector2 position)
+    public void ShowItemPickup (Vector2 position, bool isGear, bool canEquip, bool canPickup)
     {
-        pickupUI.gameObject.SetActive(show);
-        if (show)
+        //설정...아이템 따라
+        pickupUI.gameObject.SetActive(true);
+        itemInteractUI.anchoredPosition = Vector2.zero;
+
+        pickupUI.position = position; //개선...WorldCanvas로 따로?
+
+        pickupText.enabled = isGear;
+        
+        _pickupTextList.Clear();
+
+        if (isGear)
         {
-            pickupUI.position = position;
+            _pickupTextList.Add((equipText, canEquip));
         }
+        _pickupTextList.Add((pickupText, canPickup));
+        
+        
+        pickupHighlight.color = _pickupTextList[0].isAvailable 
+            ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
+        //_pickupTextListCount = isGear ? 2 : 1; 
+        
+        
+        
+        //개선점? 장비하기/획득하기(Gear는 둘 다)...개선을 어떻게? List형식?
         //아이템에 따라 달라질필요있음.(장착 상태, 종류에 따라)
     }
 
+    public void HideItemPickup()
+    {
+        pickupUI.gameObject.SetActive(false);
+    }
+    
     public void ScrollItemPickup(float y)
     {
         var uiPos = itemInteractUI.anchoredPosition;
-        uiPos.y += y * 50; //50 -> 칸의 크기 
+        uiPos.y += y * pickupTextSize; //50 -> 칸의 크기 
+       
+        var maxUIPosY = (_pickupTextList.Count - 1) * pickupTextSize; //리스트 개수 따라(최대 인덱스에 -1)
         if (uiPos.y > 0)
         {
-            uiPos.y = -50;//변경될 예정(스크롤 목록의 마지막 y위치)
+            uiPos.y = -maxUIPosY;//변경될 예정(스크롤 목록의 마지막 y위치)
         }
-        else if (uiPos.y < -50)
+        else if (uiPos.y < -maxUIPosY)
         {
             uiPos.y = 0;
         }
-
+        var idx = (int) uiPos.y / -50;
+        var (text, isAvailable) = _pickupTextList[idx];
+        pickupHighlight.color = isAvailable ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
         itemInteractUI.anchoredPosition =  uiPos;
     }
 

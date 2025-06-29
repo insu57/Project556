@@ -244,6 +244,7 @@ namespace Player
       {
          if (_playerManager.CanItemInteract) //현재 어떤것에 따라?
          {
+            Debug.Log("OnInteract");
             //_playerManager.GetFieldItem(); //아이템 줍기
          }
       }
@@ -264,7 +265,7 @@ namespace Player
       {
          Vector2 delta = context.ReadValue<Vector2>(); //마우스 휠 스크롤
 
-         if (_playerManager.CanItemInteract)
+         if (_playerManager.CanItemInteract) //상호작용 가능할 때
          {
             _playerManager.ScrollItemPickup(delta.y);
          }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -20,7 +21,9 @@ public class PlayerManager : MonoBehaviour
     
     private int _currentHealth;
     public bool CanItemInteract { get; private set; }
-    private ItemPickUp _currentItemPickUp;
+    private IItemData _currentPickupItemData;
+    private bool _currentItemCanEquip;
+    private bool _currentItemCanPickup;
     
     private void Awake()
     {
@@ -89,7 +92,6 @@ public class PlayerManager : MonoBehaviour
 
     public void ScrollItemPickup(float y)
     {
-        //
         _uiManager.ScrollItemPickup(y);//ItemPickup UI 스크롤(획득/장착 등...)
     }
     
@@ -101,25 +103,52 @@ public class PlayerManager : MonoBehaviour
             CanItemInteract = true;
             Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
             
-            _uiManager.ShowItemPickup(true, pos); //이벤트로 수정 예정
-            
             
             other.TryGetComponent<ItemPickUp>(out var itemPickUp);
-            _currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
-            //아이템 타입에 따라
-            //
+            //_currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
+            var item = itemPickUp.GetItemData();
             
+            //isGear에 따른 상태?
+            //enum? class?     UIManger
+            //<-PlayerControl -(인덱스)->  PlayerManager
+            
+            List<bool> availableList = new(); // 
+            
+            
+            bool canEquip = false;
+            //장착
+            bool isGear = item.GearType != GearType.None;
+            if (item.GearType is not GearType.None)
+            {
+                var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
+                if (checkCell is not null) canEquip = true;
+            }
+            //inventory
+            bool canPickup = false;
+
+            if (_inventoryManager.BackpackInventory)
+            {
+                var (isAvailable, firstIdx, sloRT) = 
+                    _inventoryManager.BackpackInventory.CheckCanAddItem(item);
+                canPickup = isAvailable;
+            }
+            else if (_inventoryManager.RigInventory)
+            {
+                var (isAvailable, firstIdx, sloRT) = 
+                    _inventoryManager.RigInventory.CheckCanAddItem(item);
+                canPickup = isAvailable;
+            }
+            else //리그, 가방에 공간이 없을 때
+            {
+                var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
+                if(checkCell is not null 
+                   && item.ItemHeight == 1 && item.ItemWidth == 1) canPickup = true; //Cell크기 고려
+            }
+            _uiManager.ShowItemPickup(pos, isGear, canEquip, canPickup); //이벤트로 수정 예정
             
             return;//임시 -> 인벤토리(가방)에 넣기(상호작용 키 누르면)
-            ItemPickUp newItem = other.GetComponent<ItemPickUp>();
-            if (newItem)
-            {
-                IItemData newItemData = newItem.GetItemData();
-                if (newItemData is WeaponData weaponData) //임시 - 무기 교체. -> 인벤토리 추가로 변경
-                {
-                    WeaponChange(weaponData);
-                }
-            }
+            
+            //ObjectPooling?
             Destroy(other.gameObject);
         }
     }
@@ -129,12 +158,16 @@ public class PlayerManager : MonoBehaviour
         if (other.CompareTag("Item"))
         {
             CanItemInteract = false;
-            _uiManager.ShowItemPickup(false, Vector2.zero);
+            _uiManager.HideItemPickup();
         }
     }
 
     public void GetFieldItem()
     {
-        
+        var isGear = _currentPickupItemData.GearType != GearType.None;
+        if (isGear)
+        {
+            
+        }
     }
 }
