@@ -7,6 +7,13 @@ public enum SlotStatus
     Unavailable,
 }
 
+public enum ItemInteractType
+{
+    PickUp = 0,
+    Equip,
+    Use,
+}
+
 public enum WeaponType
 {
     Pistol = 0,

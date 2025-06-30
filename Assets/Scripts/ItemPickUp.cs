@@ -7,8 +7,6 @@ public class ItemPickUp : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
     public Guid ID { get; private set; }
-    //public GameObject ItemPrefab { get; private set; }
-
     public void Init(BaseItemDataSO itemData) //추후 사용(MapManager?(맵 초기화), 아이템 드랍 등 -> Init)
     {
         this.itemData = itemData;
@@ -26,7 +24,7 @@ public class ItemPickUp : MonoBehaviour
     {
         //ItemPrefab = itemData.ItemPrefab;
         _spriteRenderer.sprite = itemData.ItemSprite;
-        _collider.size = itemData.PickUpColliderSize;
+        _collider.size = itemData.PickUpColliderSize; //Collider size 조정 -> 수정 필요
     }
 
     public IItemData GetItemData()

@@ -32,12 +32,12 @@ public class InventoryManager : MonoBehaviour
     //Right Panel
     public Inventory LootInventory { get; private set; }
     
-    
-    
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
     public event Action<GameObject, InventoryItem> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<InventoryItem> OnShowInventory;
-    public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory; 
+    public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory;
+
+    public event Action<InventoryItem> OnEquipGear;
     //인벤토리 타입, ItemPos, ItemRT(ItemDragHandler의 부모) ,아이템데이터
 
     private void Awake()
@@ -128,7 +128,7 @@ public class InventoryManager : MonoBehaviour
             case GearType.ArmoredRig:
             case GearType.UnarmoredRig:
             case GearType.Backpack:
-                if (item.ItemInventory)
+                if (item.ItemInventory) //이미 인벤토리를 생성했다면
                 {
                     OnShowInventory?.Invoke(item);
                     return;
@@ -162,6 +162,11 @@ public class InventoryManager : MonoBehaviour
         //장비 능력치 등 처리
     }
 
+    public void EquipGearItem(IItemData itemData)
+    {
+        
+    }
+    
     public void AddItemToInventory(IItemData itemData)
     {
         //item따라...

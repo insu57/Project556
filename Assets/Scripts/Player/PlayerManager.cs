@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -21,9 +22,11 @@ public class PlayerManager : MonoBehaviour
     
     private int _currentHealth;
     public bool CanItemInteract { get; private set; }
-    private IItemData _currentPickupItemData;
-    private bool _currentItemCanEquip;
-    private bool _currentItemCanPickup;
+    private int _currentItemInteractIdx;
+    private readonly List<(bool available, ItemInteractType type)> _currentItemInteractList = new();
+    private ItemPickUp _currentItemPickUp;
+    //private bool _currentItemCanEquip;
+    //private bool _currentItemCanPickup;
     
     private void Awake()
     {
@@ -90,9 +93,14 @@ public class PlayerManager : MonoBehaviour
         
     }
 
-    public void ScrollItemPickup(float y)
+    public void ScrollItemPickup(float scrollDeltaY)
     {
-        _uiManager.ScrollItemPickup(y);//ItemPickup UI 스크롤(획득/장착 등...)
+        _currentItemInteractIdx += (int)scrollDeltaY;
+        if (_currentItemInteractIdx < 0) _currentItemInteractIdx = _currentItemInteractList.Count - 1;
+        else if (_currentItemInteractIdx >= _currentItemInteractList.Count) _currentItemInteractIdx = 0;
+        //범위 넘기면 처리
+      
+        _uiManager.ScrollItemPickup(_currentItemInteractIdx);//ItemPickup UI 스크롤(획득/장착 등...)
     }
     
     private void OnTriggerEnter2D(Collider2D other)
@@ -103,17 +111,9 @@ public class PlayerManager : MonoBehaviour
             CanItemInteract = true;
             Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
             
-            
             other.TryGetComponent<ItemPickUp>(out var itemPickUp);
-            //_currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
+            _currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
             var item = itemPickUp.GetItemData();
-            
-            //isGear에 따른 상태?
-            //enum? class?     UIManger
-            //<-PlayerControl -(인덱스)->  PlayerManager
-            
-            List<bool> availableList = new(); // 
-            
             
             bool canEquip = false;
             //장착
@@ -144,11 +144,17 @@ public class PlayerManager : MonoBehaviour
                 if(checkCell is not null 
                    && item.ItemHeight == 1 && item.ItemWidth == 1) canPickup = true; //Cell크기 고려
             }
-            _uiManager.ShowItemPickup(pos, isGear, canEquip, canPickup); //이벤트로 수정 예정
             
-            return;//임시 -> 인벤토리(가방)에 넣기(상호작용 키 누르면)
+            _currentItemInteractList.Clear();
+            _currentItemInteractIdx = 0;
+            if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip));
+            _currentItemInteractList.Add((canPickup, ItemInteractType.PickUp));
             
-            //ObjectPooling?
+            _uiManager.ShowItemPickup(pos, isGear, _currentItemInteractList); //이벤트로 수정 예정
+            
+            return;//진행중
+            
+            //ObjectPooling 수정 필요
             Destroy(other.gameObject);
         }
     }
@@ -164,10 +170,28 @@ public class PlayerManager : MonoBehaviour
 
     public void GetFieldItem()
     {
-        var isGear = _currentPickupItemData.GearType != GearType.None;
-        if (isGear)
+        var itemData = _currentItemPickUp.GetItemData();
+        var isGear = itemData.GearType != GearType.None;
+        //개선방안???? bool List에서 개선..?
+        //장비 - 장착/획득 순서
+        //장비x - 획득만
+        var (isAvailable, type) = _currentItemInteractList[_currentItemInteractIdx];
+        
+        if (!isAvailable) return;
+
+        switch (type)
         {
-            
+            case ItemInteractType.Equip:
+                Debug.Log("Equip");
+                //Event
+                break;
+            case ItemInteractType.PickUp:
+                Debug.Log("Pickup");
+                break;
+
+            default:
+                Debug.LogWarning("ItemInteractType Error: None.");
+                break;
         }
     }
 }

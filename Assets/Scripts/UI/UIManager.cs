@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject playerUI;
     
     [SerializeField, Space] private RectTransform pickupUI;
+    private List<TMP_Text> _pickupTextList = new();
     [SerializeField] private TMP_Text equipText;
     [SerializeField] private TMP_Text pickupText;
     [SerializeField] private float pickupTextSize = 50f;
@@ -18,7 +19,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Image pickupHighlight;
     [SerializeField] private Color pickupHighlightAvailableColor;
     [SerializeField] private Color pickupHighlightUnavailableColor;
-    private List<(TMP_Text text, bool isAvailable)> _pickupTextList = new();
+    private List<(bool isAvailable, ItemInteractType type)> _pickupAvailableList;
     private int _pickupTextListCount;
     private int _pickupCurrentIdx;
     
@@ -112,6 +113,11 @@ public class UIManager : MonoBehaviour
         _inventoriesRT.Add(rigInvenParent);
         _inventoriesRT.Add(packInvenParent);
         _inventoriesRT.Add(lootSlotParent);
+        
+        
+        //ItemInteract UI
+        _pickupTextList.Add(equipText);
+        _pickupTextList.Add(pickupText);
     }
 
     public void UpdateAmmoText(int currentAmmo)
@@ -124,30 +130,40 @@ public class UIManager : MonoBehaviour
         playerUI.SetActive(isOpen);
     }
     
-    public void ShowItemPickup (Vector2 position, bool isGear, bool canEquip, bool canPickup)
+    public void ShowItemPickup (Vector2 position, bool isGear, List<(bool, ItemInteractType)> availableList)
     {
         //설정...아이템 따라
         pickupUI.gameObject.SetActive(true);
         itemInteractUI.anchoredPosition = Vector2.zero;
 
         pickupUI.position = position; //개선...WorldCanvas로 따로?
-
-        pickupText.enabled = isGear;
         
-        _pickupTextList.Clear();
+        _pickupAvailableList = availableList;
 
-        if (isGear)
+        foreach (var text in _pickupTextList)
         {
-            _pickupTextList.Add((equipText, canEquip));
+            text.gameObject.SetActive(false);
         }
-        _pickupTextList.Add((pickupText, canPickup));
         
+        foreach (var (isAvailable, type) in _pickupAvailableList) //비활성은?
+        {
+            switch (type)
+            {
+                case ItemInteractType.Equip:
+                    equipText.gameObject.SetActive(isAvailable);
+                    break;
+                case ItemInteractType.PickUp:
+                    pickupText.gameObject.SetActive(isAvailable);
+                    break;
+                default:
+                    Debug.LogWarning("ItemInteractType Error: None.");
+                    break;
+            }
+        }
+        LayoutRebuilder.ForceRebuildLayoutImmediate(pickupUI);
         
-        pickupHighlight.color = _pickupTextList[0].isAvailable 
+        pickupHighlight.color = _pickupAvailableList[0].isAvailable
             ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
-        //_pickupTextListCount = isGear ? 2 : 1; 
-        
-        
         
         //개선점? 장비하기/획득하기(Gear는 둘 다)...개선을 어떻게? List형식?
         //아이템에 따라 달라질필요있음.(장착 상태, 종류에 따라)
@@ -158,23 +174,13 @@ public class UIManager : MonoBehaviour
         pickupUI.gameObject.SetActive(false);
     }
     
-    public void ScrollItemPickup(float y)
+    public void ScrollItemPickup(int idx)
     {
         var uiPos = itemInteractUI.anchoredPosition;
-        uiPos.y += y * pickupTextSize; //50 -> 칸의 크기 
-       
-        var maxUIPosY = (_pickupTextList.Count - 1) * pickupTextSize; //리스트 개수 따라(최대 인덱스에 -1)
-        if (uiPos.y > 0)
-        {
-            uiPos.y = -maxUIPosY;//변경될 예정(스크롤 목록의 마지막 y위치)
-        }
-        else if (uiPos.y < -maxUIPosY)
-        {
-            uiPos.y = 0;
-        }
-        var idx = (int) uiPos.y / -50;
-        var (text, isAvailable) = _pickupTextList[idx];
-        pickupHighlight.color = isAvailable ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
+
+        uiPos.y = -idx * pickupTextSize;
+        var isAvailable = _pickupAvailableList[idx];
+        pickupHighlight.color = isAvailable.isAvailable ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
         itemInteractUI.anchoredPosition =  uiPos;
     }
 

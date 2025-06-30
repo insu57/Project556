@@ -245,7 +245,7 @@ namespace Player
          if (_playerManager.CanItemInteract) //현재 어떤것에 따라?
          {
             Debug.Log("OnInteract");
-            //_playerManager.GetFieldItem(); //아이템 줍기
+            _playerManager.GetFieldItem(); //아이템 줍기
          }
       }
    

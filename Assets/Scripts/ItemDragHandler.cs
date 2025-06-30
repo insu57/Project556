@@ -174,7 +174,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
             _itemRT.position = globalMousePos; //item Drag Handler 위치 -> GlobalMousePos
         }
         
-        //EVENT invoke
+        //Events invoke
         OnDragEvent?.Invoke(this, globalMousePos, _id);
     }
 
