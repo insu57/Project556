@@ -21,29 +21,34 @@ public class PlayerManager : MonoBehaviour
     private InventoryUIPresenter _inventoryUIPresenter;
     
     private int _currentHealth;
+
+    public bool IsUnarmed { private set; get; }
+    
     public bool CanItemInteract { get; private set; }
     private int _currentItemInteractIdx;
     private readonly List<(bool available, ItemInteractType type)> _currentItemInteractList = new();
     private ItemPickUp _currentItemPickUp;
+    private CellData _pickupTargetCell;
+    private (int firstIdx, RectTransform slotRT) _pickupTargetSlotInfo;
+    private bool _pickupTargetIsPocket;
     //private bool _currentItemCanEquip;
     //private bool _currentItemCanPickup;
     
     private void Awake()
     {
         _uiManager = FindFirstObjectByType<UIManager>();
-        //_playerAnimation = GetComponent<PlayerAnimation>();
         TryGetComponent(out _playerAnimation);
-        //_playerWeapon = GetComponent<PlayerWeapon>();
         TryGetComponent(out _playerWeapon);
         
         _mainCamera = Camera.main;
         _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
-        
+
+        IsUnarmed = true;
     }
 
     private void Start()
     {
-        WeaponChange(currentWeaponData);
+        //WeaponChange(currentWeaponData);
     }
 
     public bool CheckIsAutomatic()
@@ -69,7 +74,13 @@ public class PlayerManager : MonoBehaviour
     private void WeaponChange(WeaponData newWeaponData) //무기 교체
     {
         WeaponType weaponType = newWeaponData.WeaponType; //무기 타입
-       
+
+        if (!newWeaponData)
+        {
+            IsUnarmed = true;
+        }
+
+        IsUnarmed = false;
         if (weaponType == WeaponType.Pistol) //한손무기
         {
             oneHandSprite.sprite = newWeaponData.ItemSprite; //스프라이트 위치
@@ -121,28 +132,41 @@ public class PlayerManager : MonoBehaviour
             if (item.GearType is not GearType.None)
             {
                 var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
-                if (checkCell is not null) canEquip = true;
+                if (checkCell is not null)
+                {
+                    canEquip = true;
+                    _pickupTargetCell = checkCell;
+                }
             }
             //inventory
             bool canPickup = false;
 
             if (_inventoryManager.BackpackInventory)
             {
-                var (isAvailable, firstIdx, sloRT) = 
+                var (isAvailable, firstIdx, slotRT) = 
                     _inventoryManager.BackpackInventory.CheckCanAddItem(item);
                 canPickup = isAvailable;
+                _pickupTargetSlotInfo = (firstIdx, slotRT);
+                _pickupTargetIsPocket = false;
             }
             else if (_inventoryManager.RigInventory)
             {
                 var (isAvailable, firstIdx, sloRT) = 
                     _inventoryManager.RigInventory.CheckCanAddItem(item);
                 canPickup = isAvailable;
+                _pickupTargetSlotInfo = (firstIdx, sloRT);
+                _pickupTargetIsPocket = false;
             }
             else //리그, 가방에 공간이 없을 때
             {
                 var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
                 if(checkCell is not null 
-                   && item.ItemHeight == 1 && item.ItemWidth == 1) canPickup = true; //Cell크기 고려
+                   && item.ItemHeight == 1 && item.ItemWidth == 1) 
+                {
+                    canPickup = true; //Cell크기 고려
+                    _pickupTargetCell = checkCell;
+                    _pickupTargetIsPocket = true;
+                }
             }
             
             _currentItemInteractList.Clear();
@@ -179,19 +203,25 @@ public class PlayerManager : MonoBehaviour
         
         if (!isAvailable) return;
 
+        var item = new InventoryItem(itemData);
         switch (type)
         {
             case ItemInteractType.Equip:
-                Debug.Log("Equip");
                 //Event
+                _inventoryManager.EquipGearItem(_pickupTargetCell, item); //사이즈 준내큼
                 break;
             case ItemInteractType.PickUp:
-                Debug.Log("Pickup");
+                if (!_pickupTargetIsPocket)
+                {
+                    _inventoryManager.AddItemToInventory(_pickupTargetSlotInfo.firstIdx, _pickupTargetSlotInfo.slotRT, item);
+                }
+                else _inventoryManager.EquipGearItem(_pickupTargetCell, item);
                 break;
-
             default:
                 Debug.LogWarning("ItemInteractType Error: None.");
                 break;
         }
+        
+        Destroy(_currentItemPickUp.gameObject);
     }
 }

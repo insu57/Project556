@@ -115,7 +115,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     
     public void SetItemDragRotate(bool isRotated, Vector2 size)
     {
-        Debug.Log("SetItemDragRotate");
+        //Debug.Log("SetItemDragRotate");
         _itemRT.sizeDelta = size;
         _defaultImageSize = size; //아이템 크기와 기본 이미지 사이즈 변경.(가로세로가 바뀌기 때문에 갱신)
          if (_inventoryRT) //회전할 때 원래 GearSlot이 아니면

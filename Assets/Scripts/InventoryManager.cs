@@ -35,10 +35,8 @@ public class InventoryManager : MonoBehaviour
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
     public event Action<GameObject, InventoryItem> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<InventoryItem> OnShowInventory;
+    public event Action<CellData, InventoryItem> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory;
-
-    public event Action<InventoryItem> OnEquipGear;
-    //인벤토리 타입, ItemPos, ItemRT(ItemDragHandler의 부모) ,아이템데이터
 
     private void Awake()
     {
@@ -162,12 +160,14 @@ public class InventoryManager : MonoBehaviour
         //장비 능력치 등 처리
     }
 
-    public void EquipGearItem(IItemData itemData)
+    public void EquipGearItem(CellData gearSlot, InventoryItem item)
     {
-        
+        SetGearItem(gearSlot, item);
+        //event...
+        OnEquipFieldItem?.Invoke(gearSlot, item);
     }
     
-    public void AddItemToInventory(IItemData itemData)
+    public void AddItemToInventory(int firstIdx, RectTransform slotRT, InventoryItem item)
     {
         //item따라...
         //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
@@ -177,27 +177,18 @@ public class InventoryManager : MonoBehaviour
         
         if (BackpackInventory)
         {
-            var (isAvailable, firstIdx, sloRT ) = BackpackInventory.CheckCanAddItem(itemData);
-            if (isAvailable)
-            {
-                var item = new InventoryItem(itemData);
-                var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, sloRT);
-                OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
-                return;
-            }
+            //var item = new InventoryItem(itemData);
+            var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, slotRT);
+            OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT, item);
+            return;
         }
 
         if (RigInventory)
         {
-            var (isAvailable, firstIdx, sloRT ) = RigInventory.CheckCanAddItem(itemData);
-            
-            if (isAvailable)
-            {
-                var item = new InventoryItem(itemData);
-                var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, sloRT);
-                OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT,item);
-                return;
-            }
+            //var item = new InventoryItem(itemData);
+            var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, slotRT);
+            OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
+            return;
         }
 
         OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);

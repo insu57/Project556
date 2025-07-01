@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 namespace Player
 {
@@ -25,7 +26,8 @@ namespace Player
       private InputAction _openUIAction;
       private InputAction _openSettingAction;
       private InputAction _scrollWheelAction;
-   
+      private InputAction _changeWeaponAction;
+      
       private PlayerManager _playerManager;
       private Camera _mainCamera;
       private Rigidbody2D _rigidbody;
@@ -65,6 +67,7 @@ namespace Player
          _openUIAction = playerMap.FindAction("OpenUI");
          _openSettingAction = playerMap.FindAction("OpenSetting");
          _scrollWheelAction = playerMap.FindAction("ScrollWheel");
+         _changeWeaponAction = playerMap.FindAction("ChangeWeapon");
          
          _uiControl = FindAnyObjectByType<UIControl>(); //UIControl
          _uiControl.Init(this); //초기화
@@ -94,6 +97,7 @@ namespace Player
          _openUIAction.performed += OnOpenUI;
          _openSettingAction.performed += OnOpenSetting;
          _scrollWheelAction.performed += OnScrollWheel;
+         _changeWeaponAction.performed += OnChangeWeapon;
       }
 
       private void OnDisable()
@@ -108,6 +112,7 @@ namespace Player
          _openUIAction.performed -= OnOpenUI;
          _openSettingAction.performed -= OnOpenSetting;
          _scrollWheelAction.performed -= OnScrollWheel;
+         _changeWeaponAction.performed -= OnChangeWeapon;
       }
 
       private void Update()
@@ -140,6 +145,7 @@ namespace Player
 
       private void RotateArm()
       {
+         if(_playerManager.IsUnarmed) return;//비무장 제한...
          //장전 등 몇몇 행동에서는 안움직여야한다.
          if (!_canRotateArm) return;
 
@@ -270,6 +276,21 @@ namespace Player
             _playerManager.ScrollItemPickup(delta.y);
          }
       }
+
+      private void OnChangeWeapon(InputAction.CallbackContext context)
+      {
+         if(context.control is not KeyControl key) return;
+
+         switch (key.keyCode)
+         {
+            case Key.Digit1:
+               Debug.Log("Switch Weapon 1");
+               break;
+            case Key.Digit2:
+               Debug.Log("Switch Weapon 2");
+               break;
+         }
+      }
    
       private void OnMove(InputAction.CallbackContext context) //플레이어 이동 입력
       {
@@ -293,6 +314,8 @@ namespace Player
 
       private void OnShoot(InputAction.CallbackContext ctx)
       {
+         if(_playerManager.IsUnarmed) return;
+         
          if(!_canShoot) return;
          if (!_playerManager.CheckIsAutomatic())
          {
@@ -316,6 +339,7 @@ namespace Player
 
       private void Shoot() //사격(연사) 메서드
       {
+         if(_playerManager.IsUnarmed) return;
          if(!_playerManager.CheckIsAutomatic()) return;  //단발인 경우 return
          if(!_canShoot) return; //사격 불가 시 return
          if(!_inShooting) return; //사격 중 인지 check
@@ -332,6 +356,8 @@ namespace Player
 
       private void OnReload(InputAction.CallbackContext ctx) //재장전 입력 R키
       {
+         if(_playerManager.IsUnarmed) return;
+         
          _canRotateArm = false; //팔회전 불가
          _canShoot = false; //사격 불가
          _inShooting = false; //사격 중인 경우 중단

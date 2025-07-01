@@ -42,7 +42,7 @@ public class PlayerAnimation : MonoBehaviour
     {
         _playerControl.OnPlayerMove += HandlePlayerMove; //이동 이벤트
         _playerControl.OnPlayerReload += HandlePlayerReload; //장전 이벤트
-        ChangeWeapon(WeaponType.Pistol); //무기교체 - 애니메이션 전환
+        //ChangeWeapon(WeaponType.Pistol); //무기교체 - 애니메이션 전환
     }
     
     private void HandlePlayerMove(bool isMove)

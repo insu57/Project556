@@ -211,11 +211,11 @@ public class Inventory: MonoBehaviour
         var targetPos = (minPos + maxPos) / 2;
                         
         Debug.Log($"Adding item {item.ItemData.ItemName}, ID: {item.InstanceID}, firstIdx : {firstIdx} pos: {targetPos}");
-                        
+         
         return (targetPos, itemRT);
     }
 
-    public (bool isAvailable, int firstIdx, RectTransform sloRT) CheckCanAddItem(IItemData item)
+    public (bool isAvailable, int firstIdx, RectTransform slotRT) CheckCanAddItem(IItemData item)
     {
         //var itemCount = item.ItemCellCount;
         foreach (var slotData in slotDataList)
@@ -240,7 +240,6 @@ public class Inventory: MonoBehaviour
                         }
                         if(!isAvailable) break; //루프 벗어나기
                     }
-                    
                     
                     if (isAvailable)
                     {
