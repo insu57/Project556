@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -24,7 +25,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private CanvasGroup _canvasGroup;
 
     private InventoryUIPresenter _inventoryUIPresenter;
-    private UIManager _uiManager;
+    private ItemUIManager _itemUIManager;
     private int _widthCell;
     private int _heightCell;
     private Guid _id;

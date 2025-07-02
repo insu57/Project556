@@ -284,10 +284,13 @@ namespace Player
          switch (key.keyCode)
          {
             case Key.Digit1:
-               Debug.Log("Switch Weapon 1");
+               _playerManager.HandleOnChangeWeapon(1);
                break;
             case Key.Digit2:
-               Debug.Log("Switch Weapon 2");
+               _playerManager.HandleOnChangeWeapon(2);
+               break;
+            case Key.Digit3:
+               _playerManager.HandleOnChangeWeapon(3);
                break;
          }
       }

@@ -42,7 +42,6 @@ public class WeaponData : BaseItemDataSO
     [ShowInInspector] private float RPM => 1 / FireRate * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
 
     public override Sprite ItemSprite => itemSprite;
-    public override Vector2 PickUpColliderSize => pickUpColliderSize;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.Weapon;

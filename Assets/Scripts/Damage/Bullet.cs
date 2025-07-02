@@ -13,9 +13,11 @@ public class Bullet : MonoBehaviour
     private ObjectPoolingManager _objectPoolingManager;
     private Rigidbody2D _rigidbody2D;
     private float _speed;
+    private float _damage;
+    private float _armorPiercing;
 
     //[SerializeField] private float bulletWaitTime = 2f;
-    private static readonly WaitForSeconds BulletWait= new WaitForSeconds(2f);
+    private static readonly WaitForSeconds BulletWait = new(2f);
     
     private void Awake()
     {
@@ -23,9 +25,11 @@ public class Bullet : MonoBehaviour
         _rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
-    public void Init(float speed)
+    public void Init(float speed, float damage, float armorPiercing)
     {
         _speed = speed;
+        _damage = damage;
+        _armorPiercing = armorPiercing;
     }
     
     public void ShootBullet(float angle, Vector2 direction, Transform muzzleTransform)
@@ -41,6 +45,10 @@ public class Bullet : MonoBehaviour
         if (collision.CompareTag("Ground"))
         {
             Destroy(this.gameObject);
+        }
+        else if (collision.TryGetComponent(out IDamageable damageable))
+        {
+            damageable.TakeDamage(_damage);
         }
     }
 

@@ -16,22 +16,17 @@ public class GearData : BaseItemDataSO
     [SerializeField] private int slotHeight;
     
     [SerializeField] private GameObject slotPrefab;
-    [SerializeField] private bool isPartitioned;
-    
-    //[SerializeField] private bool isStackable = false;
+
     
     public override string ItemDataID => itemID;
     public override string ItemName => itemName;
     public override GearType GearType => gearType;
     public override Sprite ItemSprite => itemSprite;
-    public override Vector2 PickUpColliderSize => pickUpColliderSize;
+
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
-    public int SlotWidth => slotWidth;
-    public int SlotHeight => slotHeight;
-    
+
     public GameObject SlotPrefab => slotPrefab;
-    public bool IsPartitioned => isPartitioned;
     public override bool IsStackable => false;
     public override int MaxStackAmount => 1;
 }

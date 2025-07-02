@@ -210,14 +210,13 @@ public class Inventory: MonoBehaviour
             .MinPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
         var targetPos = (minPos + maxPos) / 2;
                         
-        Debug.Log($"Adding item {item.ItemData.ItemName}, ID: {item.InstanceID}, firstIdx : {firstIdx} pos: {targetPos}");
+        //Debug.Log($"Adding item {item.ItemData.ItemName}, ID: {item.InstanceID}, firstIdx : {firstIdx} pos: {targetPos}");
          
         return (targetPos, itemRT);
     }
 
     public (bool isAvailable, int firstIdx, RectTransform slotRT) CheckCanAddItem(IItemData item)
     {
-        //var itemCount = item.ItemCellCount;
         foreach (var slotData in slotDataList)
         {
             var (cells, slotCount, slotItemRT) = _slotDict[slotData.slotRT]; //슬롯정보
@@ -262,7 +261,7 @@ public class Inventory: MonoBehaviour
     public void RemoveItem(Guid id, bool hasRotated)
     {
         //아이템 제거
-        Debug.Log($"Removing item {id}");
+        //Debug.Log($"Removing item {id}");
         var slotRT = ItemDict[id].slotRT; //아이템의 SlotRT
         var firstIdx = ItemDict[id].firstIdx; //아이템의 첫번째 인덱스
         var itemCount = ItemDict[id].item.ItemCellCount; //아이템 Cell개수
@@ -288,7 +287,7 @@ public class Inventory: MonoBehaviour
         MoveItem(InventoryItem item, int firstIdx, RectTransform targetSlot)
     {
         //아이템 이동
-        Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.InstanceID}");
+        //Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.InstanceID}");
         var id = item.InstanceID;
         ItemDict.Add(id, (item, targetSlot, firstIdx));//Dict에 추가
         

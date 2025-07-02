@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using UI;
 using UnityEngine;
 
 public class PlayerWeapon : MonoBehaviour
@@ -15,7 +16,7 @@ public class PlayerWeapon : MonoBehaviour
     private bool _canShoot = true;
     //public bool CanShoot => _canShoot;
  
-    private UIManager _uiManager;
+    private ItemUIManager _itemUIManager;
     private ObjectPoolingManager _objectPoolingManager;
     
     private AmmoCategory _ammoCategory;
@@ -31,12 +32,16 @@ public class PlayerWeapon : MonoBehaviour
         _objectPoolingManager = FindFirstObjectByType<ObjectPoolingManager>();
     }
     
-    public void Init(UIManager uiManager, WeaponData weaponData)
+    public void Init(ItemUIManager itemUIManager)
     {
-        _uiManager = uiManager;
+        _itemUIManager = itemUIManager;
+    }
+
+    public void ChangeWeaponData(WeaponData weaponData)
+    {
         _weaponData = weaponData;
         _currentMagazineAmmo = weaponData.DefaultMagazineSize;
-        _uiManager.UpdateAmmoText(_currentMagazineAmmo);
+        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);
 
         _ammoCategory = EnumManager.GetAmmoCategory(weaponData.AmmoCaliber);
         _normalizedAccuracy = Mathf.Clamp01(weaponData.Accuracy / MaxAccuracy); //정확도 정규화
@@ -52,7 +57,7 @@ public class PlayerWeapon : MonoBehaviour
         StartCoroutine(ShootCoroutine()); //fireRate
         
         _currentMagazineAmmo--;
-        _uiManager.UpdateAmmoText(_currentMagazineAmmo);
+        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);
         
 
         float bulletAngle;
@@ -76,7 +81,7 @@ public class PlayerWeapon : MonoBehaviour
             bulletAngle = shootAngle;
         }
         Bullet bullet = _objectPoolingManager.GetBullet(_ammoCategory);
-        bullet.Init(_weaponData.BulletSpeed);
+        bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
         bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
         
     }
@@ -90,7 +95,7 @@ public class PlayerWeapon : MonoBehaviour
     {
         //장전 시 사격 제한...
         _currentMagazineAmmo = _weaponData.DefaultMagazineSize;
-        _uiManager.UpdateAmmoText(_currentMagazineAmmo);
+        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);
     }
     
     private IEnumerator ShootCoroutine()

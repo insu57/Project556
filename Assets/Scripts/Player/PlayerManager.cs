@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : MonoBehaviour, IDamageable
 {
     [SerializeField] private int playerHealth = 100; //추후 SO에서 받아오게 수정 예정
     [SerializeField] private WeaponData currentWeaponData;//현재 직렬화(추후 인벤토리에서)
@@ -14,13 +15,14 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private Transform twoHandMuzzleTransform;
     
     private Camera _mainCamera;
-    private UIManager _uiManager;
+    private ItemUIManager _itemUIManager;
     private PlayerWeapon _playerWeapon;
     private PlayerAnimation _playerAnimation;
     private InventoryManager _inventoryManager;
     private InventoryUIPresenter _inventoryUIPresenter;
     
     private int _currentHealth;
+    public event Action<int> OnPlayerHealthChanged;
 
     public bool IsUnarmed { private set; get; }
     
@@ -31,19 +33,21 @@ public class PlayerManager : MonoBehaviour
     private CellData _pickupTargetCell;
     private (int firstIdx, RectTransform slotRT) _pickupTargetSlotInfo;
     private bool _pickupTargetIsPocket;
-    //private bool _currentItemCanEquip;
-    //private bool _currentItemCanPickup;
-    
+
+    //UI Manager 개선?
     private void Awake()
     {
-        _uiManager = FindFirstObjectByType<UIManager>();
+        _itemUIManager = FindFirstObjectByType<ItemUIManager>();
         TryGetComponent(out _playerAnimation);
         TryGetComponent(out _playerWeapon);
+        _playerWeapon.Init(_itemUIManager);
         
         _mainCamera = Camera.main;
         _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
 
         IsUnarmed = true;
+        
+        _currentHealth = playerHealth;
     }
 
     private void Start()
@@ -71,15 +75,51 @@ public class PlayerManager : MonoBehaviour
         _playerWeapon.Reload();
     }
 
-    private void WeaponChange(WeaponData newWeaponData) //무기 교체
+    public void HandleOnChangeWeapon(int idx)
     {
-        WeaponType weaponType = newWeaponData.WeaponType; //무기 타입
+        InventoryItem weaponItem;
+        WeaponData weaponData;
 
+        switch (idx)
+        {
+            case 1:
+                if (_inventoryManager.PrimaryWeaponItem == null)
+                {
+                    IsUnarmed = true;
+                    return;
+                }
+                weaponItem = _inventoryManager.PrimaryWeaponItem;
+                weaponData = weaponItem.ItemData as WeaponData;
+                if (weaponData) ChangeCurrentWeapon(weaponData);
+                IsUnarmed = false;
+                break;
+            case 2:
+                if (_inventoryManager.SecondaryWeaponItem == null)
+                {
+                    IsUnarmed = true;
+                    return;
+                }
+                weaponItem = _inventoryManager.SecondaryWeaponItem;
+                weaponData = weaponItem.ItemData as WeaponData;
+                if (weaponData) ChangeCurrentWeapon(weaponData);
+                IsUnarmed = false;
+                break;
+            case 3: //비무장
+                ChangeCurrentWeapon(null);
+                break;
+        }
+    }
+
+    private void ChangeCurrentWeapon(WeaponData newWeaponData) //무기 교체
+    {
         if (!newWeaponData)
         {
             IsUnarmed = true;
+            _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
+            return;
         }
-
+        
+        WeaponType weaponType = newWeaponData.WeaponType; //무기 타입
         IsUnarmed = false;
         if (weaponType == WeaponType.Pistol) //한손무기
         {
@@ -99,7 +139,7 @@ public class PlayerManager : MonoBehaviour
         }
         
         currentWeaponData = newWeaponData; //현재 무기데이터 
-        _playerWeapon.Init(_uiManager, currentWeaponData); //초기화
+        _playerWeapon.ChangeWeaponData(newWeaponData); //변경
         _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
         
     }
@@ -111,7 +151,7 @@ public class PlayerManager : MonoBehaviour
         else if (_currentItemInteractIdx >= _currentItemInteractList.Count) _currentItemInteractIdx = 0;
         //범위 넘기면 처리
       
-        _uiManager.ScrollItemPickup(_currentItemInteractIdx);//ItemPickup UI 스크롤(획득/장착 등...)
+        _itemUIManager.ScrollItemPickup(_currentItemInteractIdx);//ItemPickup UI 스크롤(획득/장착 등...)
     }
     
     private void OnTriggerEnter2D(Collider2D other)
@@ -174,7 +214,7 @@ public class PlayerManager : MonoBehaviour
             if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip));
             _currentItemInteractList.Add((canPickup, ItemInteractType.PickUp));
             
-            _uiManager.ShowItemPickup(pos, isGear, _currentItemInteractList); //이벤트로 수정 예정
+            _itemUIManager.ShowItemPickup(pos, isGear, _currentItemInteractList); //이벤트로 수정 예정
             
             return;//진행중
             
@@ -188,7 +228,7 @@ public class PlayerManager : MonoBehaviour
         if (other.CompareTag("Item"))
         {
             CanItemInteract = false;
-            _uiManager.HideItemPickup();
+            _itemUIManager.HideItemPickup();
         }
     }
 
@@ -209,6 +249,14 @@ public class PlayerManager : MonoBehaviour
             case ItemInteractType.Equip:
                 //Event
                 _inventoryManager.EquipGearItem(_pickupTargetCell, item); //사이즈 준내큼
+                if (_pickupTargetCell == _inventoryManager.PrimaryWeaponSlot)
+                {
+                    HandleOnChangeWeapon(1);
+                }
+                else if (_pickupTargetCell == _inventoryManager.SecondaryWeaponSlot)
+                {
+                    HandleOnChangeWeapon(2);
+                }
                 break;
             case ItemInteractType.PickUp:
                 if (!_pickupTargetIsPocket)
@@ -222,6 +270,11 @@ public class PlayerManager : MonoBehaviour
                 break;
         }
         
-        Destroy(_currentItemPickUp.gameObject);
+        Destroy(_currentItemPickUp.gameObject); //수정
+    }
+
+    public void TakeDamage(float damage)
+    {
+        
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Player;
+using UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -8,7 +9,7 @@ public class UIControl : MonoBehaviour
 {
     private PlayerControl _playerControl;
     private PlayerInput _playerInput;
-    private UIManager _uiManager;
+    private ItemUIManager _itemUIManager;
     
     private InputAction _closeAction;
     private InputAction _closeUIAction;
@@ -16,7 +17,7 @@ public class UIControl : MonoBehaviour
     public InputAction ItemRotateAction {private set; get;}
     private void Awake()
     {
-        _uiManager = GetComponent<UIManager>();
+        _itemUIManager = GetComponent<ItemUIManager>();
     }
     
     public void Init(PlayerControl playerControl)
@@ -60,19 +61,19 @@ public class UIControl : MonoBehaviour
     //개선?
     public void OnOpenUI()
     {
-        _uiManager.OpenPlayerUI(true);
+        _itemUIManager.OpenPlayerUI(true);
     }
     
     private void OnClose(InputAction.CallbackContext context) //esc
     {
-        _uiManager.OpenPlayerUI(false);
+        _itemUIManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
         
     }
 
     private void OnCloseUI(InputAction.CallbackContext context) //Tab key
     {
-        _uiManager.OpenPlayerUI(false);
+        _itemUIManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
     }
 

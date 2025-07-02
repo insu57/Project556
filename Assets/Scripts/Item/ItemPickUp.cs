@@ -12,6 +12,8 @@ public class ItemPickUp : MonoBehaviour
         this.itemData = itemData;
         ID = Guid.NewGuid();
         //Guid 생성? (필드 아이템)
+        _spriteRenderer.sprite = itemData.ItemSprite;
+        _collider.size = _spriteRenderer.sprite.bounds.size;
     }
     
     private void Awake()
@@ -24,7 +26,8 @@ public class ItemPickUp : MonoBehaviour
     {
         //ItemPrefab = itemData.ItemPrefab;
         _spriteRenderer.sprite = itemData.ItemSprite;
-        _collider.size = itemData.PickUpColliderSize; //Collider size 조정 -> 수정 필요
+        _collider.size = _spriteRenderer.sprite.bounds.size;
+        //_collider.size = itemData.PickUpColliderSize; //Collider size 조정 -> 수정 필요
     }
 
     public IItemData GetItemData()

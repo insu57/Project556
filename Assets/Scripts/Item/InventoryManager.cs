@@ -9,22 +9,22 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     //Left Panel
-    private InventoryItem _headwearData;
+    public InventoryItem HeadwearItem { private set; get; }
     public CellData HeadwearSlot { get; } = new(GearType.HeadWear, Vector2.zero);
-    private InventoryItem _eyewearData;
+    public InventoryItem EyewearItem { private set; get; }
     public CellData EyewearSlot { get; } = new(GearType.EyeWear, Vector2.zero);
-    private InventoryItem _bodyArmorData;
+    public InventoryItem BodyArmorItem { private set; get; }
     public CellData BodyArmorSlot { get; } = new(GearType.BodyArmor, Vector2.zero);
-    private InventoryItem _primaryWeaponData;
+    public InventoryItem PrimaryWeaponItem { private set; get; }
     public CellData PrimaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
-    private InventoryItem _secondaryWeaponData;
+    public InventoryItem SecondaryWeaponItem { private set; get; }
     public CellData SecondaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
 
     //Middle Panel
-    private InventoryItem _chestRigData;
+    public InventoryItem ChestRigItem { private set; get; }
     public CellData ChestRigSlot { get; } = new(GearType.ArmoredRig, Vector2.zero);
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
-    private InventoryItem _backpackData;
+    public InventoryItem BackpackItem { private set; get; }
     public CellData BackpackSlot { get; } = new(GearType.Backpack, Vector2.zero);
     public Inventory BackpackInventory { get; private set; }
     public Inventory RigInventory { get; private set; }
@@ -33,6 +33,7 @@ public class InventoryManager : MonoBehaviour
     public Inventory LootInventory { get; private set; }
     
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
+    private readonly Dictionary<CellData, InventoryItem> _gearCellDict = new();
     public event Action<GameObject, InventoryItem> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<InventoryItem> OnShowInventory;
     public event Action<CellData, InventoryItem> OnEquipFieldItem;
@@ -45,16 +46,17 @@ public class InventoryManager : MonoBehaviour
             PocketSlots[i] = new CellData(GearType.None, Vector2.zero);
         }
         
+        _gearCellDict[HeadwearSlot] = HeadwearItem;
+        _gearCellDict[EyewearSlot] = EyewearItem;
+        _gearCellDict[BodyArmorSlot] = BodyArmorItem;
+        _gearCellDict[ChestRigSlot] = ChestRigItem;
+        _gearCellDict[BackpackSlot] = BackpackItem;
+        _gearCellDict[PrimaryWeaponSlot] = PrimaryWeaponItem;
+        _gearCellDict[SecondaryWeaponSlot] = SecondaryWeaponItem;
+        
     }
     
-    public void Init()
-    {
-        //_uiManager = uiManager;
-    }
-
-    //Presenter 이벤트 처리...
-    
-    public void SetInventoryData(Inventory inventory, GearType gearType)
+    public void SetInventoryData(Inventory inventory, GearType gearType) 
     {
         //인벤토리 설정
         switch (gearType)
@@ -72,7 +74,7 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public CellData CheckCanEquipItem(GearType gearType)
+    public CellData CheckCanEquipItem(GearType gearType) //GearSlot 장착 가능 여부 확인
     {
         switch (gearType)
         {
@@ -115,11 +117,57 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
+    private void SetGearItemData(CellData cell, InventoryItem item)
+    {
+        if (cell == HeadwearSlot)
+        {
+            HeadwearItem = item; 
+            return;
+        }
+        if (cell == EyewearSlot)
+        {
+            EyewearItem = item;
+            return ;
+        }
+
+        if (cell == BodyArmorSlot)
+        {
+            BodyArmorItem = item;
+            return;
+        }
+
+        if (cell == PrimaryWeaponSlot)
+        {
+            PrimaryWeaponItem = item;
+            return;
+        }
+
+        if (cell == SecondaryWeaponSlot)
+        {
+            SecondaryWeaponItem = item;
+            return;
+        }
+
+        if (cell == ChestRigSlot)
+        {
+            ChestRigItem = item;
+            return;
+        }
+
+        if (cell == BackpackSlot)
+        {
+            BackpackItem = item;
+            return;
+        }
+    }
+
     public void SetGearItem(CellData gearSlot, InventoryItem item)
     {
         ItemDict[item.InstanceID] = (item, gearSlot);
         gearSlot.SetEmpty(false, item.InstanceID);
-
+        
+        SetGearItemData(gearSlot, item);
+        
         GearData gearData;
         switch (item.GearType)
         {
@@ -143,9 +191,8 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveGearItem(CellData gearSlot, Guid itemID)
     {
-        
         var gearType = ItemDict[itemID].item.GearType;
-        Debug.Log($"Removing item : {ItemDict[itemID].item.ItemData.ItemName}, {itemID}");
+        //Debug.Log($"Removing item : {ItemDict[itemID].item.ItemData.ItemName}, {itemID}");
         if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack)
         {
             var inventory = ItemDict[itemID].item.ItemInventory;
@@ -154,6 +201,9 @@ public class InventoryManager : MonoBehaviour
         
         ItemDict.Remove(itemID);
         gearSlot.SetEmpty(true, Guid.Empty);
+        
+        _gearCellDict[gearSlot] = null; //Data 비우기
+        
         //Inventory있는 경우...처리
         //리그, 가방 -> 무조건 있음... 단순 비활성?
         
@@ -171,10 +221,7 @@ public class InventoryManager : MonoBehaviour
     {
         //item따라...
         //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
-        //DragHandler -> inventoryUIPresenter에서
-        //Inventory...없으면 null, backpack -> rig 순. 
-        //LootInventory -> 맵 초기화에서...일괄
-        
+
         if (BackpackInventory)
         {
             //var item = new InventoryItem(itemData);
@@ -192,6 +239,5 @@ public class InventoryManager : MonoBehaviour
         }
 
         OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
-        //unavailable 표시... -> UI?
     }
 }
