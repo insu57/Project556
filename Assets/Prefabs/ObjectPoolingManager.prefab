@@ -46,14 +46,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPoolSettings:
   - category: 0
-    prefab: {fileID: 9003748905385562159, guid: 7fdf1db73e2be804581603aecc54a52d, type: 3}
+    prefab: {fileID: 1195658896717919985, guid: 81098ebe12e68c84cb6cbdd116418bed, type: 3}
     initialSize: 100
     maxSize: 250
   - category: 1
-    prefab: {fileID: 269435753263975175, guid: ae9c5340b68c5ee4d854654b51a55132, type: 3}
+    prefab: {fileID: 2255073792994399734, guid: 8b372b66750a9a44e9aad955479dcf74, type: 3}
     initialSize: 100
     maxSize: 250
   - category: 2
-    prefab: {fileID: 269435753263975175, guid: 977c53625e8279e4dbc0ccc38a1f6bc1, type: 3}
+    prefab: {fileID: 1371491712315038372, guid: 6b151a676fe7d1948b903f689bfa2330, type: 3}
     initialSize: 100
     maxSize: 250

@@ -7,12 +7,13 @@ using UnityEngine.Serialization;
 
 public class PlayerManager : MonoBehaviour, IDamageable
 {
-    [SerializeField] private int playerHealth = 100; //추후 SO에서 받아오게 수정 예정
+    [SerializeField] private float playerHealth = 100f; //추후 SO에서 받아오게 수정 예정
     [SerializeField] private WeaponData currentWeaponData;//현재 직렬화(추후 인벤토리에서)
     [SerializeField] private SpriteRenderer oneHandSprite;
     [SerializeField] private Transform oneHandMuzzleTransform;
     [SerializeField] private SpriteRenderer twoHandSprite;
     [SerializeField] private Transform twoHandMuzzleTransform;
+    [SerializeField] private GameObject muzzleFlashVFX;
     
     private Camera _mainCamera;
     private ItemUIManager _itemUIManager;
@@ -21,8 +22,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private InventoryManager _inventoryManager;
     private InventoryUIPresenter _inventoryUIPresenter;
     
-    private int _currentHealth;
-    public event Action<int> OnPlayerHealthChanged;
+    private float _currentHealth;
+    public event Action<float> OnPlayerHealthChanged;
 
     public bool IsUnarmed { private set; get; }
     
@@ -41,6 +42,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         TryGetComponent(out _playerAnimation);
         TryGetComponent(out _playerWeapon);
         _playerWeapon.Init(_itemUIManager);
+        _playerWeapon.OnShowMuzzleFlash += () => muzzleFlashVFX.SetActive(true);
         
         _mainCamera = Camera.main;
         _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
@@ -48,11 +50,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
         IsUnarmed = true;
         
         _currentHealth = playerHealth;
-    }
-
-    private void Start()
-    {
-        //WeaponChange(currentWeaponData);
     }
 
     public bool CheckIsAutomatic()
@@ -128,6 +125,10 @@ public class PlayerManager : MonoBehaviour, IDamageable
             twoHandSprite.enabled = false;
             oneHandMuzzleTransform.localPosition = newWeaponData.MuzzlePosition;
             _playerWeapon.SetMuzzleTransform(oneHandMuzzleTransform); //총구위치 설정
+            
+            muzzleFlashVFX.transform.SetParent(oneHandMuzzleTransform);
+            muzzleFlashVFX.transform.localRotation = Quaternion.identity;
+            muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
         }
         else //양손무기
         {
@@ -136,6 +137,10 @@ public class PlayerManager : MonoBehaviour, IDamageable
             oneHandSprite.enabled = false;
             twoHandMuzzleTransform.localPosition = newWeaponData.MuzzlePosition;
             _playerWeapon.SetMuzzleTransform(twoHandMuzzleTransform);
+            
+            muzzleFlashVFX.transform.SetParent(twoHandMuzzleTransform);
+            muzzleFlashVFX.transform.localRotation = Quaternion.identity;
+            muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
         }
         
         currentWeaponData = newWeaponData; //현재 무기데이터 
@@ -275,6 +280,11 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
-        
+        _currentHealth -= damage;
+        OnPlayerHealthChanged?.Invoke(_currentHealth);
+        if (_currentHealth <= 0)
+        {
+            Debug.Log("Player Dead: Health");
+        }
     }
 }

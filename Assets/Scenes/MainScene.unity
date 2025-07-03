@@ -4554,6 +4554,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1321429274 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3203284925882852156, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
+  m_PrefabInstance: {fileID: 35690069355884480}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1321429277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1321429274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdaa04afc33031246a51ba64f68ba8f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1391971668
 GameObject:
   m_ObjectHideFlags: 0
@@ -5462,6 +5479,10 @@ PrefabInstance:
       propertyPath: m_SortingLayer
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 3203284925882852156, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3389974225602303106, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
       propertyPath: rifleAnimator
       value: 
@@ -5837,7 +5858,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6675477042620622441, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
       insertIndex: 0
       addedObject: {fileID: 1500500674}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3203284925882852156, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1321429277}
   m_SourcePrefab: {fileID: 100100000, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
 --- !u!1001 &637881974901793135
 PrefabInstance:
@@ -5984,9 +6008,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3826064467862385825, guid: eb27c658c1a59d74c8ab8a5b8929ed03, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4048211462211190875, guid: eb27c658c1a59d74c8ab8a5b8929ed03, type: 3}
       propertyPath: m_Name
       value: MainUICanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 5026424811967536611, guid: eb27c658c1a59d74c8ab8a5b8929ed03, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -220
+      objectReference: {fileID: 0}
+    - target: {fileID: 5170522612984384969, guid: eb27c658c1a59d74c8ab8a5b8929ed03, type: 3}
+      propertyPath: m_margin.z
+      value: 20
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -12,13 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a45b0ce3f01a934b9ddbebf8ea6757e, type: 3}
   m_Name: M855
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 269435753263975175, guid: ae9c5340b68c5ee4d854654b51a55132, type: 3}
+  bulletPrefab: {fileID: 2255073792994399734, guid: 8b372b66750a9a44e9aad955479dcf74, type: 3}
   ammoCaliber: 0
   ammoCategory: 0
   itemID: ammo_556x45_01
   itemName: 'M855 5.56x45mm '
   itemSprite: {fileID: -8238214526966065350, guid: b722f89953a25d54aa1f0b9cce48199b, type: 3}
-  pickUpColliderOffset: {x: 0, y: 0}
   pickUpColliderSize: {x: 0, y: 0}
   itemWidth: 1
   itemHeight: 1

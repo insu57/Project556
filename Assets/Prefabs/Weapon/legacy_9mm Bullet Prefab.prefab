@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -4682868588170927143}
   - component: {fileID: 3330651642123247795}
   m_Layer: 0
-  m_Name: 9mm Bullet Prefab
+  m_Name: legacy_9mm Bullet Prefab
   m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using TMPro;
 using UI;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PlayerWeapon : MonoBehaviour
 {
@@ -24,7 +26,8 @@ public class PlayerWeapon : MonoBehaviour
     private float _normalizedAccuracy; //정규화 정확도
     private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도
     private float _maxDeviationAngle; //최대 각도 편차(탄퍼짐 편차)
- 
+
+    public event Action OnShowMuzzleFlash;
     //[SerializeField] private float speed = 5f;
 
     private void Awake()
@@ -52,12 +55,14 @@ public class PlayerWeapon : MonoBehaviour
     public void Shoot(bool isFlipped, float shootAngle)
     {
         if(!_canShoot) return;
-        if(_currentMagazineAmmo <= 0) return; //잔탄이 없으면 return
+        if(_currentMagazineAmmo <= 0) return; //잔탄이 없으면 return 수정필요
+        
+        OnShowMuzzleFlash?.Invoke(); //show flash
         
         StartCoroutine(ShootCoroutine()); //fireRate
         
         _currentMagazineAmmo--;
-        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);
+        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);//수정 필요
         
 
         float bulletAngle;

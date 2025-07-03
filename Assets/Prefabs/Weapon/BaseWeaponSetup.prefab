@@ -102,6 +102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   muzzleOffset: {fileID: 7563597284036652086}
+  muzzleFlashOffset: {fileID: 8794306360145553090}
 --- !u!1 &6499768779012199229
 GameObject:
   m_ObjectHideFlags: 0
@@ -142,18 +143,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7563597284036652086}
     m_Modifications:
-    - target: {fileID: 2234452385500560127, guid: 6f339399204b50147b7f6a6656137d6c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.0447
-      objectReference: {fileID: 0}
-    - target: {fileID: 2234452385500560127, guid: 6f339399204b50147b7f6a6656137d6c, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.0001
-      objectReference: {fileID: 0}
-    - target: {fileID: 2234452385500560127, guid: 6f339399204b50147b7f6a6656137d6c, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2234452385500560127, guid: 6f339399204b50147b7f6a6656137d6c, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8840735547288530861}
   - component: {fileID: 9190024735813757776}
   m_Layer: 0
-  m_Name: buckshot
+  m_Name: legacy_buckshot
   m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

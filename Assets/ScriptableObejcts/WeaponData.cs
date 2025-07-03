@@ -46,6 +46,7 @@ public class WeaponData : BaseItemDataSO
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.Weapon;
     public Vector3 MuzzlePosition => weaponSetup.MuzzleOffset;
+    public Vector3 MuzzleFlashOffset => weaponSetup.MuzzleFlashOffset;
     public override bool IsStackable => false;
     public override int MaxStackAmount => 1;
 }
