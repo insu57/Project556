@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6081b0486af0a9c43af90081dd4bab44, type: 3}
-  m_Name: ArmorVest01
+  m_Name: Headgear01
   m_EditorClassIdentifier: 
-  itemID: body_armor_01
-  itemName: NPP Korund-VM
-  gearType: 2
-  armorAmount: 100
-  itemSprite: {fileID: 6204356872171817343, guid: 01f49a6374bc63845a6a9c8cab6efc5b, type: 3}
-  itemWidth: 3
-  itemHeight: 4
+  itemID: headgear_01
+  itemName: Helmet01
+  gearType: 5
+  armorAmount: 40
+  itemSprite: {fileID: 296266415210800220, guid: 44373ed093ee4914082553e136c1c431, type: 3}
+  itemWidth: 2
+  itemHeight: 2
   slotPrefab: {fileID: 0}

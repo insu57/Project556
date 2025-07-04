@@ -33,27 +33,19 @@ public class InventoryManager : MonoBehaviour
     public Inventory LootInventory { get; private set; }
     
     public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
-    private readonly Dictionary<CellData, InventoryItem> _gearCellDict = new();
+
     public event Action<GameObject, InventoryItem> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<InventoryItem> OnShowInventory;
     public event Action<CellData, InventoryItem> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory;
-
+    public event Action<float> OnUpdateArmorAmount;
+    
     private void Awake()
     {
         for (int i = 0; i < 4; i++) //PocketSlot 4
         {
             PocketSlots[i] = new CellData(GearType.None, Vector2.zero);
         }
-        
-        _gearCellDict[HeadwearSlot] = HeadwearItem;
-        _gearCellDict[EyewearSlot] = EyewearItem;
-        _gearCellDict[BodyArmorSlot] = BodyArmorItem;
-        _gearCellDict[ChestRigSlot] = ChestRigItem;
-        _gearCellDict[BackpackSlot] = BackpackItem;
-        _gearCellDict[PrimaryWeaponSlot] = PrimaryWeaponItem;
-        _gearCellDict[SecondaryWeaponSlot] = SecondaryWeaponItem;
-        
     }
     
     public void SetInventoryData(Inventory inventory, GearType gearType) 
@@ -167,8 +159,7 @@ public class InventoryManager : MonoBehaviour
         gearSlot.SetEmpty(false, item.InstanceID);
         
         SetGearItemData(gearSlot, item);
-        
-        GearData gearData;
+
         switch (item.GearType)
         {
             case GearType.ArmoredRig:
@@ -179,14 +170,17 @@ public class InventoryManager : MonoBehaviour
                     OnShowInventory?.Invoke(item);
                     return;
                 }
-                gearData = item.ItemData as GearData;
+                var gearData = item.ItemData as GearData;
                 if(gearData) OnInitInventory?.Invoke(gearData.SlotPrefab, item); 
                 //SetInventorySlot(gearData.SlotPrefab, item);
                 //인벤토리 초기화 여부... 어떻게?
                 break;
         }
         //장비 능력치, 무기 설정
-        //inventory -> player??
+        //무기 관련 구현(교체)
+        //현재 무기 장착해제 -> PlayerManager 비무장으로
+        //
+        OnUpdateArmorAmount?.Invoke(GetTotalArmorAmount());
     }
 
     public void RemoveGearItem(CellData gearSlot, Guid itemID)
@@ -202,8 +196,6 @@ public class InventoryManager : MonoBehaviour
         ItemDict.Remove(itemID);
         gearSlot.SetEmpty(true, Guid.Empty);
         
-        _gearCellDict[gearSlot] = null; //Data 비우기
-        
         //Inventory있는 경우...처리
         //리그, 가방 -> 무조건 있음... 단순 비활성?
         
@@ -215,6 +207,17 @@ public class InventoryManager : MonoBehaviour
         SetGearItem(gearSlot, item);
         //event...
         OnEquipFieldItem?.Invoke(gearSlot, item);
+    }
+
+    public float GetTotalArmorAmount()
+    {
+        float totalArmor = 0;
+        if(HeadwearItem.ItemData is GearData headwearData) totalArmor += headwearData.ArmorAmount;
+        if(EyewearItem.ItemData is GearData eyewearData) totalArmor += eyewearData.ArmorAmount;
+        if(BodyArmorItem.ItemData is GearData bodyArmorData) totalArmor += bodyArmorData.ArmorAmount;
+        if(ChestRigItem.GearType is GearType.ArmoredRig &&
+           ChestRigItem.ItemData is GearData chestRigData ) totalArmor += chestRigData.ArmorAmount;
+        return totalArmor;
     }
     
     public void AddItemToInventory(int firstIdx, RectTransform slotRT, InventoryItem item)

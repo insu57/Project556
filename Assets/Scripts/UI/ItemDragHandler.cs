@@ -43,13 +43,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     public event Action<ItemDragHandler> OnEndDragEvent;
     public event Action<ItemDragHandler> OnRotateItemEvent;
     
-    private void Awake()
-    {
-        
-        //itemImage = GetComponent<Image>();
-    }
-    
-    //이벤트 구독 이슈 
+    //이벤트 구독
     private void OnEnable()
     {
         if (!_inventoryUIPresenter) return;
@@ -105,6 +99,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         Vector2 offset = new Vector2(pivotDelta.x * parentSize.x, pivotDelta.y * parentSize.y); //pivot offest(위치보정)
         
         _itemRT.SetParent(itemParentRT); //부모 설정
+        _itemRT.localScale = Vector3.one; //world - canvas(overlay) scale 차이 -> 조정
         _itemRT.anchoredPosition = targetPos + offset; //위치보정
         _itemRT.sizeDelta = size;
         _slotImageSize = size;
@@ -116,7 +111,6 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     
     public void SetItemDragRotate(bool isRotated, Vector2 size)
     {
-        //Debug.Log("SetItemDragRotate");
         _itemRT.sizeDelta = size;
         _defaultImageSize = size; //아이템 크기와 기본 이미지 사이즈 변경.(가로세로가 바뀌기 때문에 갱신)
          if (_inventoryRT) //회전할 때 원래 GearSlot이 아니면

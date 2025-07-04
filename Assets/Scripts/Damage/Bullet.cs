@@ -10,7 +10,7 @@ public class Bullet : MonoBehaviour
     private AmmoCaliber _ammoCaliber;
     [SerializeField] private AmmoCategory ammoCategory;
     
-    private ObjectPoolingManager _objectPoolingManager;
+    //private ObjectPoolingManager _objectPoolingManager;
     private Rigidbody2D _rigidbody2D;
     private float _speed;
     private float _damage;
@@ -21,7 +21,7 @@ public class Bullet : MonoBehaviour
     
     private void Awake()
     {
-        _objectPoolingManager = GetComponentInParent<ObjectPoolingManager>();
+        //_objectPoolingManager = GetComponentInParent<ObjectPoolingManager>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
@@ -55,6 +55,7 @@ public class Bullet : MonoBehaviour
     private IEnumerator DestroyBullet()
     {
         yield return BulletWait;
-        _objectPoolingManager.ReleaseBullet(ammoCategory, this);
+        //_objectPoolingManager.ReleaseBullet(ammoCategory, this);
+        ObjectPoolingManager.Instance.ReleaseBullet(ammoCategory, this);
     }
 }

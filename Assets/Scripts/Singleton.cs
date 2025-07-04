@@ -9,13 +9,13 @@ public class Singleton <T> : MonoBehaviour where T : Singleton<T> //Singleton Ge
         {
             if (!_instance)
             {
-                //_instance = (T)FindFirstObjectByType(typeof(T));
                 _instance = (T)FindAnyObjectByType(typeof(T));
                 if (!_instance)
                 {
                     SetupInstance();
                 }
             }
+            
             return _instance;
         }
     }
@@ -27,17 +27,15 @@ public class Singleton <T> : MonoBehaviour where T : Singleton<T> //Singleton Ge
 
     private static void SetupInstance()
     {
-        //_instance = (T)FindFirstObjectByType(typeof(T));
         _instance = (T)FindAnyObjectByType(typeof(T));
-        if (!_instance)
+        
+        if (_instance) return;
+        var obj = new GameObject
         {
-            GameObject obj = new GameObject
-            {
-                name = typeof(T).Name
-            };
-            _instance = obj.AddComponent<T>();
-            DontDestroyOnLoad(obj);
-        }
+            name = typeof(T).Name
+        };
+        _instance = obj.AddComponent<T>();
+        DontDestroyOnLoad(obj);
     }
 
     private void RemoveDuplicates()

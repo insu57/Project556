@@ -9,7 +9,7 @@ public class MedicalData : BaseItemDataSO
     [SerializeField] private int healAmount;
     
     [SerializeField] private Sprite itemSprite;
-    [SerializeField] private Vector2 pickUpColliderSize;
+   
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
 

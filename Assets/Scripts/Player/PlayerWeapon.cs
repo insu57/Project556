@@ -7,19 +7,14 @@ using Random = UnityEngine.Random;
 
 public class PlayerWeapon : MonoBehaviour
 {
-    //변경? -> 들고있는건 Sprite만 정보는 다른 클래스로?
-    //private Transform muzzleTransform;
     private WeaponData _weaponData;
     private Transform _muzzleTransform;
-    //public WeaponData WeaponData => weaponData;
     
     private int _currentMagazineAmmo;
     
     private bool _canShoot = true;
-    //public bool CanShoot => _canShoot;
  
     private ItemUIManager _itemUIManager;
-    private ObjectPoolingManager _objectPoolingManager;
     
     private AmmoCategory _ammoCategory;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
@@ -28,12 +23,6 @@ public class PlayerWeapon : MonoBehaviour
     private float _maxDeviationAngle; //최대 각도 편차(탄퍼짐 편차)
 
     public event Action OnShowMuzzleFlash;
-    //[SerializeField] private float speed = 5f;
-
-    private void Awake()
-    {
-        _objectPoolingManager = FindFirstObjectByType<ObjectPoolingManager>();
-    }
     
     public void Init(ItemUIManager itemUIManager)
     {
@@ -85,7 +74,7 @@ public class PlayerWeapon : MonoBehaviour
                 new Vector2(Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
             bulletAngle = shootAngle;
         }
-        Bullet bullet = _objectPoolingManager.GetBullet(_ammoCategory);
+        Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoCategory);
         bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
         bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
         

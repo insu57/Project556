@@ -79,11 +79,10 @@ namespace UI
         private GameObject _lootSlotInstance;
     
         [SerializeField, Space] private Image slotAvailable;
-        [SerializeField] private ItemDragHandler itemDragHandlerPrefab;
     
         private readonly List<RectTransform> _gearSlotRT = new();
         private readonly List<RectTransform> _inventoriesRT = new();
-        //public readonly Dictionary<RectTransform, RectTransform> SlotItemRT = new();
+       
         private void Awake()
         {
             _panelSlotPadding = cellSize * 3;
@@ -136,7 +135,7 @@ namespace UI
                 text.gameObject.SetActive(false);
             }
         
-            foreach (var (isAvailable, type) in _pickupAvailableList) //비활성은?
+            foreach (var (isAvailable, type) in _pickupAvailableList)
             {
                 switch (type)
                 {
@@ -155,9 +154,6 @@ namespace UI
         
             pickupHighlight.color = _pickupAvailableList[0].isAvailable
                 ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
-        
-            //개선점? 장비하기/획득하기(Gear는 둘 다)...개선을 어떻게? List형식?
-            //아이템에 따라 달라질필요있음.(장착 상태, 종류에 따라)
         }
 
         public void HideItemPickup()
