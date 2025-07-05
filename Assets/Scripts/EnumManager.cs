@@ -61,6 +61,13 @@ public enum GearType
     Weapon,
 }
 
+public enum CurrentWeaponIdx
+{
+    Unarmed = 0,
+    Primary,
+    Secondary,
+}
+
 public class EnumManager : MonoBehaviour
 {
     public static AmmoCategory GetAmmoCategory(AmmoCaliber caliber)

@@ -15,7 +15,10 @@ public class InventoryItem
     public int MaxStackAmount => ItemData.MaxStackAmount;
     public int CurrentStackAmount { get; private set; }
     public bool IsRotated { get; private set; }
-    public Inventory ItemInventory {get; private set;}
+    public Inventory ItemInventory {get; private set;} 
+    
+    //내구도
+    //장탄수(무기)
     
     public InventoryItem(IItemData itemData) //new...Init
     {

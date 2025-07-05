@@ -23,7 +23,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private InventoryUIPresenter _inventoryUIPresenter;
     
     private float _currentHealth;
-    public event Action<float> OnPlayerHealthChanged;
+    private float _currentTotalArmor;
+    private CurrentWeaponIdx _currentWeaponIdx = CurrentWeaponIdx.Unarmed; //초기 Unarmed
+    public event Action<float, float> OnPlayerHealthChanged;
 
     public bool IsUnarmed { private set; get; }
     
@@ -42,16 +44,43 @@ public class PlayerManager : MonoBehaviour, IDamageable
         TryGetComponent(out _playerAnimation);
         TryGetComponent(out _playerWeapon);
         _playerWeapon.Init(_itemUIManager);
-        _playerWeapon.OnShowMuzzleFlash += () => muzzleFlashVFX.SetActive(true);
+        _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
         
         _mainCamera = Camera.main;
         _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
-
+        _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
+        _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
+        
         IsUnarmed = true;
         
         _currentHealth = playerHealth;
     }
 
+    private void OnDisable()
+    {
+        _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
+        _inventoryManager.OnUpdateArmorAmount -= HandleOnUpdateArmorAmount;
+        _inventoryManager.OnUnequipWeapon -= HandleOnUnequipWeapon;
+    }
+
+    private void HandleOnShowMuzzleFlash()
+    {
+        muzzleFlashVFX.SetActive(true);
+    }
+
+    private void HandleOnUpdateArmorAmount(float amount)
+    {
+        _currentTotalArmor = amount;
+    }
+
+    private void HandleOnUnequipWeapon(CurrentWeaponIdx weaponIdx)
+    {
+        if (_currentWeaponIdx == weaponIdx)
+        {
+            ChangeCurrentWeapon(null);
+        }
+    }
+    
     public bool CheckIsAutomatic()
     {
         return currentWeaponData.CanFullAuto;
@@ -72,39 +101,56 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _playerWeapon.Reload();
     }
 
-    public void HandleOnChangeWeapon(int idx)
+    public void HandleOnChangeWeapon(CurrentWeaponIdx weaponIdx)
     {
         InventoryItem weaponItem;
         WeaponData weaponData;
-
-        switch (idx)
+        
+        switch (weaponIdx)
         {
-            case 1:
+            case CurrentWeaponIdx.Primary:
                 if (_inventoryManager.PrimaryWeaponItem == null)
                 {
-                    IsUnarmed = true;
+                    ChangeCurrentWeapon(null);
+                    _currentWeaponIdx = CurrentWeaponIdx.Unarmed;
                     return;
                 }
                 weaponItem = _inventoryManager.PrimaryWeaponItem;
                 weaponData = weaponItem.ItemData as WeaponData;
-                if (weaponData) ChangeCurrentWeapon(weaponData);
-                IsUnarmed = false;
+                if (weaponData)
+                {
+                    ChangeCurrentWeapon(weaponData);
+                }
+                else
+                {
+                    ChangeCurrentWeapon(null);
+                    weaponIdx = CurrentWeaponIdx.Unarmed;
+                }
                 break;
-            case 2:
+            case CurrentWeaponIdx.Secondary:
                 if (_inventoryManager.SecondaryWeaponItem == null)
                 {
-                    IsUnarmed = true;
+                    ChangeCurrentWeapon(null);
+                    _currentWeaponIdx = CurrentWeaponIdx.Unarmed;
                     return;
                 }
                 weaponItem = _inventoryManager.SecondaryWeaponItem;
                 weaponData = weaponItem.ItemData as WeaponData;
-                if (weaponData) ChangeCurrentWeapon(weaponData);
-                IsUnarmed = false;
+                if (weaponData)
+                {
+                    ChangeCurrentWeapon(weaponData);
+                }
+                else
+                {
+                    ChangeCurrentWeapon(null);
+                    weaponIdx = CurrentWeaponIdx.Unarmed;
+                }
                 break;
-            case 3: //비무장
+            case CurrentWeaponIdx.Unarmed: //비무장
                 ChangeCurrentWeapon(null);
                 break;
         }
+        _currentWeaponIdx = weaponIdx;
     }
 
     private void ChangeCurrentWeapon(WeaponData newWeaponData) //무기 교체
@@ -113,6 +159,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         {
             IsUnarmed = true;
             _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
+            oneHandSprite.enabled = false;
+            twoHandSprite.enabled = false;
             return;
         }
         
@@ -218,13 +266,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
             _currentItemInteractIdx = 0;
             if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip));
             _currentItemInteractList.Add((canPickup, ItemInteractType.PickUp));
+            //버그... 장착할 수 없을때
             
-            _itemUIManager.ShowItemPickup(pos, isGear, _currentItemInteractList); //이벤트로 수정 예정
-            
-            return;//진행중
-            
-            //ObjectPooling 수정 필요
-            Destroy(other.gameObject);
+            _itemUIManager.ShowItemPickup(pos, _currentItemInteractList); //이벤트로 수정 예정
         }
     }
 
@@ -256,11 +300,11 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 _inventoryManager.EquipGearItem(_pickupTargetCell, item); //사이즈 준내큼
                 if (_pickupTargetCell == _inventoryManager.PrimaryWeaponSlot)
                 {
-                    HandleOnChangeWeapon(1);
+                    HandleOnChangeWeapon(CurrentWeaponIdx.Primary);
                 }
                 else if (_pickupTargetCell == _inventoryManager.SecondaryWeaponSlot)
                 {
-                    HandleOnChangeWeapon(2);
+                    HandleOnChangeWeapon(CurrentWeaponIdx.Secondary);
                 }
                 break;
             case ItemInteractType.PickUp:
@@ -281,7 +325,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void TakeDamage(float damage)
     {
         _currentHealth -= damage;
-        OnPlayerHealthChanged?.Invoke(_currentHealth);
+        OnPlayerHealthChanged?.Invoke(_currentHealth, playerHealth);
         if (_currentHealth <= 0)
         {
             Debug.Log("Player Dead: Health");

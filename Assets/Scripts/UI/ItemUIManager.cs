@@ -12,7 +12,7 @@ namespace UI
         [SerializeField] private GameObject playerUI;
     
         [SerializeField, Space] private RectTransform pickupUI;
-        private List<TMP_Text> _pickupTextList = new();
+        private readonly List<TMP_Text> _pickupTextList = new();
         [SerializeField] private TMP_Text equipText;
         [SerializeField] private TMP_Text pickupText;
         [SerializeField] private float pickupTextSize = 50f;
@@ -120,7 +120,7 @@ namespace UI
             playerUI.SetActive(isOpen);
         }
     
-        public void ShowItemPickup (Vector2 position, bool isGear, List<(bool, ItemInteractType)> availableList)
+        public void ShowItemPickup (Vector2 position, List<(bool, ItemInteractType)> availableList)
         {
             //설정...아이템 따라
             pickupUI.gameObject.SetActive(true);
@@ -135,15 +135,15 @@ namespace UI
                 text.gameObject.SetActive(false);
             }
         
-            foreach (var (isAvailable, type) in _pickupAvailableList)
+            foreach (var (_, type) in _pickupAvailableList) //여기가 문제... 색만 변경
             {
                 switch (type)
                 {
                     case ItemInteractType.Equip:
-                        equipText.gameObject.SetActive(isAvailable);
+                        equipText.gameObject.SetActive(true);
                         break;
                     case ItemInteractType.PickUp:
-                        pickupText.gameObject.SetActive(isAvailable);
+                        pickupText.gameObject.SetActive(true);
                         break;
                     default:
                         Debug.LogWarning("ItemInteractType Error: None.");
@@ -158,7 +158,7 @@ namespace UI
 
         public void HideItemPickup()
         {
-            pickupUI.gameObject.SetActive(false);
+            pickupUI.gameObject.SetActive(false); //버그?
         }
     
         public void ScrollItemPickup(int idx)

@@ -11,6 +11,16 @@ public class PlayerUIPresenter : MonoBehaviour
         TryGetComponent(out _playerManager);
         _playerUIManager = FindFirstObjectByType<PlayerUIManager>();
         
+        _playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
+    }
+
+    private void HandleOnUpdateHealthBar(float health, float maxHealth)
+    {
+        _playerUIManager.UpdateHealthBar(health, maxHealth);
+    }
+
+    private void HandleOnUpdateAmmoText()
+    {
         
     }
     

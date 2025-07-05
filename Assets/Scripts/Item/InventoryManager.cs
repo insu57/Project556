@@ -39,6 +39,7 @@ public class InventoryManager : MonoBehaviour
     public event Action<CellData, InventoryItem> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory;
     public event Action<float> OnUpdateArmorAmount;
+    public event Action<CurrentWeaponIdx> OnUnequipWeapon;
     
     private void Awake()
     {
@@ -109,6 +110,105 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
+    
+
+    public void SetGearItem(CellData gearSlot, InventoryItem item)
+    {
+        ItemDict[item.InstanceID] = (item, gearSlot);
+        gearSlot.SetEmpty(false, item.InstanceID);
+        
+        SetGearItemData(gearSlot, item);
+
+        switch (item.GearType)
+        {
+            case GearType.ArmoredRig:
+            case GearType.UnarmoredRig:
+            case GearType.Backpack:
+                if (item.ItemInventory) //이미 인벤토리를 생성했다면
+                {
+                    OnShowInventory?.Invoke(item);
+                    return;
+                }
+                var gearData = item.ItemData as GearData;
+                if(gearData) OnInitInventory?.Invoke(gearData.SlotPrefab, item); 
+                break;
+        }
+        //장비 능력치, 무기 설정
+        //무기 관련 구현(교체)
+        //현재 무기 장착해제 -> PlayerManager 비무장으로
+        OnUpdateArmorAmount?.Invoke(GetTotalArmorAmount());
+    }
+
+    public void RemoveGearItem(CellData gearSlot, Guid itemID)
+    {
+        var gearType = ItemDict[itemID].item.GearType;
+        //Debug.Log($"Removing item : {ItemDict[itemID].item.ItemData.ItemName}, {itemID}");
+        if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack)
+        {
+            var inventory = ItemDict[itemID].item.ItemInventory;
+            inventory.gameObject.SetActive(false); //비활성
+        }
+
+        if (gearType is GearType.Weapon)
+        {
+            //비우기 무장해제
+            var cell = ItemDict[itemID].cell;
+            if (cell == PrimaryWeaponSlot)
+            {
+                OnUnequipWeapon?.Invoke(CurrentWeaponIdx.Primary);
+            }
+            else if (cell == SecondaryWeaponSlot)
+            {
+                OnUnequipWeapon?.Invoke(CurrentWeaponIdx.Secondary);
+            }
+        }
+        
+        ItemDict.Remove(itemID);
+        gearSlot.SetEmpty(true, Guid.Empty);
+        SetGearItemData(gearSlot, null);
+    }
+
+    public void EquipGearItem(CellData gearSlot, InventoryItem item)
+    {
+        SetGearItem(gearSlot, item);
+        //event...
+        OnEquipFieldItem?.Invoke(gearSlot, item);
+    }
+
+    public float GetTotalArmorAmount()
+    {
+        float totalArmor = 0;
+        if(HeadwearItem is { ItemData: GearData headwearData }) totalArmor += headwearData.ArmorAmount;
+        if(EyewearItem is {ItemData: GearData eyewearData}) totalArmor += eyewearData.ArmorAmount;
+        if(BodyArmorItem is { ItemData: GearData bodyArmorData }) totalArmor += bodyArmorData.ArmorAmount;
+        if(ChestRigItem is { GearType: GearType.ArmoredRig, ItemData: GearData chestRigData } )
+            totalArmor += chestRigData.ArmorAmount;
+        return totalArmor;
+    }
+    
+    public void AddItemToInventory(int firstIdx, RectTransform slotRT, InventoryItem item)
+    {
+        //item따라...
+        //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
+
+        if (BackpackInventory)
+        {
+            //var item = new InventoryItem(itemData);
+            var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, slotRT);
+            OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT, item);
+            return;
+        }
+
+        if (RigInventory)
+        {
+            //var item = new InventoryItem(itemData);
+            var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, slotRT);
+            OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
+            return;
+        }
+
+        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
+    }
     private void SetGearItemData(CellData cell, InventoryItem item)
     {
         if (cell == HeadwearSlot)
@@ -151,96 +251,5 @@ public class InventoryManager : MonoBehaviour
             BackpackItem = item;
             return;
         }
-    }
-
-    public void SetGearItem(CellData gearSlot, InventoryItem item)
-    {
-        ItemDict[item.InstanceID] = (item, gearSlot);
-        gearSlot.SetEmpty(false, item.InstanceID);
-        
-        SetGearItemData(gearSlot, item);
-
-        switch (item.GearType)
-        {
-            case GearType.ArmoredRig:
-            case GearType.UnarmoredRig:
-            case GearType.Backpack:
-                if (item.ItemInventory) //이미 인벤토리를 생성했다면
-                {
-                    OnShowInventory?.Invoke(item);
-                    return;
-                }
-                var gearData = item.ItemData as GearData;
-                if(gearData) OnInitInventory?.Invoke(gearData.SlotPrefab, item); 
-                //SetInventorySlot(gearData.SlotPrefab, item);
-                //인벤토리 초기화 여부... 어떻게?
-                break;
-        }
-        //장비 능력치, 무기 설정
-        //무기 관련 구현(교체)
-        //현재 무기 장착해제 -> PlayerManager 비무장으로
-        //
-        OnUpdateArmorAmount?.Invoke(GetTotalArmorAmount());
-    }
-
-    public void RemoveGearItem(CellData gearSlot, Guid itemID)
-    {
-        var gearType = ItemDict[itemID].item.GearType;
-        //Debug.Log($"Removing item : {ItemDict[itemID].item.ItemData.ItemName}, {itemID}");
-        if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack)
-        {
-            var inventory = ItemDict[itemID].item.ItemInventory;
-            inventory.gameObject.SetActive(false); //비활성
-        }
-        
-        ItemDict.Remove(itemID);
-        gearSlot.SetEmpty(true, Guid.Empty);
-        
-        //Inventory있는 경우...처리
-        //리그, 가방 -> 무조건 있음... 단순 비활성?
-        
-        //장비 능력치 등 처리
-    }
-
-    public void EquipGearItem(CellData gearSlot, InventoryItem item)
-    {
-        SetGearItem(gearSlot, item);
-        //event...
-        OnEquipFieldItem?.Invoke(gearSlot, item);
-    }
-
-    public float GetTotalArmorAmount()
-    {
-        float totalArmor = 0;
-        if(HeadwearItem.ItemData is GearData headwearData) totalArmor += headwearData.ArmorAmount;
-        if(EyewearItem.ItemData is GearData eyewearData) totalArmor += eyewearData.ArmorAmount;
-        if(BodyArmorItem.ItemData is GearData bodyArmorData) totalArmor += bodyArmorData.ArmorAmount;
-        if(ChestRigItem.GearType is GearType.ArmoredRig &&
-           ChestRigItem.ItemData is GearData chestRigData ) totalArmor += chestRigData.ArmorAmount;
-        return totalArmor;
-    }
-    
-    public void AddItemToInventory(int firstIdx, RectTransform slotRT, InventoryItem item)
-    {
-        //item따라...
-        //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
-
-        if (BackpackInventory)
-        {
-            //var item = new InventoryItem(itemData);
-            var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, slotRT);
-            OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT, item);
-            return;
-        }
-
-        if (RigInventory)
-        {
-            //var item = new InventoryItem(itemData);
-            var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, slotRT);
-            OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
-            return;
-        }
-
-        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
     }
 }
