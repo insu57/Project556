@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 public class PlayerManager : MonoBehaviour, IDamageable
 {
     [SerializeField] private float playerHealth = 100f; //추후 SO에서 받아오게 수정 예정
-    [SerializeField] private WeaponData currentWeaponData;//현재 직렬화(추후 인벤토리에서)
+    
     [SerializeField] private SpriteRenderer oneHandSprite;
     [SerializeField] private Transform oneHandMuzzleTransform;
     [SerializeField] private SpriteRenderer twoHandSprite;
@@ -24,9 +24,12 @@ public class PlayerManager : MonoBehaviour, IDamageable
     
     private float _currentHealth;
     private float _currentTotalArmor;
-    private CurrentWeaponIdx _currentWeaponIdx = CurrentWeaponIdx.Unarmed; //초기 Unarmed
+    private InventoryItem _currentWeaponItem;
+    private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
     public event Action<float, float> OnPlayerHealthChanged;
+    public event Action<int> OnUpdateMagazineCount;
 
+   
     public bool IsUnarmed { private set; get; }
     
     public bool CanItemInteract { get; private set; }
@@ -43,7 +46,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _itemUIManager = FindFirstObjectByType<ItemUIManager>();
         TryGetComponent(out _playerAnimation);
         TryGetComponent(out _playerWeapon);
-        _playerWeapon.Init(_itemUIManager);
         _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
         
         _mainCamera = Camera.main;
@@ -54,6 +56,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         IsUnarmed = true;
         
         _currentHealth = playerHealth;
+        OnPlayerHealthChanged?.Invoke(_currentHealth, playerHealth);
     }
 
     private void OnDisable()
@@ -73,90 +76,105 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _currentTotalArmor = amount;
     }
 
-    private void HandleOnUnequipWeapon(CurrentWeaponIdx weaponIdx)
+    private void HandleOnUnequipWeapon(EquipWeaponIdx weaponIdx)
     {
-        if (_currentWeaponIdx == weaponIdx)
+        if (_equipWeaponIdx == weaponIdx)
         {
             ChangeCurrentWeapon(null);
         }
     }
-    
+
     public bool CheckIsAutomatic()
     {
-        return currentWeaponData.CanFullAuto;
+        if (_currentWeaponItem is { ItemData: WeaponData weaponData })
+            return weaponData.CanFullAuto;
+        return false;
     }
 
     public bool CheckIsOneHanded()
     {
-        return currentWeaponData.IsOneHanded;
+        if (_currentWeaponItem is { ItemData: WeaponData weaponData })
+            return weaponData.IsOneHanded;
+        return false;
     }
     
     public void Shoot(bool isFlipped, float shootAngle) //사격
     {
-        _playerWeapon.Shoot(isFlipped, shootAngle);
+        //총알 데이터..?
+        if(GetCurrentWeaponMagazineCount() <= 0) return;
+        bool isShoot = _playerWeapon.Shoot(isFlipped, shootAngle);
+        
+        if (!isShoot) return;
+        OnUpdateMagazineCount?.Invoke(GetCurrentWeaponMagazineCount());
+        switch (_equipWeaponIdx) //탄소모?
+        {
+            case EquipWeaponIdx.Primary:
+                _inventoryManager.PrimaryWeaponItem.UseAmmo();
+                break;
+            case EquipWeaponIdx.Secondary:
+                _inventoryManager.SecondaryWeaponItem.UseAmmo();
+                break;
+        }
     }
 
+    public int GetCurrentWeaponMagazineCount()
+    {
+        if (_currentWeaponItem != null)
+        {
+            return _currentWeaponItem.CurrentMagazineCount;
+        }
+        return -1;
+    }
+    
     public void Reload()
     {
-        _playerWeapon.Reload();
+        _currentWeaponItem?.ReloadAmmo();
+        OnUpdateMagazineCount?.Invoke(GetCurrentWeaponMagazineCount());
     }
 
-    public void HandleOnChangeWeapon(CurrentWeaponIdx weaponIdx)
+    public void HandleOnChangeWeapon(EquipWeaponIdx weaponIdx)
     {
-        InventoryItem weaponItem;
-        WeaponData weaponData;
-        
         switch (weaponIdx)
         {
-            case CurrentWeaponIdx.Primary:
-                if (_inventoryManager.PrimaryWeaponItem == null)
+            case EquipWeaponIdx.Primary:
+                _currentWeaponItem = _inventoryManager.PrimaryWeaponItem;
+                ChangeCurrentWeapon(_currentWeaponItem);
+                if (_currentWeaponItem == null)
                 {
-                    ChangeCurrentWeapon(null);
-                    _currentWeaponIdx = CurrentWeaponIdx.Unarmed;
-                    return;
-                }
-                weaponItem = _inventoryManager.PrimaryWeaponItem;
-                weaponData = weaponItem.ItemData as WeaponData;
-                if (weaponData)
-                {
-                    ChangeCurrentWeapon(weaponData);
-                }
-                else
-                {
-                    ChangeCurrentWeapon(null);
-                    weaponIdx = CurrentWeaponIdx.Unarmed;
+                    weaponIdx = EquipWeaponIdx.Unarmed;
                 }
                 break;
-            case CurrentWeaponIdx.Secondary:
-                if (_inventoryManager.SecondaryWeaponItem == null)
+            case EquipWeaponIdx.Secondary:
+                _currentWeaponItem = _inventoryManager.SecondaryWeaponItem;
+                ChangeCurrentWeapon(_currentWeaponItem);
+                if (_currentWeaponItem == null)
                 {
-                    ChangeCurrentWeapon(null);
-                    _currentWeaponIdx = CurrentWeaponIdx.Unarmed;
-                    return;
-                }
-                weaponItem = _inventoryManager.SecondaryWeaponItem;
-                weaponData = weaponItem.ItemData as WeaponData;
-                if (weaponData)
-                {
-                    ChangeCurrentWeapon(weaponData);
-                }
-                else
-                {
-                    ChangeCurrentWeapon(null);
-                    weaponIdx = CurrentWeaponIdx.Unarmed;
+                    weaponIdx = EquipWeaponIdx.Unarmed;
                 }
                 break;
-            case CurrentWeaponIdx.Unarmed: //비무장
+            case EquipWeaponIdx.Unarmed: //비무장
+                _currentWeaponItem = null;
                 ChangeCurrentWeapon(null);
                 break;
         }
-        _currentWeaponIdx = weaponIdx;
+        _equipWeaponIdx = weaponIdx;
     }
 
-    private void ChangeCurrentWeapon(WeaponData newWeaponData) //무기 교체
+    private void ChangeCurrentWeapon(InventoryItem weaponItem) //무기 교체
     {
+        if (weaponItem == null)
+        {
+            IsUnarmed = true;
+            _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
+            oneHandSprite.enabled = false;
+            twoHandSprite.enabled = false;
+            return;
+        }
+        
+        var newWeaponData = weaponItem.ItemData as WeaponData;
         if (!newWeaponData)
         {
+            Debug.LogWarning("Item is not null , WeaponData is null");
             IsUnarmed = true;
             _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
             oneHandSprite.enabled = false;
@@ -191,10 +209,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
             muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
         }
         
-        currentWeaponData = newWeaponData; //현재 무기데이터 
         _playerWeapon.ChangeWeaponData(newWeaponData); //변경
         _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
-        
+        OnUpdateMagazineCount?.Invoke(GetCurrentWeaponMagazineCount());
     }
 
     public void ScrollItemPickup(float scrollDeltaY)
@@ -266,7 +283,6 @@ public class PlayerManager : MonoBehaviour, IDamageable
             _currentItemInteractIdx = 0;
             if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip));
             _currentItemInteractList.Add((canPickup, ItemInteractType.PickUp));
-            //버그... 장착할 수 없을때
             
             _itemUIManager.ShowItemPickup(pos, _currentItemInteractList); //이벤트로 수정 예정
         }
@@ -300,11 +316,11 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 _inventoryManager.EquipGearItem(_pickupTargetCell, item); //사이즈 준내큼
                 if (_pickupTargetCell == _inventoryManager.PrimaryWeaponSlot)
                 {
-                    HandleOnChangeWeapon(CurrentWeaponIdx.Primary);
+                    HandleOnChangeWeapon(EquipWeaponIdx.Primary);
                 }
                 else if (_pickupTargetCell == _inventoryManager.SecondaryWeaponSlot)
                 {
-                    HandleOnChangeWeapon(CurrentWeaponIdx.Secondary);
+                    HandleOnChangeWeapon(EquipWeaponIdx.Secondary);
                 }
                 break;
             case ItemInteractType.PickUp:

@@ -110,11 +110,6 @@ namespace UI
             _pickupTextList.Add(pickupText);
         }
 
-        public void UpdateAmmoText(int currentAmmo)
-        {
-            ammoText.text = currentAmmo.ToString();
-        }
-
         public void OpenPlayerUI(bool isOpen) //PlayerUI
         {
             playerUI.SetActive(isOpen);

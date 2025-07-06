@@ -61,7 +61,7 @@ public enum GearType
     Weapon,
 }
 
-public enum CurrentWeaponIdx
+public enum EquipWeaponIdx
 {
     Unarmed = 0,
     Primary,

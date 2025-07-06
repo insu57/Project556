@@ -16,8 +16,9 @@ public class InventoryItem
     public int CurrentStackAmount { get; private set; }
     public bool IsRotated { get; private set; }
     public Inventory ItemInventory {get; private set;} 
-    
-    //내구도
+    public float Durability { get; private set; }
+    public int CurrentMagazineCount { get; private set; }
+    public int MaxMagazineCount { get; private set; }
     //장탄수(무기)
     
     public InventoryItem(IItemData itemData) //new...Init
@@ -26,8 +27,13 @@ public class InventoryItem
         InstanceID = Guid.NewGuid();
         CurrentStackAmount = IsStackable ? 0 : 1; //Stackable 이면 0부터
         ItemCellCount = new Vector2Int(ItemData.ItemWidth, ItemData.ItemHeight);
-        //초기화따로...? pickUp 아이템 따로?
+        Durability = 100f;
         
+        if (itemData is not WeaponData weaponData) return;
+        CurrentMagazineCount = weaponData.DefaultMagazineSize;
+        MaxMagazineCount = weaponData.DefaultMagazineSize;
+
+        //초기화따로...? pickUp 아이템 따로?
     }
 
     public void SetItemInventory(Inventory itemInventory)
@@ -39,7 +45,26 @@ public class InventoryItem
     public void AddStackAmount(int stackAmount)
     {
         CurrentStackAmount += stackAmount;
-        // 0이하? -> 처리
+    }
+
+    public void DecreaseDurability(float damage)
+    {
+        Durability -= damage;
+    }
+
+    //WeaponInstance????
+    public void UseAmmo() 
+    {
+        if (ItemData is not WeaponData) return;
+        CurrentMagazineCount--;
+    }
+
+    public void ReloadAmmo() //주머니 탄 소모...
+    {
+        if (ItemData is not WeaponData weaponData) return;
+        if (weaponData.IsOpenBolt)
+            CurrentMagazineCount = MaxMagazineCount;
+        else CurrentMagazineCount = MaxMagazineCount + 1;
     }
 
     public void RotateItem()

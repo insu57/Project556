@@ -284,13 +284,13 @@ namespace Player
          switch (key.keyCode)
          {
             case Key.Digit1:
-               _playerManager.HandleOnChangeWeapon(CurrentWeaponIdx.Primary);
+               _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Primary);
                break;
             case Key.Digit2:
-               _playerManager.HandleOnChangeWeapon(CurrentWeaponIdx.Secondary);
+               _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Secondary);
                break;
             case Key.Digit3:
-               _playerManager.HandleOnChangeWeapon(CurrentWeaponIdx.Unarmed);
+               _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Unarmed);
                break;
          }
       }

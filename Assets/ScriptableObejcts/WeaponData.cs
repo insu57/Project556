@@ -14,6 +14,7 @@ public class WeaponData : BaseItemDataSO
     
     [SerializeField] private bool canFullAuto = false;
     [SerializeField] private bool isOneHanded = false;
+    [SerializeField] private bool isOpenBolt = false;
     
     [SerializeField] private float fireRate;
     [SerializeField] private float accuracy;
@@ -35,6 +36,8 @@ public class WeaponData : BaseItemDataSO
 
     public bool CanFullAuto => canFullAuto;
     public bool IsOneHanded => isOneHanded;
+    public bool IsOpenBolt => isOpenBolt;
+    
     public float FireRate => fireRate;
     public float Accuracy => accuracy;
     public float BulletSpeed => bulletSpeed;

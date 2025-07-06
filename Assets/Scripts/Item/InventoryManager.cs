@@ -39,7 +39,7 @@ public class InventoryManager : MonoBehaviour
     public event Action<CellData, InventoryItem> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory;
     public event Action<float> OnUpdateArmorAmount;
-    public event Action<CurrentWeaponIdx> OnUnequipWeapon;
+    public event Action<EquipWeaponIdx> OnUnequipWeapon;
     
     private void Awake()
     {
@@ -155,11 +155,11 @@ public class InventoryManager : MonoBehaviour
             var cell = ItemDict[itemID].cell;
             if (cell == PrimaryWeaponSlot)
             {
-                OnUnequipWeapon?.Invoke(CurrentWeaponIdx.Primary);
+                OnUnequipWeapon?.Invoke(EquipWeaponIdx.Primary);
             }
             else if (cell == SecondaryWeaponSlot)
             {
-                OnUnequipWeapon?.Invoke(CurrentWeaponIdx.Secondary);
+                OnUnequipWeapon?.Invoke(EquipWeaponIdx.Secondary);
             }
         }
         

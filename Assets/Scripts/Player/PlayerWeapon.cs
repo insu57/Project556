@@ -13,8 +13,6 @@ public class PlayerWeapon : MonoBehaviour
     private int _currentMagazineAmmo;
     
     private bool _canShoot = true;
- 
-    private ItemUIManager _itemUIManager;
     
     private AmmoCategory _ammoCategory;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
@@ -24,35 +22,24 @@ public class PlayerWeapon : MonoBehaviour
 
     public event Action OnShowMuzzleFlash;
     
-    public void Init(ItemUIManager itemUIManager)
-    {
-        _itemUIManager = itemUIManager;
-    }
-
     public void ChangeWeaponData(WeaponData weaponData)
     {
         _weaponData = weaponData;
         _currentMagazineAmmo = weaponData.DefaultMagazineSize;
-        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);
 
         _ammoCategory = EnumManager.GetAmmoCategory(weaponData.AmmoCaliber);
         _normalizedAccuracy = Mathf.Clamp01(weaponData.Accuracy / MaxAccuracy); //정확도 정규화
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy); //탄퍼짐 각도 편차
     }
     
-    
-    public void Shoot(bool isFlipped, float shootAngle)
+    //개선...? Player매니저 shoot에서 장탄검사?
+    public bool Shoot(bool isFlipped, float shootAngle)
     {
-        if(!_canShoot) return;
-        if(_currentMagazineAmmo <= 0) return; //잔탄이 없으면 return 수정필요
+        if(!_canShoot) return false;
         
         OnShowMuzzleFlash?.Invoke(); //show flash
         
         StartCoroutine(ShootCoroutine()); //fireRate
-        
-        _currentMagazineAmmo--;
-        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);//수정 필요
-        
 
         float bulletAngle;
         Vector2 direction;
@@ -77,19 +64,12 @@ public class PlayerWeapon : MonoBehaviour
         Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoCategory);
         bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
         bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
-        
+        return true;
     }
 
     public void SetMuzzleTransform(Transform muzzleTransform)
     {
         _muzzleTransform = muzzleTransform;
-    }
-    
-    public void Reload()
-    {
-        //장전 시 사격 제한...
-        _currentMagazineAmmo = _weaponData.DefaultMagazineSize;
-        _itemUIManager.UpdateAmmoText(_currentMagazineAmmo);
     }
     
     private IEnumerator ShootCoroutine()

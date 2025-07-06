@@ -1,16 +1,8 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
-public class Au : MonoBehaviour
+public class AudioManager : Singleton<AudioManager>
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [SerializeField] private AudioMixer audioMixer;
+    //audio
 }
