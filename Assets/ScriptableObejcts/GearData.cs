@@ -26,5 +26,6 @@ public class GearData : BaseItemDataSO
 
     public GameObject SlotPrefab => slotPrefab;
     public override bool IsStackable => false;
+    public override bool IsConsumable => false;
     public override int MaxStackAmount => 1;
 }

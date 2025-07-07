@@ -34,7 +34,7 @@ public class Inventory: MonoBehaviour
     public float Width { private set; get; }
     public float Height { private set; get; }
     private float _cellSize;
-    public Dictionary<Guid, (InventoryItem item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
+    public Dictionary<Guid, (ItemInstance item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
     //기존 슬롯->아이템 정보...
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
 
@@ -80,7 +80,7 @@ public class Inventory: MonoBehaviour
         Guid TargetCellItemID
     );
     
-    public InventorySlotCheckResult CheckSlot(Vector2 mousePos, InventoryItem item)
+    public InventorySlotCheckResult CheckSlot(Vector2 mousePos, ItemInstance item)
     {
         var itemCellCount = item.ItemCellCount;//아이템 칸 크기
         
@@ -187,7 +187,7 @@ public class Inventory: MonoBehaviour
     }
     
     //LootInven 아이템 초기화?
-    public (Vector2 pos, RectTransform slotItemRT) AddItem(InventoryItem item, int firstIdx, RectTransform slotRT)
+    public (Vector2 pos, RectTransform slotItemRT) AddItem(ItemInstance item, int firstIdx, RectTransform slotRT)
     {
         //중첩for문 개선???
         var itemCount = item.ItemCellCount;
@@ -251,7 +251,7 @@ public class Inventory: MonoBehaviour
         return (false, -1, null);
     }
     
-    public InventoryItem GetItemData(Guid id)
+    public ItemInstance GetItemData(Guid id)
     {
         var (item, slotRT, firstIdx) = ItemDict[id];
         
@@ -284,7 +284,7 @@ public class Inventory: MonoBehaviour
 
     //MoveItem -> 해당 Cell이 available 일 때만 호출
     public (Vector2 targetPos, RectTransform itemRT) 
-        MoveItem(InventoryItem item, int firstIdx, RectTransform targetSlot)
+        MoveItem(ItemInstance item, int firstIdx, RectTransform targetSlot)
     {
         //아이템 이동
         //Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.InstanceID}");

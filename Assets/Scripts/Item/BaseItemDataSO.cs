@@ -10,8 +10,7 @@ public abstract class BaseItemDataSO : ScriptableObject, IItemData
     public abstract int ItemHeight { get; }
     public abstract GearType GearType { get; }
     public abstract bool IsStackable { get; }
+    public abstract bool IsConsumable { get; }
     public abstract int MaxStackAmount { get; }
     
-    //public abstract Vector2 ItemSize { get; }
-    //public abstract GameObject ItemPrefab { get; }
 }

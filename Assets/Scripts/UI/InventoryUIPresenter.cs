@@ -21,7 +21,7 @@ public class InventoryUIPresenter : MonoBehaviour
 
     public float CellSize => _itemUIManager.CellSize;
     
-    private InventoryItem _currentDragItem; //현재 드래그 중인 아이템
+    private ItemInstance _currentDragItem; //현재 드래그 중인 아이템
     private bool _rotatedOnClick; //클릭 시 회전 상태
     private bool _targetIsAvailable; //타겟 슬롯(Cell)이 유효한지?
     private bool _targetIsGearSlot; //타겟이 GearSlot인지
@@ -132,7 +132,7 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         var originInvenRT = itemDrag.InventoryRT;
 
-        InventoryItem item;
+        ItemInstance item;
 
         if (!originInvenRT) //기존 위치 인벤토리 체크
         {
@@ -181,7 +181,7 @@ public class InventoryUIPresenter : MonoBehaviour
         _targetIsGearSlot = slotInfo.isGearSlot;
         _matchRT = slotInfo.matchSlot;
 
-        InventoryItem dragItem;
+        ItemInstance dragItem;
         if (itemDrag.InventoryRT)
         {
             var originInven = _invenMap[itemDrag.InventoryRT];
@@ -226,7 +226,7 @@ public class InventoryUIPresenter : MonoBehaviour
 
         if (_targetCellItemID != Guid.Empty) //타겟CellItem이 동일한 stackable 아이템
         {
-            InventoryItem targetCellItem;
+            ItemInstance targetCellItem;
             if (_targetIsGearSlot) //타겟이 GearSlot
             {
                 targetCellItem = _inventoryManager.ItemDict[_targetCellItemID].item;
@@ -245,9 +245,9 @@ public class InventoryUIPresenter : MonoBehaviour
             if (remainingTargetCellAmount < itemStackAmount)
             {
                 //drag 아이템의 스택이 더 많으면
-                _currentDragItem.AddStackAmount(-remainingTargetCellAmount); //타겟 Cell의 부족한 스택만큼 빼기
+                _currentDragItem.ChangeStackAmount(-remainingTargetCellAmount); //타겟 Cell의 부족한 스택만큼 빼기
                 itemDrag.SetStackAmountText(_currentDragItem.CurrentStackAmount);
-                targetCellItem.AddStackAmount(remainingTargetCellAmount); //Max까지
+                targetCellItem.ChangeStackAmount(remainingTargetCellAmount); //Max까지
                 _itemDragHandlers[targetCellItem.InstanceID].SetStackAmountText(targetCellItem.CurrentStackAmount);
                 itemDrag.ReturnItemDrag();
             }
@@ -261,7 +261,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 ObjectPoolingManager.Instance.ReleaseItemDragHandler(itemDragHandler);
                 _itemDragHandlers.Remove(_currentDragItem.InstanceID); //drag Handler 비활성화...(추후 풀링으로 관리)
 
-                targetCellItem.AddStackAmount(itemStackAmount); //드래그 아이템의 스택만큼 추가
+                targetCellItem.ChangeStackAmount(itemStackAmount); //드래그 아이템의 스택만큼 추가
                 _itemDragHandlers[targetCellItem.InstanceID].SetStackAmountText(targetCellItem.CurrentStackAmount);
             }
 
@@ -323,7 +323,7 @@ public class InventoryUIPresenter : MonoBehaviour
         //GearSlot rotate 해제...
     }
 
-    private bool CheckGearSlot(RectTransform matchRT, InventoryItem dragItem)
+    private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
     {
         if (!_gearSlotsMap[matchRT].IsEmpty) //Empty가 아닐 때
         {
@@ -378,7 +378,7 @@ public class InventoryUIPresenter : MonoBehaviour
         return true; //Slot Available      
     }
 
-    private bool CheckInventory(RectTransform matchRT, Vector2 mousePos, InventoryItem dragItem)
+    private bool CheckInventory(RectTransform matchRT, Vector2 mousePos, ItemInstance dragItem)
     {
         //인벤토리 - 아이템 자신의 인벤토리 안으로 들어 가는 것 방지...
         var targetInven = _invenMap[matchRT];
@@ -415,7 +415,7 @@ public class InventoryUIPresenter : MonoBehaviour
         return isAvailable;
     }
 
-    private void HandleOnInitInventory(GameObject inventoryPrefab, InventoryItem item)
+    private void HandleOnInitInventory(GameObject inventoryPrefab, ItemInstance item)
     {
         GearType gearType;
         Guid instanceID;
@@ -436,7 +436,7 @@ public class InventoryUIPresenter : MonoBehaviour
         OnSetInventory(item, gearType, inventory);//인벤토리 Set
     }
 
-    private void HandleOnShowInventory(InventoryItem item)
+    private void HandleOnShowInventory(ItemInstance item)
     {
         var inventory = item.ItemInventory;
         var gearType = item.GearType;
@@ -446,7 +446,7 @@ public class InventoryUIPresenter : MonoBehaviour
         OnSetInventory(item, gearType, inventory);
     }
 
-    private void OnSetInventory(InventoryItem item, GearType gearType, Inventory inventory)
+    private void OnSetInventory(ItemInstance item, GearType gearType, Inventory inventory)
     {
         switch (gearType)
         {
@@ -470,7 +470,7 @@ public class InventoryUIPresenter : MonoBehaviour
         }
     }
 
-    private void HandleOnEquipItem(CellData gearSlot, InventoryItem item)//장착
+    private void HandleOnEquipItem(CellData gearSlot, ItemInstance item)//장착
     {
         var gearSlotRT = _gearRTMap[gearSlot];
        
@@ -485,7 +485,7 @@ public class InventoryUIPresenter : MonoBehaviour
         
     }
     
-    private void HandleOnAddItemToInventory(GearType inventoryType, Vector2 pos, RectTransform itemRT ,InventoryItem item)
+    private void HandleOnAddItemToInventory(GearType inventoryType, Vector2 pos, RectTransform itemRT ,ItemInstance item)
         //인벤토리에 아이템 추가(아이템 줍기, 보상 받기 등)
     {
         var itemDragHandlerInstance = ObjectPoolingManager.Instance.GetItemDragHandler();
@@ -516,7 +516,7 @@ public class InventoryUIPresenter : MonoBehaviour
         
         if(!isAvailable) return;
         
-        var invenItem = new InventoryItem(itemData);
+        var invenItem = new ItemInstance(itemData);
         var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
         
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
@@ -535,7 +535,7 @@ public class InventoryUIPresenter : MonoBehaviour
         var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
         
         if(!isAvailable) return;
-        var invenItem = new InventoryItem(itemData);
+        var invenItem = new ItemInstance(itemData);
         var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
         
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
@@ -543,7 +543,7 @@ public class InventoryUIPresenter : MonoBehaviour
         
         var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);
         itemDrag.SetItemDragPos(pos, size, itemRT,_itemUIManager.LootSlotParent);
-        invenItem.AddStackAmount(stackAmount);
+        invenItem.ChangeStackAmount(stackAmount);
         _itemDragHandlers.Add(invenItem.InstanceID, itemDrag);
         itemDrag.SetStackAmountText(stackAmount);
     }
@@ -552,7 +552,7 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         if (!_gearSlotsMap.TryGetValue(gearSlot, out var gearCell)) return;
 
-        var invenItem = new InventoryItem(itemData);
+        var invenItem = new ItemInstance(itemData);
         var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
         
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);

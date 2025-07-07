@@ -63,7 +63,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _rotateItemAction.Disable();
     }
 
-    public void Init(InventoryItem item, InventoryUIPresenter presenter, InputAction itemRotateAction, 
+    public void Init(ItemInstance item, InventoryUIPresenter presenter, InputAction itemRotateAction, 
         Transform uiParent)
     {
         _inventoryUIPresenter = presenter;

@@ -24,5 +24,6 @@ public class MedicalData : BaseItemDataSO
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.None;
     public override bool IsStackable => isStackable;
+    public override bool IsConsumable => true;
     public override int MaxStackAmount => maxStackAmount;
 }

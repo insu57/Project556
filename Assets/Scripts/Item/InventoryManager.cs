@@ -9,22 +9,22 @@ using UnityEngine.UI;
 public class InventoryManager : MonoBehaviour
 {
     //Left Panel
-    public InventoryItem HeadwearItem { private set; get; }
+    public ItemInstance HeadwearItem { private set; get; }
     public CellData HeadwearSlot { get; } = new(GearType.HeadWear, Vector2.zero);
-    public InventoryItem EyewearItem { private set; get; }
+    public ItemInstance EyewearItem { private set; get; }
     public CellData EyewearSlot { get; } = new(GearType.EyeWear, Vector2.zero);
-    public InventoryItem BodyArmorItem { private set; get; }
+    public ItemInstance BodyArmorItem { private set; get; }
     public CellData BodyArmorSlot { get; } = new(GearType.BodyArmor, Vector2.zero);
-    public InventoryItem PrimaryWeaponItem { private set; get; }
+    public ItemInstance PrimaryWeaponItem { private set; get; }
     public CellData PrimaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
-    public InventoryItem SecondaryWeaponItem { private set; get; }
+    public ItemInstance SecondaryWeaponItem { private set; get; }
     public CellData SecondaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
 
     //Middle Panel
-    public InventoryItem ChestRigItem { private set; get; }
+    public ItemInstance ChestRigItem { private set; get; }
     public CellData ChestRigSlot { get; } = new(GearType.ArmoredRig, Vector2.zero);
     public CellData[] PocketSlots { get; private set; } = new CellData[4];
-    public InventoryItem BackpackItem { private set; get; }
+    public ItemInstance BackpackItem { private set; get; }
     public CellData BackpackSlot { get; } = new(GearType.Backpack, Vector2.zero);
     public Inventory BackpackInventory { get; private set; }
     public Inventory RigInventory { get; private set; }
@@ -32,12 +32,12 @@ public class InventoryManager : MonoBehaviour
     //Right Panel
     public Inventory LootInventory { get; private set; }
     
-    public Dictionary<Guid, (InventoryItem item, CellData cell)> ItemDict { get; } = new();
+    public Dictionary<Guid, (ItemInstance item, CellData cell)> ItemDict { get; } = new();
 
-    public event Action<GameObject, InventoryItem> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
-    public event Action<InventoryItem> OnShowInventory;
-    public event Action<CellData, InventoryItem> OnEquipFieldItem;
-    public event Action<GearType, Vector2, RectTransform ,InventoryItem> OnAddItemToInventory;
+    public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
+    public event Action<ItemInstance> OnShowInventory;
+    public event Action<CellData, ItemInstance> OnEquipFieldItem;
+    public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddItemToInventory;
     public event Action<float> OnUpdateArmorAmount;
     public event Action<EquipWeaponIdx> OnUnequipWeapon;
     
@@ -112,9 +112,10 @@ public class InventoryManager : MonoBehaviour
 
     
 
-    public void SetGearItem(CellData gearSlot, InventoryItem item)
+    public void SetGearItem(CellData gearSlot, ItemInstance item)
     {
         ItemDict[item.InstanceID] = (item, gearSlot);
+        Debug.Log($"Setting item : {item.ItemData.ItemName}, {item.InstanceID}, Count : {ItemDict.Count}");
         gearSlot.SetEmpty(false, item.InstanceID);
         
         SetGearItemData(gearSlot, item);
@@ -168,7 +169,7 @@ public class InventoryManager : MonoBehaviour
         SetGearItemData(gearSlot, null);
     }
 
-    public void EquipGearItem(CellData gearSlot, InventoryItem item)
+    public void EquipFieldItem(CellData gearSlot, ItemInstance item)
     {
         SetGearItem(gearSlot, item);
         //event...
@@ -186,7 +187,7 @@ public class InventoryManager : MonoBehaviour
         return totalArmor;
     }
     
-    public void AddItemToInventory(int firstIdx, RectTransform slotRT, InventoryItem item)
+    public void AddItemToInventory(int firstIdx, RectTransform slotRT, ItemInstance item)
     {
         //item따라...
         //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
@@ -209,7 +210,44 @@ public class InventoryManager : MonoBehaviour
 
         OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
     }
-    private void SetGearItemData(CellData cell, InventoryItem item)
+    
+    //Ammo...
+    //Quickslot...
+
+    public bool LoadAmmo(AmmoCaliber ammoCaliber, int ammoToRefill) //탄종구분 - 탄 구분(zero sivert처럼)
+    {
+        if (RigInventory)
+        {
+            foreach (var (_, (item, _, _)) in RigInventory.ItemDict)
+            {
+                if (item.ItemData is not AmmoData ammoData) continue;
+                if (ammoData.AmmoCaliber == ammoCaliber)
+                {
+                    Debug.Log($"Rig, Use Ammo : {ammoData.AmmoCaliber}");
+                    var stackAmount = item.CurrentStackAmount;
+                    if (stackAmount > ammoToRefill)
+                    {
+                        //
+                    }
+                    return true;
+                }
+            }
+        }
+        foreach (var (_, (item, _)) in ItemDict)
+        {
+            if(item.ItemData is not AmmoData ammoData) continue;
+            if (ammoData.AmmoCaliber == ammoCaliber)
+            {
+                Debug.Log($"Pocket, Use Ammo : {ammoData.AmmoCaliber}");
+                return true;
+            }
+        }
+        Debug.Log($"No Ammo : {ammoCaliber}");
+        return false;
+    }
+    
+    
+    private void SetGearItemData(CellData cell, ItemInstance item) //아이템 데이터 참조
     {
         if (cell == HeadwearSlot)
         {

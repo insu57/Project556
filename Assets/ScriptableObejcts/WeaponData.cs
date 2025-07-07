@@ -55,5 +55,6 @@ public class WeaponData : BaseItemDataSO
     public Vector3 MuzzlePosition => weaponSetup.MuzzleOffset;
     public Vector3 MuzzleFlashOffset => weaponSetup.MuzzleFlashOffset;
     public override bool IsStackable => false;
+    public override bool IsConsumable => false;
     public override int MaxStackAmount => 1;
 }

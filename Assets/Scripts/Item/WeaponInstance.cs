@@ -1,20 +1,27 @@
 using UnityEngine;
 
-public class WeaponInstance : InventoryItem
+public class WeaponInstance : ItemInstance
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public WeaponInstance(IItemData itemData) : base(itemData)
+
+    public WeaponData WeaponData { get; }
+    public int CurrentMagazineCount { get; private set; }
+    private int MaxMagazineCount { get; }
+    public WeaponInstance( WeaponData weaponData) : base(weaponData)
     {
+        WeaponData = weaponData;
+        CurrentMagazineCount = weaponData.DefaultMagazineSize;
+        MaxMagazineCount = weaponData.DefaultMagazineSize;
+    }
+    public void UseAmmo() 
+    {
+        CurrentMagazineCount--;
     }
 
-    void Start()
+    public void ReloadAmmo() //주머니 탄 소모...
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        if (WeaponData.IsOpenBolt)
+            CurrentMagazineCount = MaxMagazineCount;
+        else CurrentMagazineCount = MaxMagazineCount + 1;
     }
 }

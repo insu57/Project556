@@ -20,7 +20,7 @@ public class InventoryUILegacy : MonoBehaviour
     
     private CellData[] _cellDataArray;
     //Array로 수정(크기가 거의 안변하기 때문에 배열로) 변할 일이 많아지면 List + Span?(2021+)
-    private Dictionary<Guid, InventoryItem> _itemDataDictionary = new Dictionary<Guid, InventoryItem>(); 
+    private Dictionary<Guid, ItemInstance> _itemDataDictionary = new Dictionary<Guid, ItemInstance>(); 
     
     //TEMP Test
     [SerializeField] private ItemDragHandler item;
@@ -168,7 +168,7 @@ public class InventoryUILegacy : MonoBehaviour
         //버그가...?
         if (CheckSlotAvailable((targetPos, id)))//자기 자신의 원래 슬롯은??
         {
-            InventoryItem dragItem = _itemDataDictionary[id];
+            ItemInstance dragItem = _itemDataDictionary[id];
             Vector2Int itemSize = dragItem.ItemCellCount;
             int width = itemSize.x;
             int height = itemSize.y;
@@ -219,7 +219,7 @@ public class InventoryUILegacy : MonoBehaviour
         }
         //나머지 슬롯도 체크!
         //bool isAvailable = true;
-        InventoryItem dragItem = _itemDataDictionary[id]; //현재 들고있는 아이템
+        ItemInstance dragItem = _itemDataDictionary[id]; //현재 들고있는 아이템
         var itemSize = dragItem.ItemCellCount;
         for (int h = 0; h < itemSize.x; h++)
         {

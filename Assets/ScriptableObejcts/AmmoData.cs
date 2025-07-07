@@ -30,6 +30,7 @@ public class AmmoData : BaseItemDataSO
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.None;
     public override bool IsStackable => true;
+    public override bool IsConsumable => false; //직접 사용은 불가
     public override int MaxStackAmount => maxStackAmount;
     
     public float AmmoDamage => ammoDamage;
