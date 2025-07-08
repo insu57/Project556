@@ -27,8 +27,8 @@ public class Inventory: MonoBehaviour
     [SerializeField] private List<SlotData> slotDataList = new();
     private RectTransform _inventoryRT;
     
-    private readonly Dictionary<RectTransform, (List<CellData> cells, Vector2Int slotCount, RectTransform slotItemRT)> 
-        _slotDict = new(); // Slot -> CellData List
+    public Dictionary<RectTransform, (List<CellData> cells, Vector2Int slotCount, RectTransform slotItemRT)> 
+        SlotDict { get; } = new(); // Slot -> CellData List
 
     public Guid ItemInstanceID { get; private set; }
     public float Width { private set; get; }
@@ -65,7 +65,7 @@ public class Inventory: MonoBehaviour
                 }
             }
             
-            _slotDict[slotRT] = (cellDataList, slotData.cellCount, slotData.itemRT); //Dictionary 설정
+            SlotDict[slotRT] = (cellDataList, slotData.cellCount, slotData.itemRT); //Dictionary 설정
         }
     }
     
@@ -92,7 +92,7 @@ public class Inventory: MonoBehaviour
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(matchSlot, mousePos, null,
                     out var localPoint)) continue; //Slot Local point
             
-            var (cells, slotCount, _) = _slotDict[matchSlot]; //슬롯의 정보
+            var (cells, slotCount, _) = SlotDict[matchSlot]; //슬롯의 정보
             
             GetFirstCellIdx(localPoint, slotCount, itemCellCount, out var firstIdx);
             //FirstIdx(해당 슬롯의 local Point로 아이템의 첫번째 인덱스(좌상단)
@@ -186,13 +186,12 @@ public class Inventory: MonoBehaviour
         if (x < 0 || x >= slotSize.x || y < 0 || y >= slotSize.y) firstIdx = -1;
     }
     
-    //LootInven 아이템 초기화?
     public (Vector2 pos, RectTransform slotItemRT) AddItem(ItemInstance item, int firstIdx, RectTransform slotRT)
     {
         //중첩for문 개선???
         var itemCount = item.ItemCellCount;
 
-        var (cells, slotCount, itemRT) = _slotDict[slotRT];
+        var (cells, slotCount, itemRT) = SlotDict[slotRT];
         
         for (int y = 0; y < itemCount.y; y++)//배치
         {
@@ -219,7 +218,7 @@ public class Inventory: MonoBehaviour
     {
         foreach (var slotData in slotDataList)
         {
-            var (cells, slotCount, slotItemRT) = _slotDict[slotData.slotRT]; //슬롯정보
+            var (cells, slotCount, slotItemRT) = SlotDict[slotData.slotRT]; //슬롯정보
 
             for (int h = 0; h < slotCount.y; h++)
             {
@@ -269,7 +268,7 @@ public class Inventory: MonoBehaviour
         if(hasRotated) //중간에 회전했다면 원래 상태에서의 Cell로
             itemCount = new Vector2Int(ItemDict[id].item.ItemCellCount.y, ItemDict[id].item.ItemCellCount.x);
         
-        var slotData = _slotDict[slotRT];
+        var slotData = SlotDict[slotRT];
 
         for (int y = 0; y < itemCount.y; y++)
         {
@@ -291,7 +290,7 @@ public class Inventory: MonoBehaviour
         var id = item.InstanceID;
         ItemDict.Add(id, (item, targetSlot, firstIdx));//Dict에 추가
         
-        var (cells, slotCount, slotItemRT) = _slotDict[targetSlot]; //slot정보
+        var (cells, slotCount, slotItemRT) = SlotDict[targetSlot]; //slot정보
         var itemCount = item.ItemCellCount;
         for (int y = 0; y < itemCount.y; y++)
         {

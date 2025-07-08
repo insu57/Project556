@@ -138,14 +138,18 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 else ammoToRefill = magazineSize + 1 - currentAmmo;//약실 한 발 고려
             }
             
-            _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
-            //오픈 볼트 -> 그냥 최대치로
-            //클로즈드 볼트 -> 1. 빈탄창 -> 최대, 2. 남음(약실에 있음) 최대+1까지
-            //탄 넉넉 -> 그대로, 모자람 ->?
+            var (canReload, reloadAmmo)  = _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
+
+            if (canReload)
+            {
+                _currentWeaponItem?.ReloadAmmo();
+                OnUpdateMagazineCount?.Invoke(currentAmmo + reloadAmmo);
+            }
+            //무기 장착 오류
+            
+            //장전할 탄이 하나도 없으면 경고문구 띄우기
+            //장전 제어?
         }
-        
-        _currentWeaponItem?.ReloadAmmo();
-        OnUpdateMagazineCount?.Invoke(GetCurrentWeaponMagazineCount());
     }
 
     public void HandleOnChangeWeapon(EquipWeaponIdx weaponIdx)

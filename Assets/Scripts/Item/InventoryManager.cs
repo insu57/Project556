@@ -34,12 +34,18 @@ public class InventoryManager : MonoBehaviour
     
     public Dictionary<Guid, (ItemInstance item, CellData cell)> ItemDict { get; } = new();
 
+    //ItemUI Presenter
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<ItemInstance> OnShowInventory;
     public event Action<CellData, ItemInstance> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddItemToInventory;
+    public event Action<Guid, int> OnUpdateItemStack;
+    public event Action<Guid> OnRemoveItem;
+    
+    //PlayerManager
     public event Action<float> OnUpdateArmorAmount;
     public event Action<EquipWeaponIdx> OnUnequipWeapon;
+    
     
     private void Awake()
     {
@@ -109,8 +115,6 @@ public class InventoryManager : MonoBehaviour
         }
         return null;
     }
-
-    
 
     public void SetGearItem(CellData gearSlot, ItemInstance item)
     {
@@ -211,39 +215,73 @@ public class InventoryManager : MonoBehaviour
         OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
     }
     
-    //Ammo...
     //Quickslot...
 
-    public bool LoadAmmo(AmmoCaliber ammoCaliber, int ammoToRefill) //탄종구분 - 탄 구분(zero sivert처럼)
+    public (bool canReload, int reloadAmmo) LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo) //탄종구분 - 탄 구분(zero sivert처럼)
     {
+        int reloadAmmo = 0;
         if (RigInventory)
         {
-            foreach (var (_, (item, _, _)) in RigInventory.ItemDict)
+            foreach (var (_, (cells, _, _)) in RigInventory.SlotDict)
             {
-                if (item.ItemData is not AmmoData ammoData) continue;
-                if (ammoData.AmmoCaliber == ammoCaliber)
+                foreach (var cell in cells)
                 {
+                    if(cell.IsEmpty) continue;
+                    var (item, _, _) = RigInventory.ItemDict[cell.InstanceID];
+                    if(item.ItemData is not AmmoData ammoData) continue;
+                    if(ammoData.AmmoCaliber != ammoCaliber) continue;
                     Debug.Log($"Rig, Use Ammo : {ammoData.AmmoCaliber}");
                     var stackAmount = item.CurrentStackAmount;
-                    if (stackAmount > ammoToRefill)
+                    if (stackAmount > neededAmmo) //스택이 더 많을때(장전에 필요한 것보다 많음)
                     {
-                        //
+                        Debug.Log($"Rig, over stack : {ammoData.ItemName}, {neededAmmo}, {stackAmount}");
+                        reloadAmmo += neededAmmo;
+                        item.ChangeStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
+                        OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
+                        return (true, reloadAmmo); //요구치 전부
                     }
-                    return true;
+
+                    //item 삭제...
+                    Debug.Log($"Rig, less stack : {ammoData.ItemName}, {neededAmmo}, {stackAmount}");
+                    neededAmmo -= stackAmount; //요구치 스택만큼 감소
+                    reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
+                    OnRemoveItem?.Invoke(item.InstanceID); //아이템 제거
+                    RigInventory.ItemDict.Remove(item.InstanceID); //ItemDict제거, CellData 초기화...
+                    cell.SetEmpty(true, Guid.Empty);
                 }
             }
         }
-        foreach (var (_, (item, _)) in ItemDict)
+
+        foreach (var pocket in PocketSlots)
         {
+            if(pocket.IsEmpty) continue;
+            var (item, _) = ItemDict[pocket.InstanceID];
             if(item.ItemData is not AmmoData ammoData) continue;
-            if (ammoData.AmmoCaliber == ammoCaliber)
+            if(ammoData.AmmoCaliber != ammoCaliber) continue;
+            Debug.Log($"Pocket, Use Ammo : {ammoData.AmmoCaliber}");
+            var stackAmount = item.CurrentStackAmount;
+            if (stackAmount > neededAmmo)
             {
-                Debug.Log($"Pocket, Use Ammo : {ammoData.AmmoCaliber}");
-                return true;
+                reloadAmmo += neededAmmo;
+                item.ChangeStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
+                OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
+                return (true, reloadAmmo); //요구치 전부
             }
+            //item 삭제...
+            neededAmmo -= stackAmount; //요구치 스택만큼 감소
+            reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
+            OnRemoveItem?.Invoke(item.InstanceID); //아이템 제거
+            ItemDict.Remove(item.InstanceID);
+            pocket.SetEmpty(true, Guid.Empty);
         }
-        Debug.Log($"No Ammo : {ammoCaliber}");
-        return false;
+        
+        if (reloadAmmo <= 0)
+        {
+            Debug.Log($"No Ammo : {ammoCaliber}");
+            return (false, 0);
+        }
+        Debug.Log($"Reload Ammo : {ammoCaliber}, {reloadAmmo}");
+        return (true, reloadAmmo);
     }
     
     

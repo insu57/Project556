@@ -34,7 +34,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private Image itemImage;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private Image highlightImage;
-    [SerializeField] private TMP_Text stackText;
+    [FormerlySerializedAs("stackText")] [SerializeField] private TMP_Text countText;
     
     private InputAction _rotateItemAction;
     private bool _isDragging;
@@ -86,7 +86,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _id = item.InstanceID;
         _itemDraggingParent = uiParent;
         
-        if(item.IsStackable) stackText.enabled = true; //Stack 표시용 TMP Text
+        if(item.IsStackable) countText.enabled = true; //Stack 표시용 TMP Text
         
         _rotateItemAction = itemRotateAction;
         _rotateItemAction.performed += OnRotateItemAction;
@@ -127,7 +127,20 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void SetStackAmountText(int amount)
     {
-        stackText.text = amount.ToString();
+        countText.text = amount.ToString();
+    }
+
+    //장전세분화?
+    public void SetMagazineCountText(bool hasChamber, int amount)
+    {
+        if (hasChamber)
+        {
+            countText.text = amount + "<size=%75>+1</size>";
+        }
+        else
+        {
+            countText.text = amount.ToString();
+        }
     }
     
     public void OnPointerEnter(PointerEventData eventData)

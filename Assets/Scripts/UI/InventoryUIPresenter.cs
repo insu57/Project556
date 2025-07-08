@@ -85,8 +85,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnShowInventory += HandleOnShowInventory;
         _inventoryManager.OnEquipFieldItem += HandleOnEquipItem;
         _inventoryManager.OnAddItemToInventory += HandleOnAddItemToInventory;
-
-        
+        _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
+        _inventoryManager.OnRemoveItem += HandleOnRemoveItem;
         
         //test
         HandleOnInitInventory(crate01Test, null); //Loot
@@ -106,7 +106,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnShowInventory -= HandleOnShowInventory;
         _inventoryManager.OnEquipFieldItem -= HandleOnEquipItem;
         _inventoryManager.OnAddItemToInventory -= HandleOnAddItemToInventory;
-        
+        _inventoryManager.OnUpdateItemStack -= HandleOnUpdateItemStack;
+        _inventoryManager.OnRemoveItem -= HandleOnRemoveItem;
     }
 
     public void InitItemDragHandler(ItemDragHandler itemDrag) //아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
@@ -507,6 +508,18 @@ public class InventoryUIPresenter : MonoBehaviour
                 break;
         }
     }
+
+    private void HandleOnUpdateItemStack(Guid id, int stackAmount)
+    {
+        _itemDragHandlers[id].SetStackAmountText(stackAmount);
+    }
+
+    private void HandleOnRemoveItem(Guid id)
+    {
+        var itemDragHandler = _itemDragHandlers[id];
+        ObjectPoolingManager.Instance.ReleaseItemDragHandler(itemDragHandler);
+        _itemDragHandlers.Remove(id);
+    }
     
     //임시?
     private void SetItem(BaseItemDataSO itemData)
@@ -516,7 +529,9 @@ public class InventoryUIPresenter : MonoBehaviour
         
         if(!isAvailable) return;
         
-        var invenItem = new ItemInstance(itemData);
+        ItemInstance invenItem;
+        if (itemData is WeaponData weaponData) invenItem = new WeaponInstance(weaponData);
+        else invenItem = new ItemInstance(itemData);
         var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
         
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
@@ -551,8 +566,11 @@ public class InventoryUIPresenter : MonoBehaviour
     private void SetGearItem(BaseItemDataSO itemData, RectTransform gearSlot) //처리?
     {
         if (!_gearSlotsMap.TryGetValue(gearSlot, out var gearCell)) return;
-
-        var invenItem = new ItemInstance(itemData);
+        
+        ItemInstance invenItem;
+        if (itemData is WeaponData weaponData) invenItem = new WeaponInstance(weaponData);
+        else  invenItem = new ItemInstance(itemData);
+        
         var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
         
         itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
