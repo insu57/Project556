@@ -27,7 +27,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private WeaponInstance _currentWeaponItem;
     private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
     public event Action<float, float> OnPlayerHealthChanged;
-    public event Action<int> OnUpdateMagazineCount;
+    public event Action<bool, int> OnUpdateMagazineCount;
+    public event Action OnReloadNoAmmo;
 
    
     public bool IsUnarmed { private set; get; }
@@ -106,7 +107,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         
         if (!isShoot) return;
         _currentWeaponItem.UseAmmo();
-        OnUpdateMagazineCount?.Invoke(GetCurrentWeaponMagazineCount());
+        OnUpdateMagazineCount?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
     }
 
     public int GetCurrentWeaponMagazineCount()
@@ -138,14 +139,15 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 else ammoToRefill = magazineSize + 1 - currentAmmo;//약실 한 발 고려
             }
             
-            var (canReload, reloadAmmo)  = _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
+            var (canReload, reloadAmmo)  = 
+                _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill, _currentWeaponItem.InstanceID);
 
             if (canReload)
             {
-                _currentWeaponItem?.ReloadAmmo();
-                OnUpdateMagazineCount?.Invoke(currentAmmo + reloadAmmo);
+                _currentWeaponItem.ReloadAmmo();
+                OnUpdateMagazineCount?.Invoke(_currentWeaponItem.IsFullyLoaded(), currentAmmo + reloadAmmo);
+                _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
             }
-            //무기 장착 오류
             
             //장전할 탄이 하나도 없으면 경고문구 띄우기
             //장전 제어?
@@ -188,6 +190,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
             oneHandSprite.enabled = false;
             twoHandSprite.enabled = false;
+            OnUpdateMagazineCount?.Invoke(false, 0);
             return;
         }
 
@@ -222,7 +225,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         
         _playerWeapon.ChangeWeaponData(newWeaponData); //변경
         _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
-        OnUpdateMagazineCount?.Invoke(GetCurrentWeaponMagazineCount());
+        OnUpdateMagazineCount?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
     }
 
     public void ScrollItemPickup(float scrollDeltaY)
@@ -245,8 +248,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
             
             other.TryGetComponent<ItemPickUp>(out var itemPickUp);
             _currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
-            var item = itemPickUp.GetItemData();
-            
+            var item = itemPickUp.GetItemInstance();
+            var itemData = item.ItemData;
             bool canEquip = false;
             //장착
             bool isGear = item.GearType != GearType.None;
@@ -265,7 +268,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             if (_inventoryManager.BackpackInventory)
             {
                 var (isAvailable, firstIdx, slotRT) = 
-                    _inventoryManager.BackpackInventory.CheckCanAddItem(item);
+                    _inventoryManager.BackpackInventory.CheckCanAddItem(itemData);
                 canPickup = isAvailable;
                 _pickupTargetSlotInfo = (firstIdx, slotRT);
                 _pickupTargetIsPocket = false;
@@ -273,7 +276,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             else if (_inventoryManager.RigInventory)
             {
                 var (isAvailable, firstIdx, sloRT) = 
-                    _inventoryManager.RigInventory.CheckCanAddItem(item);
+                    _inventoryManager.RigInventory.CheckCanAddItem(itemData);
                 canPickup = isAvailable;
                 _pickupTargetSlotInfo = (firstIdx, sloRT);
                 _pickupTargetIsPocket = false;
@@ -282,7 +285,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             {
                 var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
                 if(checkCell is not null 
-                   && item.ItemHeight == 1 && item.ItemWidth == 1) 
+                   && itemData.ItemHeight == 1 && itemData.ItemWidth == 1) 
                 {
                     canPickup = true; //Cell크기 고려
                     _pickupTargetCell = checkCell;
@@ -310,7 +313,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
 
     public void GetFieldItem()
     {
-        var itemData = _currentItemPickUp.GetItemData();
+        var item = _currentItemPickUp.GetItemInstance();
        
         //개선방안???? bool List에서 개선..?
         //장비 - 장착/획득 순서
@@ -319,12 +322,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
         
         if (!isAvailable) return;
 
-        ItemInstance item;
-        if (itemData is WeaponData weaponData)
-        {
-            item = new WeaponInstance(weaponData);
-        }
-        else item = new ItemInstance(itemData);
+        //ItemInstance item = ItemInstance.CreateItemInstance(itemData);
+      
         switch (type)
         {
             case ItemInteractType.Equip:
@@ -342,7 +341,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             case ItemInteractType.PickUp:
                 if (!_pickupTargetIsPocket)
                 {
-                    _inventoryManager.AddItemToInventory(_pickupTargetSlotInfo.firstIdx, _pickupTargetSlotInfo.slotRT, item);
+                    _inventoryManager.AddNewItemToInventory(_pickupTargetSlotInfo.firstIdx, _pickupTargetSlotInfo.slotRT, item);
                 }
                 else _inventoryManager.EquipFieldItem(_pickupTargetCell, item);
                 break;
@@ -351,7 +350,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 break;
         }
         
-        Destroy(_currentItemPickUp.gameObject); //수정
+        //Destroy(_currentItemPickUp.gameObject); //수정
+        ObjectPoolingManager.Instance.ReleaseItemPickUp(_currentItemPickUp);
     }
 
     public void TakeDamage(float damage)

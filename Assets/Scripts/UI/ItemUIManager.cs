@@ -31,6 +31,15 @@ namespace UI
 
         [SerializeField] private Color availableColor;
         [SerializeField] private Color unavailableColor;
+        
+        [SerializeField] private Image quickSlot01;
+        [SerializeField] private TMP_Text quickSlot01Count;
+        [SerializeField] private Image quickSlot02;
+        [SerializeField] private TMP_Text quickSlot02Count;
+        [SerializeField] private Image quickSlot03;
+        [SerializeField] private TMP_Text quickSlot03Count;
+        [SerializeField] private Image quickSlot04;
+        [SerializeField] private TMP_Text quickSlot04Count;
     
         [Header("Player Inventory")]
         [Header("Left Panel")]

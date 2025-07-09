@@ -83,20 +83,21 @@ public class InventoryUIPresenter : MonoBehaviour
         //InventoryManager
         _inventoryManager.OnInitInventory += HandleOnInitInventory;
         _inventoryManager.OnShowInventory += HandleOnShowInventory;
-        _inventoryManager.OnEquipFieldItem += HandleOnEquipItem;
-        _inventoryManager.OnAddItemToInventory += HandleOnAddItemToInventory;
+        _inventoryManager.OnEquipFieldItem += HandleOnEquipFieldItem;
+        _inventoryManager.OnAddNewItemToInventory += HandleOnAddNewItemToInventory;
         _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
+        _inventoryManager.OnUpdateWeaponMagCount += HandleOnUpdateWeaponMagCount;
         _inventoryManager.OnRemoveItem += HandleOnRemoveItem;
         
         //test
         HandleOnInitInventory(crate01Test, null); //Loot
-        SetItem(pistolTestData);
-        SetItem(itemDataTest);
+        SetItemToInventory(pistolTestData);
+        SetItemToInventory(itemDataTest);
         SetStackableItem(bullet556TestData, 50);
         SetStackableItem(bullet556TestData, 10);
         SetGearItem(backpackTestData, _itemUIManager.BackpackSlotRT);
         SetGearItem(rigTestData, _itemUIManager.RigSlotRT);
-        SetItem(rigTanTestData);
+        SetItemToInventory(rigTanTestData);
     }
 
     private void OnDestroy()
@@ -104,9 +105,10 @@ public class InventoryUIPresenter : MonoBehaviour
         //Event unsubscribe
         _inventoryManager.OnInitInventory -= HandleOnInitInventory;
         _inventoryManager.OnShowInventory -= HandleOnShowInventory;
-        _inventoryManager.OnEquipFieldItem -= HandleOnEquipItem;
-        _inventoryManager.OnAddItemToInventory -= HandleOnAddItemToInventory;
+        _inventoryManager.OnEquipFieldItem -= HandleOnEquipFieldItem;
+        _inventoryManager.OnAddNewItemToInventory -= HandleOnAddNewItemToInventory;
         _inventoryManager.OnUpdateItemStack -= HandleOnUpdateItemStack;
+        _inventoryManager.OnUpdateWeaponMagCount -= HandleOnUpdateWeaponMagCount;
         _inventoryManager.OnRemoveItem -= HandleOnRemoveItem;
     }
 
@@ -246,23 +248,32 @@ public class InventoryUIPresenter : MonoBehaviour
             if (remainingTargetCellAmount < itemStackAmount)
             {
                 //drag 아이템의 스택이 더 많으면
-                _currentDragItem.ChangeStackAmount(-remainingTargetCellAmount); //타겟 Cell의 부족한 스택만큼 빼기
+                _currentDragItem.AdjustStackAmount(-remainingTargetCellAmount); //타겟 Cell의 부족한 스택만큼 빼기
                 itemDrag.SetStackAmountText(_currentDragItem.CurrentStackAmount);
-                targetCellItem.ChangeStackAmount(remainingTargetCellAmount); //Max까지
+                targetCellItem.AdjustStackAmount(remainingTargetCellAmount); //Max까지
                 _itemDragHandlers[targetCellItem.InstanceID].SetStackAmountText(targetCellItem.CurrentStackAmount);
                 itemDrag.ReturnItemDrag();
             }
             else
             {
                 //drag 아이템 스택이 더 적으면
-                var originCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
-                _inventoryManager.RemoveGearItem(originCell, _currentDragItem.InstanceID); //drag아이템 기존 슬롯에서 제거
+                //origin...
+                if (!originInvenRT)
+                {
+                    var originCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
+                    _inventoryManager.RemoveGearItem(originCell, _currentDragItem.InstanceID); //drag아이템 기존 슬롯에서 제거
+                }
+                else
+                {
+                    _invenMap[originInvenRT].RemoveItem(_currentDragItem.InstanceID, _currentDragItem.IsRotated);
+                }
+                
                 var itemDragHandler = _itemDragHandlers[_currentDragItem.InstanceID];
                
                 ObjectPoolingManager.Instance.ReleaseItemDragHandler(itemDragHandler);
                 _itemDragHandlers.Remove(_currentDragItem.InstanceID); //drag Handler 비활성화...(추후 풀링으로 관리)
 
-                targetCellItem.ChangeStackAmount(itemStackAmount); //드래그 아이템의 스택만큼 추가
+                targetCellItem.AdjustStackAmount(itemStackAmount); //드래그 아이템의 스택만큼 추가
                 _itemDragHandlers[targetCellItem.InstanceID].SetStackAmountText(targetCellItem.CurrentStackAmount);
             }
 
@@ -465,34 +476,45 @@ public class InventoryUIPresenter : MonoBehaviour
             case GearType.None: //LootInventory
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_itemUIManager.LootSlotParent] = inventory;
-                
-                //itemDragHandler -> pooling 개선
+               
                 break;
         }
     }
 
-    private void HandleOnEquipItem(CellData gearSlot, ItemInstance item)//장착
+    private ItemDragHandler InitItemDragHandler(ItemInstance item) //ItemDragHandler초기화
+    {
+        var itemDragHandler = ObjectPoolingManager.Instance.GetItemDragHandler();
+        _itemDragHandlers[item.InstanceID] = itemDragHandler;
+        itemDragHandler.Init(item, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
+        if (item.IsStackable)
+        {
+            itemDragHandler.SetStackAmountText(item.CurrentStackAmount);
+        }
+        else if (item is WeaponInstance weapon)
+        {
+            itemDragHandler.SetMagazineCountText(weapon.IsFullyLoaded(), weapon.CurrentMagazineCount);
+        }
+        return itemDragHandler;
+    }
+
+    private void HandleOnEquipFieldItem(CellData gearSlot, ItemInstance item)//장착
     {
         var gearSlotRT = _gearRTMap[gearSlot];
+
+        var itemDragHandlerInstance = InitItemDragHandler(item);
        
-        var itemDragHandlerInstance = ObjectPoolingManager.Instance.GetItemDragHandler();
-        _itemDragHandlers[item.InstanceID] = itemDragHandlerInstance;
         var size = gearSlotRT.sizeDelta;
-       
-        itemDragHandlerInstance.Init(item, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
         
         var targetPos = new Vector2(size.x, -size.y) / 2;
         itemDragHandlerInstance.SetItemDragPos(targetPos, size, gearSlotRT, null);
-        
     }
     
-    private void HandleOnAddItemToInventory(GearType inventoryType, Vector2 pos, RectTransform itemRT ,ItemInstance item)
+    private void HandleOnAddNewItemToInventory(GearType inventoryType, Vector2 pos, RectTransform itemRT ,ItemInstance item)
         //인벤토리에 아이템 추가(아이템 줍기, 보상 받기 등)
     {
-        var itemDragHandlerInstance = ObjectPoolingManager.Instance.GetItemDragHandler();
-        _itemDragHandlers[item.InstanceID] = itemDragHandlerInstance;
+        var itemDragHandlerInstance = InitItemDragHandler(item);
+        
         Vector2 size = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * _itemUIManager.CellSize;
-        itemDragHandlerInstance.Init(item, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
         
         switch (inventoryType)
         {
@@ -514,6 +536,11 @@ public class InventoryUIPresenter : MonoBehaviour
         _itemDragHandlers[id].SetStackAmountText(stackAmount);
     }
 
+    private void HandleOnUpdateWeaponMagCount(Guid id, bool hasChamber, int magazineCount)
+    {
+        _itemDragHandlers[id].SetMagazineCountText(hasChamber, magazineCount);
+    }
+    
     private void HandleOnRemoveItem(Guid id)
     {
         var itemDragHandler = _itemDragHandlers[id];
@@ -522,24 +549,21 @@ public class InventoryUIPresenter : MonoBehaviour
     }
     
     //임시?
-    private void SetItem(BaseItemDataSO itemData)
+    private void SetItemToInventory(BaseItemDataSO itemData)
     {
         var inventory = _inventoryManager.LootInventory;
         var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
         
         if(!isAvailable) return;
+
+        var invenItem = ItemInstance.CreateItemInstance(itemData);
+
+        var itemDrag = InitItemDragHandler(invenItem); 
         
-        ItemInstance invenItem;
-        if (itemData is WeaponData weaponData) invenItem = new WeaponInstance(weaponData);
-        else invenItem = new ItemInstance(itemData);
-        var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
-        
-        itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
         var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUIManager.CellSize;
         
-        var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);;
+        var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);
         itemDrag.SetItemDragPos(pos, size,itemRT,_itemUIManager.LootSlotParent);
-        _itemDragHandlers.Add(invenItem.InstanceID, itemDrag);
     }
 
     private void SetStackableItem(BaseItemDataSO itemData, int stackAmount)
@@ -550,16 +574,16 @@ public class InventoryUIPresenter : MonoBehaviour
         var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
         
         if(!isAvailable) return;
-        var invenItem = new ItemInstance(itemData);
-        var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
         
-        itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
+        var invenItem = ItemInstance.CreateItemInstance(itemData);
+        var itemDrag = InitItemDragHandler(invenItem);
+        
         var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUIManager.CellSize;
         
         var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);
         itemDrag.SetItemDragPos(pos, size, itemRT,_itemUIManager.LootSlotParent);
-        invenItem.ChangeStackAmount(stackAmount);
-        _itemDragHandlers.Add(invenItem.InstanceID, itemDrag);
+      
+        invenItem.SetStackAmount(stackAmount);
         itemDrag.SetStackAmountText(stackAmount);
     }
 
@@ -567,17 +591,13 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         if (!_gearSlotsMap.TryGetValue(gearSlot, out var gearCell)) return;
         
-        ItemInstance invenItem;
-        if (itemData is WeaponData weaponData) invenItem = new WeaponInstance(weaponData);
-        else  invenItem = new ItemInstance(itemData);
+        var invenItem = ItemInstance.CreateItemInstance(itemData);
+
+        var itemDrag = InitItemDragHandler(invenItem);
         
-        var itemDrag = ObjectPoolingManager.Instance.GetItemDragHandler();
-        
-        itemDrag.Init(invenItem, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
         var size = gearSlot.sizeDelta;
         var pos = new Vector2(gearSlot.sizeDelta.x, -gearSlot.sizeDelta.y) / 2;
         itemDrag.SetItemDragPos(pos, size, gearSlot, null);
         _inventoryManager.SetGearItem(gearCell, invenItem);
-        _itemDragHandlers.Add(invenItem.InstanceID, itemDrag);
     }
 }

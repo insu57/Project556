@@ -87,6 +87,7 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
         _itemDraggingParent = uiParent;
         
         if(item.IsStackable) countText.enabled = true; //Stack 표시용 TMP Text
+        if (item is WeaponInstance) countText.enabled = true;
         
         _rotateItemAction = itemRotateAction;
         _rotateItemAction.performed += OnRotateItemAction;
@@ -131,11 +132,11 @@ public class ItemDragHandler : MonoBehaviour, IPointerDownHandler, IDragHandler,
     }
 
     //장전세분화?
-    public void SetMagazineCountText(bool hasChamber, int amount)
+    public void SetMagazineCountText(bool hasChamber, int amount) //방식 변경? 꽉찼을때만?
     {
         if (hasChamber)
         {
-            countText.text = amount + "<size=%75>+1</size>";
+            countText.text = amount - 1 + "<size=75%>+1</size>";
         }
         else
         {

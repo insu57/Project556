@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class ItemInstance
 {
@@ -17,8 +18,8 @@ public class ItemInstance
     public bool IsRotated { get; private set; }
     public Inventory ItemInventory {get; private set;} 
     public float Durability { get; private set; }
-    
-    public ItemInstance(IItemData itemData) //new...Init
+
+    protected ItemInstance(IItemData itemData) //new...Init
     {
         ItemData = itemData;
         InstanceID = Guid.NewGuid();
@@ -33,16 +34,26 @@ public class ItemInstance
         ItemInventory = itemInventory;
     }
     
-    public void ChangeStackAmount(int stackAmount)
+    public void AdjustStackAmount(int stackAmount)
     {
         CurrentStackAmount += stackAmount;
     }
 
-    public void ChangeDurability(float durability)
+    public void AdjustDurability(float durability)
     {
         Durability += durability;
     }
 
+    public void SetStackAmount(int stackAmount)
+    {
+        CurrentStackAmount = stackAmount;
+    }
+
+    public void SetDurability(float durability)
+    {
+        Durability = durability;   
+    }
+    
     public void RotateItem()
     {
         IsRotated = !IsRotated;
@@ -54,6 +65,28 @@ public class ItemInstance
         {
             ItemCellCount = new Vector2Int(ItemData.ItemHeight, ItemData.ItemWidth);       
         }
+    }
+
+    public static ItemInstance CreateItemInstance(IItemData itemData) //ItemInstance 생성(ItemPickup 등에서 사용) 
+    {
+        if (itemData is WeaponData weaponData) //Weapon
+        {
+            var weaponInstance = new WeaponInstance(weaponData);
+            var randMagCount = Random.Range(0, weaponData.DefaultMagazineSize); //무작위 탄 개수
+            weaponInstance.SetMagazineCount(randMagCount);
+         
+            return weaponInstance;
+        }
+        
+        var itemInstance = new ItemInstance(itemData);
+
+        if (itemData.IsStackable) //stackable인 경우
+        {
+            var randStack = Random.Range(1, itemData.MaxStackAmount);
+            itemInstance.SetStackAmount(randStack);
+        }
+
+        return itemInstance;
     }
    
 }

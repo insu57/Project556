@@ -13,8 +13,16 @@ public class PlayerUIManager : MonoBehaviour
         healthBar.fillAmount = health / maxHealth;
     }
 
-    public void UpdateAmmoText(int ammo) 
+    public void UpdateAmmoText(bool isFullyLoaded, int ammo) 
     {
         ammoText.text = ammo.ToString();
+        if (isFullyLoaded)
+        {
+            ammoText.text = ammo - 1 + "<size=75%>+1</size>";
+        }
+        else
+        {
+            ammoText.text = ammo.ToString();
+        }
     }
 }

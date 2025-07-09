@@ -38,8 +38,9 @@ public class InventoryManager : MonoBehaviour
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<ItemInstance> OnShowInventory;
     public event Action<CellData, ItemInstance> OnEquipFieldItem;
-    public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddItemToInventory;
+    public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddNewItemToInventory;
     public event Action<Guid, int> OnUpdateItemStack;
+    public event Action<Guid, bool, int> OnUpdateWeaponMagCount;
     public event Action<Guid> OnRemoveItem;
     
     //PlayerManager
@@ -147,12 +148,12 @@ public class InventoryManager : MonoBehaviour
     public void RemoveGearItem(CellData gearSlot, Guid itemID)
     {
         var gearType = ItemDict[itemID].item.GearType;
-        //Debug.Log($"Removing item : {ItemDict[itemID].item.ItemData.ItemName}, {itemID}");
+        
         if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack)
         {
             var inventory = ItemDict[itemID].item.ItemInventory;
             inventory.gameObject.SetActive(false); //비활성
-        }
+        } //씬이동 시?... 데이터 저장(하위 아이템별?)
 
         if (gearType is GearType.Weapon)
         {
@@ -191,33 +192,29 @@ public class InventoryManager : MonoBehaviour
         return totalArmor;
     }
     
-    public void AddItemToInventory(int firstIdx, RectTransform slotRT, ItemInstance item)
+    public void AddNewItemToInventory(int firstIdx, RectTransform slotRT, ItemInstance item)
     {
-        //item따라...
-        //DragHandler -> ObjectPooling(active, inactive 로 구분, inactive인 경우 리셋...)
-
         if (BackpackInventory)
         {
-            //var item = new InventoryItem(itemData);
             var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, slotRT);
-            OnAddItemToInventory?.Invoke(GearType.Backpack, pos, itemRT, item);
+            OnAddNewItemToInventory?.Invoke(GearType.Backpack, pos, itemRT, item);
             return;
         }
 
         if (RigInventory)
         {
-            //var item = new InventoryItem(itemData);
             var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, slotRT);
-            OnAddItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
+            OnAddNewItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
             return;
         }
 
-        OnAddItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
+        OnAddNewItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
     }
     
-    //Quickslot...
+    //QuickSlot...
 
-    public (bool canReload, int reloadAmmo) LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo) //탄종구분 - 탄 구분(zero sivert처럼)
+    public (bool canReload, int reloadAmmo) 
+        LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo, Guid weaponID) //탄종구분 - 탄 구분(zero sivert처럼)?
     {
         int reloadAmmo = 0;
         if (RigInventory)
@@ -236,7 +233,7 @@ public class InventoryManager : MonoBehaviour
                     {
                         Debug.Log($"Rig, over stack : {ammoData.ItemName}, {neededAmmo}, {stackAmount}");
                         reloadAmmo += neededAmmo;
-                        item.ChangeStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
+                        item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
                         OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
                         return (true, reloadAmmo); //요구치 전부
                     }
@@ -263,7 +260,7 @@ public class InventoryManager : MonoBehaviour
             if (stackAmount > neededAmmo)
             {
                 reloadAmmo += neededAmmo;
-                item.ChangeStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
+                item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
                 OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
                 return (true, reloadAmmo); //요구치 전부
             }
@@ -283,7 +280,15 @@ public class InventoryManager : MonoBehaviour
         Debug.Log($"Reload Ammo : {ammoCaliber}, {reloadAmmo}");
         return (true, reloadAmmo);
     }
-    
+
+    public void UpdateWeaponMagCount(Guid id)
+    {
+        var (item, _) = ItemDict[id];
+        if (item is WeaponInstance weapon)
+        {
+            OnUpdateWeaponMagCount?.Invoke(id, weapon.IsFullyLoaded() ,weapon.CurrentMagazineCount);
+        }
+    }
     
     private void SetGearItemData(CellData cell, ItemInstance item) //아이템 데이터 참조
     {

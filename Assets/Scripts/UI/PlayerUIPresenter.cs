@@ -5,16 +5,19 @@ public class PlayerUIPresenter : MonoBehaviour
 {
     private PlayerUIManager _playerUIManager;
     private PlayerManager _playerManager;
-    private PlayerWeapon _playerWeapon;
 
     private void Awake()
     {
         TryGetComponent(out _playerManager);
         _playerUIManager = FindFirstObjectByType<PlayerUIManager>();
-        TryGetComponent(out _playerWeapon);
         
         _playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
         _playerManager.OnUpdateMagazineCount += HandleOnUpdateMagazineCount;
+    }
+
+    private void OnDisable()
+    {
+        
     }
 
     private void HandleOnUpdateHealthBar(float health, float maxHealth)
@@ -22,9 +25,9 @@ public class PlayerUIPresenter : MonoBehaviour
         _playerUIManager.UpdateHealthBar(health, maxHealth);
     }
 
-    private void HandleOnUpdateMagazineCount(int ammo)
+    private void HandleOnUpdateMagazineCount(bool isFullyLoaded, int ammo)
     {
-        _playerUIManager.UpdateAmmoText(ammo);
+        _playerUIManager.UpdateAmmoText(isFullyLoaded, ammo);
     }
     
 }
