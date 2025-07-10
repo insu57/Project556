@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Cainos.LucidEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -9,16 +10,18 @@ namespace Player
    public class PlayerControl : MonoBehaviour
    {
       [SerializeField] private float moveSpeed = 5f;
+      [SerializeField] private float runSpeedMultiplier = 1.2f;
+      [ShowInInspector] private float _runSpeed;
+      
       [SerializeField] private float jumpSpeed = 5f;
    
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;
       private Vector3 _baseRArmPosition;
       private float _shootAngle;
-   
-      //private InputSystem_Actions _inputActions;
+      
       private PlayerInput _playerInput;
-      private InputAction _moveAction;
+      private InputAction _moveAction; //개선방안?
       private InputAction _jumpAction;
       private InputAction _shootAction;
       private InputAction _reloadAction;
@@ -43,12 +46,10 @@ namespace Player
       private bool _isGrounded = false;
       private bool _canClimb = false;
       private bool _canRotateArm = true;
-   
-      //private UIManager _uiManager;
+
       private UIControl _uiControl;
    
       public event Action<bool> OnPlayerMove;
-      //public event Action<bool> OnPlayerShoot;
       public event Action OnPlayerReload;
    
       private void Awake()
@@ -83,6 +84,8 @@ namespace Player
          
          _playerInput.SwitchCurrentActionMap("Player");
          //Project-Wide Actions 비활성..., UI Input Module 사용?
+         
+         _runSpeed = moveSpeed * runSpeedMultiplier; //RunSpeed 이동속도에 보정(1.25기본)
       }
 
       private void OnEnable()
@@ -219,7 +222,7 @@ namespace Player
       
       }
    
-      private void PlayerMovement()
+      private void PlayerMovement() //플레이어 이동
       {
          _rigidbody.linearVelocityX = _playerMoveVector.x * moveSpeed;
          if (_canClimb)

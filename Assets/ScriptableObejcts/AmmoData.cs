@@ -13,6 +13,7 @@ public class AmmoData : BaseItemDataSO
 
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
+    [SerializeField] private float itemWeight;
     [SerializeField] private int maxStackAmount;
     
     [SerializeField] private float ammoDamage;
@@ -29,6 +30,7 @@ public class AmmoData : BaseItemDataSO
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.None;
+    public override float ItemWeight => itemWeight;
     public override bool IsStackable => true;
     public override bool IsConsumable => false; //직접 사용은 불가
     public override int MaxStackAmount => maxStackAmount;

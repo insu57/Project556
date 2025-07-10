@@ -9,6 +9,7 @@ public interface IItemData
     public int ItemWidth { get; }
     public int ItemHeight { get; }
     public GearType GearType { get; }
+    public float ItemWeight { get; }
     public bool IsStackable { get; }
     public bool IsConsumable { get; }
     public int MaxStackAmount { get; }

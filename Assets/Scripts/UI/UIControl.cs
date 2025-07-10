@@ -15,6 +15,9 @@ public class UIControl : MonoBehaviour
     private InputAction _closeUIAction;
 
     public InputAction ItemRotateAction {private set; get;}
+    public InputAction QuickAddItemAction {private set; get;}
+    public InputAction QuickDropItemAction {private set; get;}
+    
     private void Awake()
     {
         _itemUIManager = GetComponent<ItemUIManager>();
@@ -29,18 +32,13 @@ public class UIControl : MonoBehaviour
         _closeAction = map.FindAction("Close");
         _closeUIAction = map.FindAction("CloseUI");
         ItemRotateAction = map.FindAction("Rotate");
-        var testAction = map.FindAction("Ctrl Test");
-        testAction.performed += OnTest;
+        QuickAddItemAction = map.FindAction("QuickAddItem");
+        QuickDropItemAction = map.FindAction("QuickDropItem");
         
         _closeAction.performed += OnClose;
         _closeUIAction.performed += OnCloseUI;
         
         //_playerInput.inputIsActive
-    }
-
-    private void OnTest(InputAction.CallbackContext context)
-    {
-        Debug.Log("L Ctrl");
     }
     
     private void OnEnable()

@@ -1,15 +1,13 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "MedicalData", menuName = "Scriptable Objects/MedicalData")]
-public class MedicalData : BaseItemDataSO
+[CreateAssetMenu(fileName = "FoodData", menuName = "Scriptable Objects/FoodData")]
+public class FoodData : BaseItemDataSO
 {
     [SerializeField] private string itemID;
     [SerializeField] private string itemName;
     
-    [SerializeField] private int healAmount;
-    //추가 - 상태이상(출혈, 독 등) 치료
-    //틱 당 회복, 출혈 치료, 독 치료... 등
-    //여러 종류...
+    [SerializeField] private float hydrationAmount;
+    [SerializeField] private float energyAmount;
     
     [SerializeField] private Sprite itemSprite;
    
@@ -21,7 +19,6 @@ public class MedicalData : BaseItemDataSO
     
     public override string ItemDataID => itemID;
     public override string ItemName => itemName;
-    public int HealAmount => healAmount;
     public override Sprite ItemSprite => itemSprite;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
@@ -30,4 +27,7 @@ public class MedicalData : BaseItemDataSO
     public override bool IsStackable => isStackable;
     public override bool IsConsumable => true;
     public override int MaxStackAmount => maxStackAmount;
+    
+    public float HydrationAmount => hydrationAmount;
+    public float EnergyAmount => energyAmount;
 }

@@ -130,6 +130,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSlot",
+                    "type": "Button",
+                    "id": "47efd4e8-fb3d-42af-be3d-f034ac0451ab",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -594,6 +603,50 @@
                     "action": "ChangeWeapon",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9c0a878a-ff4c-4faf-b512-0162b987bcc2",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "22658de1-6e0b-4b4c-8c33-e33198b71c40",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ed65fed7-8017-49b9-bb56-ddeaae0f3447",
+                    "path": "<Keyboard>/6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "797c70e0-00a6-4571-93d9-8dde7399a070",
+                    "path": "<Keyboard>/7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -719,9 +772,27 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Ctrl Test",
+                    "name": "QuickAddItem",
                     "type": "Button",
-                    "id": "f59e9233-f932-4ce0-9cbb-194c02b1ac57",
+                    "id": "ee910568-0d13-4372-a308-0a3e33871c08",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickDropItem",
+                    "type": "Button",
+                    "id": "fb85b0e2-5939-4a0b-86a5-170635693351",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SetQuickSlot",
+                    "type": "Button",
+                    "id": "1872f48b-f29b-4ccb-bf87-384bd778c664",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1181,13 +1252,90 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "632f1120-3a3c-4a3a-90ba-df190e5a7527",
+                    "name": "One Modifier",
+                    "id": "51e25d57-dfc5-4181-9845-2c35906db0d2",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickAddItem",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "cbd5369d-2c81-48d5-b038-5d4f97da9740",
                     "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Ctrl Test",
+                    "action": "QuickAddItem",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "bb565e61-0811-42e6-8cdc-7610eaf62020",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickAddItem",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "9d620187-cba5-49cb-9df4-0e7856b35ccc",
+                    "path": "<Keyboard>/delete",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuickDropItem",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6231ac8d-c7eb-4285-83bb-d0669e345bbb",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SetQuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8ceb6508-aa8a-4d9a-90df-ebcf5e017c87",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SetQuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6df499c7-9fb3-4ba4-9240-d047078304e5",
+                    "path": "<Keyboard>/6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SetQuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "555bcf27-139d-43f4-81ca-2599190bcd18",
+                    "path": "<Keyboard>/7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SetQuickSlot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -11,7 +11,7 @@ public class GearData : BaseItemDataSO
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private int itemWidth = 1;
     [SerializeField] private int itemHeight = 1;
-    
+    [SerializeField] private float itemWeight;
     [SerializeField] private GameObject slotPrefab;
 
     
@@ -23,7 +23,7 @@ public class GearData : BaseItemDataSO
 
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
-
+    public override float ItemWeight => itemWeight;
     public GameObject SlotPrefab => slotPrefab;
     public override bool IsStackable => false;
     public override bool IsConsumable => false;

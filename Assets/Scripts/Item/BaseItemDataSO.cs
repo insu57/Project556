@@ -9,6 +9,7 @@ public abstract class BaseItemDataSO : ScriptableObject, IItemData
     public abstract int ItemWidth { get; }
     public abstract int ItemHeight { get; }
     public abstract GearType GearType { get; }
+    public abstract float ItemWeight { get; }
     public abstract bool IsStackable { get; }
     public abstract bool IsConsumable { get; }
     public abstract int MaxStackAmount { get; }

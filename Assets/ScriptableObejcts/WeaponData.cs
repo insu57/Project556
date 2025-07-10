@@ -25,7 +25,8 @@ public class WeaponData : BaseItemDataSO
   
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
-
+    [SerializeField] private float itemWeight;
+    
     [SerializeField] private WeaponSetup weaponSetup;
     
     public override string ItemDataID => itemID;
@@ -52,6 +53,7 @@ public class WeaponData : BaseItemDataSO
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
     public override GearType GearType => GearType.Weapon;
+    public override float ItemWeight => itemWeight;
     public Vector3 MuzzlePosition => weaponSetup.MuzzleOffset;
     public Vector3 MuzzleFlashOffset => weaponSetup.MuzzleFlashOffset;
     public override bool IsStackable => false;

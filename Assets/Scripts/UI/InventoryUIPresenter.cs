@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 public class InventoryUIPresenter : MonoBehaviour
@@ -117,7 +118,9 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnPointerDownEvent += HandleOnPointerEnter;
         itemDrag.OnDragEvent += HandleOnDragItem;
         itemDrag.OnEndDragEvent += HandleOnEndDragItem;
-        itemDrag.OnRotateItemEvent += HandleOnRotateItem;
+        itemDrag.OnRotateItem += HandleOnRotateItem;
+        itemDrag.OnQuickAddItem += HandleOnQuickAddItem;
+        itemDrag.OnQuickDropItem += HandleOnQuickDropItem;
     }
 
     public void OnDisableItemDragHandler(ItemDragHandler itemDrag)
@@ -125,23 +128,26 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnPointerDownEvent -= HandleOnPointerEnter;
         itemDrag.OnDragEvent -= HandleOnDragItem;
         itemDrag.OnEndDragEvent -= HandleOnEndDragItem;
-        itemDrag.OnRotateItemEvent -= HandleOnRotateItem;
+        itemDrag.OnRotateItem -= HandleOnRotateItem;
+        itemDrag.OnQuickAddItem -= HandleOnQuickAddItem;
+        itemDrag.OnQuickDropItem -= HandleOnQuickDropItem;
     }
-
+    
     //OnPointerEnter -> 해당 아이템, 기존 슬롯 정보 캐싱
     //OnDrag -> 해당 슬롯 정보 캐싱
     //OnEndDrag -> 이동/원복 처리
-    private void HandleOnPointerEnter(ItemDragHandler itemDrag, Guid itemID)
+    private void HandleOnPointerEnter(ItemDragHandler itemDrag)
     {
         var originInvenRT = itemDrag.InventoryRT;
-
+        var instanceID = itemDrag.InstanceID;
+        
         ItemInstance item;
 
         if (!originInvenRT) //기존 위치 인벤토리 체크
         {
-            if (!_inventoryManager.ItemDict.TryGetValue(itemID, out var inventoryItem))
+            if (!_inventoryManager.ItemDict.TryGetValue(instanceID, out var inventoryItem))
             {
-                Debug.LogError("Item not found...!: " + itemID);
+                Debug.LogError("Item not found...!: " + instanceID);
                 return;
             }
 
@@ -151,16 +157,16 @@ public class InventoryUIPresenter : MonoBehaviour
         {
             if (!_invenMap.TryGetValue(originInvenRT, out var inventory))
             {
-                Debug.LogError("Inventory not found...!: " + itemID);
+                Debug.LogError("Inventory not found...!: " + instanceID);
                 return;
             }
 
-            if (!inventory.ItemDict.TryGetValue(itemID, out var inventoryItem))
+            if (!inventory.ItemDict.TryGetValue(instanceID, out var inventoryItem))
             {
-                Debug.LogError($"Inventory:{inventory} - Item not found...!: " + itemID);
+                Debug.LogError($"Inventory:{inventory} - Item not found...!: " + instanceID);
                 return;
             }
-            item = inventory.ItemDict[itemID].item; //Inventory의 ItemDict
+            item = inventory.ItemDict[instanceID].item; //Inventory의 ItemDict
         }
 
         if (item != null)
@@ -170,9 +176,9 @@ public class InventoryUIPresenter : MonoBehaviour
         }
     }
 
-    private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos, Guid instanceID)
+    private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos)
     {
-
+        var instanceID = itemDrag.InstanceID;
         var slotInfo = _itemUIManager.GetItemSlotRT(mousePos);
         if (!slotInfo.matchSlot) //No Match Slot...
         {
@@ -330,11 +336,33 @@ public class InventoryUIPresenter : MonoBehaviour
         _currentDragItem.RotateItem();
 
         var size = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y) * CellSize;
-        var isOriginGearSlot = !itemDrag.InventoryRT; //InventoryRT가 없으면 GearSlot에서 움직이는 것
         itemDrag.SetItemDragRotate(_currentDragItem.IsRotated, size);
         //GearSlot rotate 해제...
     }
 
+    private void HandleOnQuickAddItem(ItemDragHandler itemDrag)
+    {
+        Debug.Log("HandleOnQuickAddItem");
+        var instanceID = itemDrag.InstanceID;
+        var inventoryRT = itemDrag.InventoryRT;
+        if(inventoryRT != _itemUIManager.LootSlotParent) return; //Loot인벤이 아니면 무시
+        ItemInstance item;
+        if (inventoryRT)  item = _invenMap[inventoryRT].ItemDict[instanceID].item;
+        else item = _inventoryManager.ItemDict[instanceID].item;
+        
+       
+    }
+
+    private void HandleOnQuickDropItem(ItemDragHandler itemDrag)
+    {
+        Debug.Log("HandleOnQuickDropItem");
+        var instanceID = itemDrag.InstanceID;
+        var inventoryRT = itemDrag.InventoryRT;
+        ItemInstance item;
+        if (inventoryRT)  item = _invenMap[inventoryRT].ItemDict[instanceID].item;
+        else item = _inventoryManager.ItemDict[instanceID].item;
+    }
+    
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
     {
         if (!_gearSlotsMap[matchRT].IsEmpty) //Empty가 아닐 때
@@ -485,7 +513,8 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         var itemDragHandler = ObjectPoolingManager.Instance.GetItemDragHandler();
         _itemDragHandlers[item.InstanceID] = itemDragHandler;
-        itemDragHandler.Init(item, this, _uiControl.ItemRotateAction, _itemUIManager.transform);
+        itemDragHandler.Init(item, this, _uiControl.ItemRotateAction, _uiControl.QuickAddItemAction ,
+            _uiControl.QuickDropItemAction  ,_itemUIManager.transform);
         if (item.IsStackable)
         {
             itemDragHandler.SetStackAmountText(item.CurrentStackAmount);

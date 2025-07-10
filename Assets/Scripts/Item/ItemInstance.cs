@@ -72,7 +72,7 @@ public class ItemInstance
         if (itemData is WeaponData weaponData) //Weapon
         {
             var weaponInstance = new WeaponInstance(weaponData);
-            var randMagCount = Random.Range(0, weaponData.DefaultMagazineSize); //무작위 탄 개수
+            var randMagCount = Random.Range(1, weaponData.DefaultMagazineSize + 1); //무작위 탄 개수
             weaponInstance.SetMagazineCount(randMagCount);
          
             return weaponInstance;
@@ -82,7 +82,7 @@ public class ItemInstance
 
         if (itemData.IsStackable) //stackable인 경우
         {
-            var randStack = Random.Range(1, itemData.MaxStackAmount);
+            var randStack = Random.Range(1, itemData.MaxStackAmount + 1);
             itemInstance.SetStackAmount(randStack);
         }
 

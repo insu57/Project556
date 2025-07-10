@@ -216,6 +216,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot"",
+                    ""type"": ""Button"",
+                    ""id"": ""47efd4e8-fb3d-42af-be3d-f034ac0451ab"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -680,6 +689,50 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""action"": ""ChangeWeapon"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c0a878a-ff4c-4faf-b512-0162b987bcc2"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""22658de1-6e0b-4b4c-8c33-e33198b71c40"",
+                    ""path"": ""<Keyboard>/5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ed65fed7-8017-49b9-bb56-ddeaae0f3447"",
+                    ""path"": ""<Keyboard>/6"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""797c70e0-00a6-4571-93d9-8dde7399a070"",
+                    ""path"": ""<Keyboard>/7"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -805,9 +858,27 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Ctrl Test"",
+                    ""name"": ""QuickAddItem"",
                     ""type"": ""Button"",
-                    ""id"": ""f59e9233-f932-4ce0-9cbb-194c02b1ac57"",
+                    ""id"": ""ee910568-0d13-4372-a308-0a3e33871c08"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickDropItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""fb85b0e2-5939-4a0b-86a5-170635693351"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SetQuickSlot"",
+                    ""type"": ""Button"",
+                    ""id"": ""1872f48b-f29b-4ccb-bf87-384bd778c664"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -1267,13 +1338,90 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""632f1120-3a3c-4a3a-90ba-df190e5a7527"",
+                    ""name"": ""One Modifier"",
+                    ""id"": ""51e25d57-dfc5-4181-9845-2c35906db0d2"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickAddItem"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""cbd5369d-2c81-48d5-b038-5d4f97da9740"",
                     ""path"": ""<Keyboard>/leftCtrl"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Ctrl Test"",
+                    ""action"": ""QuickAddItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""bb565e61-0811-42e6-8cdc-7610eaf62020"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickAddItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9d620187-cba5-49cb-9df4-0e7856b35ccc"",
+                    ""path"": ""<Keyboard>/delete"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickDropItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6231ac8d-c7eb-4285-83bb-d0669e345bbb"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SetQuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8ceb6508-aa8a-4d9a-90df-ebcf5e017c87"",
+                    ""path"": ""<Keyboard>/5"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SetQuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6df499c7-9fb3-4ba4-9240-d047078304e5"",
+                    ""path"": ""<Keyboard>/6"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SetQuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""555bcf27-139d-43f4-81ca-2599190bcd18"",
+                    ""path"": ""<Keyboard>/7"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SetQuickSlot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1359,6 +1507,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_OpenSetting = m_Player.FindAction("OpenSetting", throwIfNotFound: true);
         m_Player_ScrollWheel = m_Player.FindAction("ScrollWheel", throwIfNotFound: true);
         m_Player_ChangeWeapon = m_Player.FindAction("ChangeWeapon", throwIfNotFound: true);
+        m_Player_QuickSlot = m_Player.FindAction("QuickSlot", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1374,7 +1523,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_UI_Close = m_UI.FindAction("Close", throwIfNotFound: true);
         m_UI_CloseUI = m_UI.FindAction("CloseUI", throwIfNotFound: true);
         m_UI_Rotate = m_UI.FindAction("Rotate", throwIfNotFound: true);
-        m_UI_CtrlTest = m_UI.FindAction("Ctrl Test", throwIfNotFound: true);
+        m_UI_QuickAddItem = m_UI.FindAction("QuickAddItem", throwIfNotFound: true);
+        m_UI_QuickDropItem = m_UI.FindAction("QuickDropItem", throwIfNotFound: true);
+        m_UI_SetQuickSlot = m_UI.FindAction("SetQuickSlot", throwIfNotFound: true);
     }
 
     ~@InputSystem_Actions()
@@ -1470,6 +1621,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_OpenSetting;
     private readonly InputAction m_Player_ScrollWheel;
     private readonly InputAction m_Player_ChangeWeapon;
+    private readonly InputAction m_Player_QuickSlot;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1538,6 +1690,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @ChangeWeapon => m_Wrapper.m_Player_ChangeWeapon;
         /// <summary>
+        /// Provides access to the underlying input action "Player/QuickSlot".
+        /// </summary>
+        public InputAction @QuickSlot => m_Wrapper.m_Player_QuickSlot;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1605,6 +1761,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ChangeWeapon.started += instance.OnChangeWeapon;
             @ChangeWeapon.performed += instance.OnChangeWeapon;
             @ChangeWeapon.canceled += instance.OnChangeWeapon;
+            @QuickSlot.started += instance.OnQuickSlot;
+            @QuickSlot.performed += instance.OnQuickSlot;
+            @QuickSlot.canceled += instance.OnQuickSlot;
         }
 
         /// <summary>
@@ -1658,6 +1817,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ChangeWeapon.started -= instance.OnChangeWeapon;
             @ChangeWeapon.performed -= instance.OnChangeWeapon;
             @ChangeWeapon.canceled -= instance.OnChangeWeapon;
+            @QuickSlot.started -= instance.OnQuickSlot;
+            @QuickSlot.performed -= instance.OnQuickSlot;
+            @QuickSlot.canceled -= instance.OnQuickSlot;
         }
 
         /// <summary>
@@ -1708,7 +1870,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Close;
     private readonly InputAction m_UI_CloseUI;
     private readonly InputAction m_UI_Rotate;
-    private readonly InputAction m_UI_CtrlTest;
+    private readonly InputAction m_UI_QuickAddItem;
+    private readonly InputAction m_UI_QuickDropItem;
+    private readonly InputAction m_UI_SetQuickSlot;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -1773,9 +1937,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Rotate => m_Wrapper.m_UI_Rotate;
         /// <summary>
-        /// Provides access to the underlying input action "UI/CtrlTest".
+        /// Provides access to the underlying input action "UI/QuickAddItem".
         /// </summary>
-        public InputAction @CtrlTest => m_Wrapper.m_UI_CtrlTest;
+        public InputAction @QuickAddItem => m_Wrapper.m_UI_QuickAddItem;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/QuickDropItem".
+        /// </summary>
+        public InputAction @QuickDropItem => m_Wrapper.m_UI_QuickDropItem;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/SetQuickSlot".
+        /// </summary>
+        public InputAction @SetQuickSlot => m_Wrapper.m_UI_SetQuickSlot;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1841,9 +2013,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Rotate.started += instance.OnRotate;
             @Rotate.performed += instance.OnRotate;
             @Rotate.canceled += instance.OnRotate;
-            @CtrlTest.started += instance.OnCtrlTest;
-            @CtrlTest.performed += instance.OnCtrlTest;
-            @CtrlTest.canceled += instance.OnCtrlTest;
+            @QuickAddItem.started += instance.OnQuickAddItem;
+            @QuickAddItem.performed += instance.OnQuickAddItem;
+            @QuickAddItem.canceled += instance.OnQuickAddItem;
+            @QuickDropItem.started += instance.OnQuickDropItem;
+            @QuickDropItem.performed += instance.OnQuickDropItem;
+            @QuickDropItem.canceled += instance.OnQuickDropItem;
+            @SetQuickSlot.started += instance.OnSetQuickSlot;
+            @SetQuickSlot.performed += instance.OnSetQuickSlot;
+            @SetQuickSlot.canceled += instance.OnSetQuickSlot;
         }
 
         /// <summary>
@@ -1894,9 +2072,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Rotate.started -= instance.OnRotate;
             @Rotate.performed -= instance.OnRotate;
             @Rotate.canceled -= instance.OnRotate;
-            @CtrlTest.started -= instance.OnCtrlTest;
-            @CtrlTest.performed -= instance.OnCtrlTest;
-            @CtrlTest.canceled -= instance.OnCtrlTest;
+            @QuickAddItem.started -= instance.OnQuickAddItem;
+            @QuickAddItem.performed -= instance.OnQuickAddItem;
+            @QuickAddItem.canceled -= instance.OnQuickAddItem;
+            @QuickDropItem.started -= instance.OnQuickDropItem;
+            @QuickDropItem.performed -= instance.OnQuickDropItem;
+            @QuickDropItem.canceled -= instance.OnQuickDropItem;
+            @SetQuickSlot.started -= instance.OnSetQuickSlot;
+            @SetQuickSlot.performed -= instance.OnSetQuickSlot;
+            @SetQuickSlot.canceled -= instance.OnSetQuickSlot;
         }
 
         /// <summary>
@@ -2100,6 +2284,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnChangeWeapon(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "QuickSlot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnQuickSlot(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
@@ -2200,11 +2391,25 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRotate(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Ctrl Test" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "QuickAddItem" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnCtrlTest(InputAction.CallbackContext context);
+        void OnQuickAddItem(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "QuickDropItem" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnQuickDropItem(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SetQuickSlot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSetQuickSlot(InputAction.CallbackContext context);
     }
 }

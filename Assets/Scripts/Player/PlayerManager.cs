@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -8,6 +9,9 @@ using UnityEngine.Serialization;
 public class PlayerManager : MonoBehaviour, IDamageable
 {
     [SerializeField] private float playerHealth = 100f; //추후 SO에서 받아오게 수정 예정
+    [SerializeField] private float playerStamina = 100f;
+    [SerializeField] private float playerHydration = 100f;
+    [SerializeField] private float playerEnergy = 100f;
     
     [SerializeField] private SpriteRenderer oneHandSprite;
     [SerializeField] private Transform oneHandMuzzleTransform;
@@ -22,8 +26,13 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private InventoryManager _inventoryManager;
     private InventoryUIPresenter _inventoryUIPresenter;
     
-    private float _currentHealth;
-    private float _currentTotalArmor;
+    [ShowInInspector] private float _currentHealth;
+    [ShowInInspector] private float _currentTotalArmor;
+    [ShowInInspector] private float _currentStamina;
+    [ShowInInspector] private float _currentHydration;
+    [ShowInInspector] private float _currentEnergy;
+    [ShowInInspector] private float _currentTotalWeight;
+    
     private WeaponInstance _currentWeaponItem;
     private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
     public event Action<float, float> OnPlayerHealthChanged;
