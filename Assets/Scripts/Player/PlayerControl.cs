@@ -251,9 +251,8 @@ namespace Player
 
       private void OnInteract(InputAction.CallbackContext context)
       {
-         if (_playerManager.CanItemInteract) //현재 어떤것에 따라?
+         if (_playerManager.CanItemInteract) //아이템 상호작용 가능 상태
          {
-            Debug.Log("OnInteract");
             _playerManager.GetFieldItem(); //아이템 줍기
          }
       }

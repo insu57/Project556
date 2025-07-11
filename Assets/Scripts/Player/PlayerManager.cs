@@ -273,7 +273,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
             }
             //inventory
             bool canPickup = false;
-
+            
+            //겹칠 때?
             if (_inventoryManager.BackpackInventory)
             {
                 var (isAvailable, firstIdx, slotRT) = 
@@ -281,6 +282,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 canPickup = isAvailable;
                 _pickupTargetSlotInfo = (firstIdx, slotRT);
                 _pickupTargetIsPocket = false;
+                Debug.Log($"{itemPickUp.gameObject.name}, Item: {item.ItemData.ItemName}... firstIdx: " + firstIdx);
             }
             else if (_inventoryManager.RigInventory)
             {
@@ -359,7 +361,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
                 break;
         }
         
-        //Destroy(_currentItemPickUp.gameObject); //수정
+        CanItemInteract = false;
+        _itemUIManager.HideItemPickup();
+        
         ObjectPoolingManager.Instance.ReleaseItemPickUp(_currentItemPickUp);
     }
 

@@ -80,7 +80,7 @@ public class Inventory: MonoBehaviour
         Guid TargetCellItemID
     );
     
-    public InventorySlotCheckResult CheckSlot(Vector2 mousePos, ItemInstance item)
+    public InventorySlotCheckResult CheckSlot(Vector2 mousePos, ItemInstance item) //Mouse -> Slot -> Cell
     {
         var itemCellCount = item.ItemCellCount;//아이템 칸 크기
         
@@ -225,14 +225,19 @@ public class Inventory: MonoBehaviour
                 for (int w = 0; w < slotCount.x; w++)
                 {
                     int firstIdx = w + h * slotCount.x; //빈 슬롯 체크 시작 Idx
-
+                    int firstIdxX = firstIdx % slotCount.x;
+                    int firstIdxY = firstIdx / slotCount.x;
                     bool isAvailable = true;
-                    for (int y = 0; y < item.ItemHeight; y++)
+                    
+                    for (int y = h; y < h + item.ItemHeight; y++)
                     {
-                        for (int x = 0; x < item.ItemWidth; x++)
+                        for (int x = w; x < w + item.ItemWidth; x++)
                         {
-                            var idx = firstIdx + x + y * slotCount.x; //슬롯 체크 Idx
-                            if (idx < cells.Count && cells[idx].IsEmpty) continue; //out of bounds가 아닌지, Empty인지 검사
+                            var idx = x + slotCount.x * y;
+
+                            if (x < slotCount.x && y < slotCount.y && cells[idx].IsEmpty) continue;
+                            //out of bounds가 아닌지, empty인지 검사. 위 조건에 해당하지 않으면 Out of Bounds이다.
+                            
                             isAvailable = false; //아니라면 unavailable
                             break;
                         }

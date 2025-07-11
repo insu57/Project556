@@ -121,6 +121,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnRotateItem += HandleOnRotateItem;
         itemDrag.OnQuickAddItem += HandleOnQuickAddItem;
         itemDrag.OnQuickDropItem += HandleOnQuickDropItem;
+        itemDrag.OnSetQuickSlot += HandleOnSetQuickSlot;
     }
 
     public void OnDisableItemDragHandler(ItemDragHandler itemDrag)
@@ -131,6 +132,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnRotateItem -= HandleOnRotateItem;
         itemDrag.OnQuickAddItem -= HandleOnQuickAddItem;
         itemDrag.OnQuickDropItem -= HandleOnQuickDropItem;
+        itemDrag.OnSetQuickSlot -= HandleOnSetQuickSlot;
     }
     
     //OnPointerEnter -> 해당 아이템, 기존 슬롯 정보 캐싱
@@ -271,7 +273,11 @@ public class InventoryUIPresenter : MonoBehaviour
                 }
                 else
                 {
-                    _invenMap[originInvenRT].RemoveItem(_currentDragItem.InstanceID, _currentDragItem.IsRotated);
+                    //_invenMap[originInvenRT].RemoveItem(_currentDragItem.InstanceID, _currentDragItem.IsRotated);
+                    var originInven = _invenMap[originInvenRT];
+
+                    bool hasRotated = _rotatedOnClick != _currentDragItem.IsRotated; //드래그 중에 회전했는지 체크
+                    originInven.RemoveItem(_currentDragItem.InstanceID, hasRotated); //기존 Inven에서 제거
                 }
                 
                 var itemDragHandler = _itemDragHandlers[_currentDragItem.InstanceID];
@@ -319,7 +325,7 @@ public class InventoryUIPresenter : MonoBehaviour
         else
         {
             var (targetPos, itemRT) =
-                _targetInventory.MoveItem(_currentDragItem, _targetFirstIdx, _targetSlotRT); //target인벤으로 이동
+                _targetInventory.AddItem(_currentDragItem, _targetFirstIdx, _targetSlotRT); //target인벤으로 이동
             var itemSize = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y)
                            * _itemUIManager.CellSize;
 
@@ -342,13 +348,13 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnQuickAddItem(ItemDragHandler itemDrag)
     {
-        Debug.Log("HandleOnQuickAddItem");
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
+       
         if(inventoryRT != _itemUIManager.LootSlotParent) return; //Loot인벤이 아니면 무시
-        ItemInstance item;
-        if (inventoryRT)  item = _invenMap[inventoryRT].ItemDict[instanceID].item;
-        else item = _inventoryManager.ItemDict[instanceID].item;
+        Debug.Log("HandleOnQuickAddItem");
+        var item = _inventoryManager.LootInventory.ItemDict[instanceID].item;
+        
         
        
     }
@@ -361,6 +367,11 @@ public class InventoryUIPresenter : MonoBehaviour
         ItemInstance item;
         if (inventoryRT)  item = _invenMap[inventoryRT].ItemDict[instanceID].item;
         else item = _inventoryManager.ItemDict[instanceID].item;
+    }
+
+    private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, int quickSlotIdx)
+    {
+        Debug.Log("HandleOnSetQuickSlot: " + quickSlotIdx);
     }
     
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
@@ -513,8 +524,19 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         var itemDragHandler = ObjectPoolingManager.Instance.GetItemDragHandler();
         _itemDragHandlers[item.InstanceID] = itemDragHandler;
-        itemDragHandler.Init(item, this, _uiControl.ItemRotateAction, _uiControl.QuickAddItemAction ,
-            _uiControl.QuickDropItemAction  ,_itemUIManager.transform);
+        
+        //itemDragHandler.Init(item, this, _uiControl.ItemRotateAction,
+        //_uiControl.QuickAddItemAction, _uiControl.QuickDropItemAction, _itemUIManager.transform);
+        var itemDragActionMap = new Dictionary<ItemDragAction, InputAction>
+        {
+            { ItemDragAction.Rotate, _uiControl.ItemRotateAction },
+            { ItemDragAction.QuickAddItem, _uiControl.QuickAddItemAction },
+            { ItemDragAction.QuickDropItem, _uiControl.QuickDropItemAction },
+            { ItemDragAction.SetQuickSlot, _uiControl.SetQuickSlotAction }
+        };
+        
+        itemDragHandler.Init(item, this, itemDragActionMap, _itemUIManager.transform);;
+        
         if (item.IsStackable)
         {
             itemDragHandler.SetStackAmountText(item.CurrentStackAmount);

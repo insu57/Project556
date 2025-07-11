@@ -17,6 +17,7 @@ public class UIControl : MonoBehaviour
     public InputAction ItemRotateAction {private set; get;}
     public InputAction QuickAddItemAction {private set; get;}
     public InputAction QuickDropItemAction {private set; get;}
+    public InputAction SetQuickSlotAction {private set; get;}
     
     private void Awake()
     {
@@ -34,11 +35,10 @@ public class UIControl : MonoBehaviour
         ItemRotateAction = map.FindAction("Rotate");
         QuickAddItemAction = map.FindAction("QuickAddItem");
         QuickDropItemAction = map.FindAction("QuickDropItem");
+        SetQuickSlotAction = map.FindAction("SetQuickSlot");
         
         _closeAction.performed += OnClose;
         _closeUIAction.performed += OnCloseUI;
-        
-        //_playerInput.inputIsActive
     }
     
     private void OnEnable()
