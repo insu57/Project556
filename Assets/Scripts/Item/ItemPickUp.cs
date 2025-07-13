@@ -7,14 +7,13 @@ public class ItemPickUp : MonoBehaviour
     private ItemInstance _itemInstance;
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
-    //public Guid ID { get; private set; }
-    //stack amount, weapon mag count
-    public void Init(BaseItemDataSO itemData) //추후 사용(MapManager?(맵 초기화), 아이템 드랍 등 -> Init)
+
+    public void Init(ItemInstance item) //MapManager?(맵 초기화), 아이템 드랍 등 -> Init)
     {
-        this.itemData = itemData;
-        //ID = Guid.NewGuid();
-        //Guid 생성? (필드 아이템)
-        SetItemData(itemData);
+        _itemInstance = item;
+        _spriteRenderer.sprite = item.ItemData.ItemSprite;
+        _collider.size = _spriteRenderer.sprite.bounds.size;
+        //SetItemData(itemData);
     }
     
     private void Awake()

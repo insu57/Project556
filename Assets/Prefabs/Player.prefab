@@ -1559,6 +1559,70 @@ Transform:
   - {fileID: 3856077472029148978}
   m_Father: {fileID: 6965456725221257982}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3278003164265294539
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5427185655571892789}
+  - component: {fileID: 2972252778790228537}
+  - component: {fileID: 6053613718806597069}
+  m_Layer: 0
+  m_Name: Inventory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5427185655571892789
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3278003164265294539}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4486083072825107886}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2972252778790228537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3278003164265294539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf63076be492d26468ec098d70560262, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6053613718806597069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3278003164265294539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c87817b8a70e5e7438e29cb6eb76d138, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  crate01Test: {fileID: 7321939041111035002, guid: e595211f0a5e07d4db98e9fc054a0b4b, type: 3}
+  pistolTestData: {fileID: 11400000, guid: 53960c62b9c69a14f8c913e94fe1e107, type: 2}
+  itemDataTest: {fileID: 11400000, guid: 4edd6477f6f6ec343beb8a5c1db1d5ed, type: 2}
+  backpackTestData: {fileID: 11400000, guid: 78135379f6834fc43a5165875e3c3751, type: 2}
+  rigTestData: {fileID: 11400000, guid: 39986b537ed07b246a05da7f85657663, type: 2}
+  bullet556TestData: {fileID: 11400000, guid: 5b70e39c2e2bf2c458c4a7d1c911b520, type: 2}
+  rigTanTestData: {fileID: 11400000, guid: b0385b768e84dff46ab79b94fbcbee91, type: 2}
 --- !u!1 &3694176857987904705
 GameObject:
   m_ObjectHideFlags: 0
@@ -3919,6 +3983,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8704335814835641786}
+  - {fileID: 5427185655571892789}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8680173139404657581
@@ -3934,7 +3999,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHealth: 100
-  currentWeaponData: {fileID: 0}
+  playerStamina: 100
+  playerHydration: 100
+  playerEnergy: 100
   oneHandSprite: {fileID: 3132709087802935702}
   oneHandMuzzleTransform: {fileID: 8056941492875823244}
   twoHandSprite: {fileID: 7509388812552137820}
@@ -3953,6 +4020,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 3
+  runSpeedMultiplier: 1.2
   jumpSpeed: 4
   rightArm: {fileID: 1669731848458698949}
   leftArm: {fileID: 5413740005232500178}
@@ -5473,7 +5541,7 @@ GameObject:
   - component: {fileID: 2774463170376641999}
   - component: {fileID: 6411596332340496012}
   m_Layer: 0
-  m_Name: UnitRoot
+  m_Name: PlayerUnitRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5616,7 +5684,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3512577730631424074, guid: 6f339399204b50147b7f6a6656137d6c, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

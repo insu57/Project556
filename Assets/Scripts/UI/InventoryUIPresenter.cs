@@ -346,17 +346,51 @@ public class InventoryUIPresenter : MonoBehaviour
         //GearSlot rotate 해제...
     }
 
-    private void HandleOnQuickAddItem(ItemDragHandler itemDrag)
+    private void HandleOnQuickAddItem(ItemDragHandler itemDrag)//빠른 획득
     {
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
        
         if(inventoryRT != _itemUIManager.LootSlotParent) return; //Loot인벤이 아니면 무시
         Debug.Log("HandleOnQuickAddItem");
-        var item = _inventoryManager.LootInventory.ItemDict[instanceID].item;
+        var lootInven = _inventoryManager.LootInventory;
+        var item = lootInven.ItemDict[instanceID].item;
         
+        var backpackInven = _inventoryManager.BackpackInventory;
+        var rigInven = _inventoryManager.RigInventory;
+        Inventory targetInven = null;
+        RectTransform targetRT = null;
+        if (backpackInven)
+        {
+            targetInven = backpackInven;
+            targetRT = _itemUIManager.BackpackInvenParent;
+        }
+        else if (rigInven)
+        {
+            targetInven = rigInven;
+            targetRT = _itemUIManager.RigInvenParent;
+        }
         
-       
+        if (targetInven != null)
+        {
+            var (isAvailable,  firstIdx, slotRT) = targetInven.CheckCanAddItem(item.ItemData);
+            if(!isAvailable) return;
+            var (targetPos, itemRT) = targetInven.AddItem(item, firstIdx, slotRT);
+            var itemSize = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * CellSize;
+            itemDrag.SetItemDragPos(targetPos, itemSize, itemRT, targetRT);
+           
+        }
+        else
+        {
+            var cell = _inventoryManager.CheckCanEquipItem(GearType.None); //Pocket
+            if(cell == null) return;
+            _inventoryManager.SetGearItem(cell, item);
+            var gearSlotRT = _gearRTMap[cell];
+            var targetPos = new Vector2(gearSlotRT.sizeDelta.x, -gearSlotRT.sizeDelta.y) / 2;
+            itemDrag.SetItemDragPos(targetPos, gearSlotRT.sizeDelta, gearSlotRT, null);
+        }
+        lootInven.RemoveItem(instanceID, false);
+        
     }
 
     private void HandleOnQuickDropItem(ItemDragHandler itemDrag)
@@ -364,11 +398,25 @@ public class InventoryUIPresenter : MonoBehaviour
         Debug.Log("HandleOnQuickDropItem");
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
+        
+        if(inventoryRT == _itemUIManager.LootSlotParent) return;
         ItemInstance item;
         if (inventoryRT)  item = _invenMap[inventoryRT].ItemDict[instanceID].item;
         else item = _inventoryManager.ItemDict[instanceID].item;
+        
+        //메서드로?
+        if(inventoryRT) _invenMap[inventoryRT].RemoveItem(instanceID, false);
+        else _inventoryManager.RemoveGearItem(_inventoryManager.ItemDict[instanceID].cell, instanceID);
+        _itemDragHandlers.Remove(instanceID);
+        ObjectPoolingManager.Instance.ReleaseItemDragHandler(itemDrag);
+        
+        ItemPickUp itemPickUp =  ObjectPoolingManager.Instance.GetItemPickUp(); //Position?
+        itemPickUp.transform.position = gameObject.transform.position + new Vector3(0, .5f, 0);
+        itemPickUp.Init(item);
+        item.RotateItem();
     }
-
+    //장탄버그
+    
     private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, int quickSlotIdx)
     {
         Debug.Log("HandleOnSetQuickSlot: " + quickSlotIdx);
@@ -434,7 +482,8 @@ public class InventoryUIPresenter : MonoBehaviour
         //인벤토리 - 아이템 자신의 인벤토리 안으로 들어 가는 것 방지...
         var targetInven = _invenMap[matchRT];
 
-        if (dragItem.InstanceID == targetInven.ItemInstanceID) return false; // 아이템이 자기 자신의 인벤토리에 들어갈려고 하면 false;
+        if (dragItem.InstanceID == targetInven.ItemInstanceID) return false; 
+        // 아이템이 자기 자신의 인벤토리에 들어갈려고 하면 false;
 
         //간소화?
         var (firstIdx, firstIdxPos, mathSlotRT, status, cellCount, targetCellItemID) =
@@ -525,8 +574,6 @@ public class InventoryUIPresenter : MonoBehaviour
         var itemDragHandler = ObjectPoolingManager.Instance.GetItemDragHandler();
         _itemDragHandlers[item.InstanceID] = itemDragHandler;
         
-        //itemDragHandler.Init(item, this, _uiControl.ItemRotateAction,
-        //_uiControl.QuickAddItemAction, _uiControl.QuickDropItemAction, _itemUIManager.transform);
         var itemDragActionMap = new Dictionary<ItemDragAction, InputAction>
         {
             { ItemDragAction.Rotate, _uiControl.ItemRotateAction },
