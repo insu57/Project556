@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI
@@ -32,14 +33,15 @@ namespace UI
         [SerializeField] private Color availableColor;
         [SerializeField] private Color unavailableColor;
         
-        [SerializeField] private Image quickSlot01;
-        [SerializeField] private TMP_Text quickSlot01Count;
-        [SerializeField] private Image quickSlot02;
-        [SerializeField] private TMP_Text quickSlot02Count;
-        [SerializeField] private Image quickSlot03;
-        [SerializeField] private TMP_Text quickSlot03Count;
         [SerializeField] private Image quickSlot04;
         [SerializeField] private TMP_Text quickSlot04Count;
+        [SerializeField] private Image quickSlot05;
+        [SerializeField] private TMP_Text quickSlot05Count;
+        [SerializeField] private Image quickSlot06;
+        [SerializeField] private TMP_Text quickSlot06Count;
+        [SerializeField] private Image quickSlot07;
+        [SerializeField] private TMP_Text quickSlot07Count;
+        private Dictionary<int, (Image img, TMP_Text txt)> _quickSlotDict = new();
     
         [Header("Player Inventory")]
         [Header("Left Panel")]
@@ -117,6 +119,12 @@ namespace UI
             //ItemInteract UI
             _pickupTextList.Add(equipText);
             _pickupTextList.Add(pickupText);
+            
+            //QuickSlot
+            _quickSlotDict.Add(4, (quickSlot04, quickSlot04Count));
+            _quickSlotDict.Add(5, (quickSlot05, quickSlot05Count));
+            _quickSlotDict.Add(6, (quickSlot06, quickSlot06Count));
+            _quickSlotDict.Add(7, (quickSlot07, quickSlot07Count));
         }
 
         public void OpenPlayerUI(bool isOpen) //PlayerUI
@@ -282,7 +290,20 @@ namespace UI
             }
             return inventory;
         }
-    
-    
+
+        public void UpdateQuickSlot(int idx, bool isStackable, Sprite itemSprite, int count)
+        {
+            _quickSlotDict[idx].img.sprite = itemSprite;
+            _quickSlotDict[idx].img.enabled = true;
+            if (!isStackable) return;
+            _quickSlotDict[idx].txt.enabled = true;
+            _quickSlotDict[idx].txt.text = count.ToString();
+        }
+
+        public void ClearQuickSlot(int idx)
+        {
+            _quickSlotDict[idx].img.enabled = false;
+            _quickSlotDict[idx].txt.enabled = false;
+        }
     }
 }

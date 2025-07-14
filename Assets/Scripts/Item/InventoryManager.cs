@@ -19,7 +19,8 @@ public class InventoryManager : MonoBehaviour
     public CellData PrimaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
     public ItemInstance SecondaryWeaponItem { private set; get; }
     public CellData SecondaryWeaponSlot { get; } = new(GearType.Weapon, Vector2.zero);
-
+    public Dictionary<Guid, (ItemInstance item, CellData cell)> ItemDict { get; } = new();
+    
     //Middle Panel
     public ItemInstance ChestRigItem { private set; get; }
     public CellData ChestRigSlot { get; } = new(GearType.ArmoredRig, Vector2.zero);
@@ -32,15 +33,17 @@ public class InventoryManager : MonoBehaviour
     //Right Panel
     public Inventory LootInventory { get; private set; }
     
-    public Dictionary<Guid, (ItemInstance item, CellData cell)> ItemDict { get; } = new();
+    //QuickSlot
+    public Dictionary<int, (Guid ID, Inventory inventory)> QuickSlotDict { get; } = new();
+   
 
     //ItemUI Presenter
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<ItemInstance> OnShowInventory;
     public event Action<CellData, ItemInstance> OnEquipFieldItem;
-    public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddNewItemToInventory;
+    public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddFieldItemToInventory;
     public event Action<Guid, int> OnUpdateItemStack;
-    public event Action<Guid, bool, int> OnUpdateWeaponMagCount;
+    public event Action<Guid, bool, int> OnUpdateWeaponItemMagCount;
     public event Action<Guid> OnRemoveItem;
     
     //PlayerManager
@@ -140,8 +143,6 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
         //장비 능력치, 무기 설정
-        //무기 관련 구현(교체)
-        //현재 무기 장착해제 -> PlayerManager 비무장으로
         OnUpdateArmorAmount?.Invoke(GetTotalArmorAmount());
     }
 
@@ -192,23 +193,15 @@ public class InventoryManager : MonoBehaviour
         return totalArmor;
     }
     
-    public void AddNewItemToInventory(int firstIdx, RectTransform slotRT, ItemInstance item)
+    public void AddFieldItemToInventory(int firstIdx, RectTransform slotRT, Inventory inventory  ,ItemInstance item)
     {
-        if (BackpackInventory)
-        {
-            var (pos, itemRT) = BackpackInventory.AddItem(item, firstIdx, slotRT);
-            OnAddNewItemToInventory?.Invoke(GearType.Backpack, pos, itemRT, item);
-            return;
-        }
-
-        if (RigInventory)
-        {
-            var (pos, itemRT) = RigInventory.AddItem(item, firstIdx, slotRT);
-            OnAddNewItemToInventory?.Invoke(GearType.ArmoredRig, pos, itemRT,item);
-            return;
-        }
-
-        OnAddNewItemToInventory?.Invoke(GearType.None, Vector2.zero, null, null);
+        GearType inventoryType = GearType.None;
+        if(inventory == BackpackInventory)  inventoryType = GearType.Backpack;
+        else if(inventory == RigInventory) inventoryType = GearType.ArmoredRig;
+        else Debug.LogWarning("Add Field Item To Inventory Error : Inventory is null.");
+        
+        var (pos, itemRT) = inventory.AddItem(item, firstIdx, slotRT);
+        OnAddFieldItemToInventory?.Invoke(inventoryType, pos, itemRT, item);
     }
     
     //QuickSlot...
@@ -286,7 +279,7 @@ public class InventoryManager : MonoBehaviour
         var (item, _) = ItemDict[id];
         if (item is WeaponInstance weapon)
         {
-            OnUpdateWeaponMagCount?.Invoke(id, weapon.IsFullyLoaded() ,weapon.CurrentMagazineCount);
+            OnUpdateWeaponItemMagCount?.Invoke(id, weapon.IsFullyLoaded() ,weapon.CurrentMagazineCount);
         }
     }
     

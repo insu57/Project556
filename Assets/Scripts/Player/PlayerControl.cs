@@ -30,6 +30,7 @@ namespace Player
       private InputAction _openSettingAction;
       private InputAction _scrollWheelAction;
       private InputAction _changeWeaponAction;
+      private InputAction _quickSlotAction;
       
       private PlayerManager _playerManager;
       private Camera _mainCamera;
@@ -69,6 +70,7 @@ namespace Player
          _openSettingAction = playerMap.FindAction("OpenSetting");
          _scrollWheelAction = playerMap.FindAction("ScrollWheel");
          _changeWeaponAction = playerMap.FindAction("ChangeWeapon");
+         _quickSlotAction = playerMap.FindAction("QuickSlot");
          
          _uiControl = FindAnyObjectByType<UIControl>(); //UIControl
          _uiControl.Init(this); //초기화
@@ -101,6 +103,7 @@ namespace Player
          _openSettingAction.performed += OnOpenSetting;
          _scrollWheelAction.performed += OnScrollWheel;
          _changeWeaponAction.performed += OnChangeWeapon;
+         _quickSlotAction.performed += OnQuickSlot;
       }
 
       private void OnDisable()
@@ -116,6 +119,7 @@ namespace Player
          _openSettingAction.performed -= OnOpenSetting;
          _scrollWheelAction.performed -= OnScrollWheel;
          _changeWeaponAction.performed -= OnChangeWeapon;
+         _quickSlotAction.performed -= OnQuickSlot;
       }
 
       private void Update()
@@ -295,6 +299,14 @@ namespace Player
                _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Unarmed);
                break;
          }
+      }
+
+      private void OnQuickSlot(InputAction.CallbackContext context)
+      {
+         if(context.control is not KeyControl key) return;
+         var quickSlotIdx = key.keyCode - Key.Digit1 + 1; //
+         
+         Debug.Log($"QuickSlot-{quickSlotIdx}");
       }
    
       private void OnMove(InputAction.CallbackContext context) //플레이어 이동 입력

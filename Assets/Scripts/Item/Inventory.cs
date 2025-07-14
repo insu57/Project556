@@ -10,8 +10,6 @@ namespace System.Runtime.CompilerServices //c# 9.0 {init} 키워드 때문에
     public static class IsExternalInit { }
 }
 
-
-
 public class Inventory: MonoBehaviour
 {
     [Serializable]
@@ -173,7 +171,6 @@ public class Inventory: MonoBehaviour
     private void GetFirstCellIdx(Vector2 localPoint, Vector2Int slotSize, Vector2Int itemCellCount , out int firstIdx)
     {
         int width = slotSize.x;
-        //int height = slotSize.y;
         Vector2 firstPos = localPoint - new Vector2(itemCellCount.x * _cellSize / 2f , -itemCellCount.y * _cellSize / 2f) 
                              + new Vector2(_cellSize, -_cellSize)/2f;
         // 중심(아이템)에서 좌상단 MinPosition(가로세로 절반)(좌상단Cell, 첫번째Cell) + 해당 Cell의 Center
@@ -208,9 +205,7 @@ public class Inventory: MonoBehaviour
         var maxPos = cells[firstIdx + itemCount.x -1 + slotCount.x * (itemCount.y - 1)]
             .MinPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
         var targetPos = (minPos + maxPos) / 2;
-                        
-        //Debug.Log($"Adding item {item.ItemData.ItemName}, ID: {item.InstanceID}, firstIdx : {firstIdx} pos: {targetPos}");
-         
+        
         return (targetPos, itemRT);
     }
 
@@ -255,17 +250,9 @@ public class Inventory: MonoBehaviour
         return (false, -1, null);
     }
     
-    public ItemInstance GetItemData(Guid id)
-    {
-        var (item, slotRT, firstIdx) = ItemDict[id];
-        
-        return item;
-    }
-    
     public void RemoveItem(Guid id, bool hasRotated)
     {
         //아이템 제거
-        //Debug.Log($"Removing item {id}");
         var slotRT = ItemDict[id].slotRT; //아이템의 SlotRT
         var firstIdx = ItemDict[id].firstIdx; //아이템의 첫번째 인덱스
         var itemCount = ItemDict[id].item.ItemCellCount; //아이템 Cell개수
@@ -285,32 +272,4 @@ public class Inventory: MonoBehaviour
         }
         ItemDict.Remove(id); //Dict에서 제거
     }
-
-    //MoveItem -> 해당 Cell이 available 일 때만 호출
-    public (Vector2 targetPos, RectTransform itemRT) 
-        MoveItem(ItemInstance item, int firstIdx, RectTransform targetSlot)
-    {
-        //아이템 이동
-        //Debug.Log($"Moving item {item.ItemData.ItemName}, ID: {item.InstanceID}");
-        var id = item.InstanceID;
-        ItemDict.Add(id, (item, targetSlot, firstIdx));//Dict에 추가
-        
-        var (cells, slotCount, slotItemRT) = SlotDict[targetSlot]; //slot정보
-        var itemCount = item.ItemCellCount;
-        for (int y = 0; y < itemCount.y; y++)
-        {
-            for (int x = 0; x < itemCount.x; x++)
-            {
-                var idx = firstIdx + x + y * slotCount.x;
-                cells[idx].SetEmpty(false, id); //해당 Cell들을 isEmpty false로(id는 Drag(옮기기) 중인 아이템)
-            }
-        }
-
-        var minPos = cells[firstIdx].MinPos; //CellRT.anchoredPosition;
-        var maxPos = cells[firstIdx + itemCount.x - 1 + slotCount.x * (itemCount.y - 1)].MinPos
-                     + new Vector2(_cellSize, -_cellSize);//MaxPos;
-        // 아이템의 중앙 Pos
-        return ((minPos + maxPos) / 2, slotItemRT);
-    }
-    
 }

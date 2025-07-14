@@ -20,7 +20,7 @@ public class Singleton <T> : MonoBehaviour where T : Singleton<T> //Singleton Ge
         }
     }
 
-    public virtual void Awake()
+    protected virtual void Awake()
     {
         RemoveDuplicates();
     }

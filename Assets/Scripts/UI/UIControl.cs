@@ -24,7 +24,7 @@ public class UIControl : MonoBehaviour
         _itemUIManager = GetComponent<ItemUIManager>();
     }
     
-    public void Init(PlayerControl playerControl)
+    public void Init(PlayerControl playerControl) //개선?
     {
         _playerControl = playerControl;
         _playerInput = _playerControl.GetComponent<PlayerInput>();

@@ -15,10 +15,7 @@ public class InventoryUIPresenter : MonoBehaviour
     private readonly Dictionary<RectTransform, CellData> _gearSlotsMap = new();
     private readonly Dictionary<CellData, RectTransform> _gearRTMap = new();
     private readonly Dictionary<RectTransform, Inventory> _invenMap = new();
-
     private readonly Dictionary<Guid, ItemDragHandler> _itemDragHandlers = new();
-    //drag handler 관리는?? 각 인벤토리에서???
-    //inventory UI - 데이터 분리????
 
     public float CellSize => _itemUIManager.CellSize;
     
@@ -85,9 +82,9 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnInitInventory += HandleOnInitInventory;
         _inventoryManager.OnShowInventory += HandleOnShowInventory;
         _inventoryManager.OnEquipFieldItem += HandleOnEquipFieldItem;
-        _inventoryManager.OnAddNewItemToInventory += HandleOnAddNewItemToInventory;
+        _inventoryManager.OnAddFieldItemToInventory += HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
-        _inventoryManager.OnUpdateWeaponMagCount += HandleOnUpdateWeaponMagCount;
+        _inventoryManager.OnUpdateWeaponItemMagCount += HandleOnUpdateWeaponItemMagCount;
         _inventoryManager.OnRemoveItem += HandleOnRemoveItem;
         
         //test
@@ -107,9 +104,9 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnInitInventory -= HandleOnInitInventory;
         _inventoryManager.OnShowInventory -= HandleOnShowInventory;
         _inventoryManager.OnEquipFieldItem -= HandleOnEquipFieldItem;
-        _inventoryManager.OnAddNewItemToInventory -= HandleOnAddNewItemToInventory;
+        _inventoryManager.OnAddFieldItemToInventory -= HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack -= HandleOnUpdateItemStack;
-        _inventoryManager.OnUpdateWeaponMagCount -= HandleOnUpdateWeaponMagCount;
+        _inventoryManager.OnUpdateWeaponItemMagCount -= HandleOnUpdateWeaponItemMagCount;
         _inventoryManager.OnRemoveItem -= HandleOnRemoveItem;
     }
 
@@ -273,7 +270,6 @@ public class InventoryUIPresenter : MonoBehaviour
                 }
                 else
                 {
-                    //_invenMap[originInvenRT].RemoveItem(_currentDragItem.InstanceID, _currentDragItem.IsRotated);
                     var originInven = _invenMap[originInvenRT];
 
                     bool hasRotated = _rotatedOnClick != _currentDragItem.IsRotated; //드래그 중에 회전했는지 체크
@@ -299,7 +295,6 @@ public class InventoryUIPresenter : MonoBehaviour
             _inventoryManager.RemoveGearItem(originGearCell, _currentDragItem.InstanceID); //기존 GearSlot에서 제거
 
             //rig, backpack 장착해제 -> 인벤토리 해제...
-
         }
         else
         {
@@ -352,7 +347,7 @@ public class InventoryUIPresenter : MonoBehaviour
         var inventoryRT = itemDrag.InventoryRT;
        
         if(inventoryRT != _itemUIManager.LootSlotParent) return; //Loot인벤이 아니면 무시
-        Debug.Log("HandleOnQuickAddItem");
+      
         var lootInven = _inventoryManager.LootInventory;
         var item = lootInven.ItemDict[instanceID].item;
         
@@ -395,7 +390,6 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnQuickDropItem(ItemDragHandler itemDrag)
     {
-        Debug.Log("HandleOnQuickDropItem");
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
         
@@ -415,11 +409,39 @@ public class InventoryUIPresenter : MonoBehaviour
         itemPickUp.Init(item);
         item.RotateItem();
     }
-    //장탄버그
     
-    private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, int quickSlotIdx)
+    private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, int quickSlotIdx) 
     {
         Debug.Log("HandleOnSetQuickSlot: " + quickSlotIdx);
+        var instanceID = itemDrag.InstanceID;
+        var inventoryRT = itemDrag.InventoryRT;
+        //아이템 사용 시 개선?
+        //QuickSlot 검사...
+        if (inventoryRT == _itemUIManager.RigInvenParent)
+        {
+            var item = _inventoryManager.RigInventory.ItemDict[instanceID].item;
+            if (item.ItemData is MedicalData or FoodData)
+            {
+                _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, _inventoryManager.RigInventory);
+                _itemUIManager.UpdateQuickSlot(quickSlotIdx, item.IsStackable, 
+                    item.ItemData.ItemSprite, item.CurrentStackAmount);
+            }
+            
+        }
+
+        if (!inventoryRT)
+        {
+            var item = _inventoryManager.ItemDict[instanceID].item;
+
+            if (item.ItemData is MedicalData or FoodData)
+            {
+                _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, null);
+                _itemUIManager.UpdateQuickSlot(quickSlotIdx, item.IsStackable,
+                    item.ItemData.ItemSprite, item.CurrentStackAmount);
+            }
+            
+        }
+       
     }
     
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
@@ -584,7 +606,7 @@ public class InventoryUIPresenter : MonoBehaviour
         
         itemDragHandler.Init(item, this, itemDragActionMap, _itemUIManager.transform);;
         
-        if (item.IsStackable)
+        if (item.IsStackable) //개선?
         {
             itemDragHandler.SetStackAmountText(item.CurrentStackAmount);
         }
@@ -607,7 +629,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDragHandlerInstance.SetItemDragPos(targetPos, size, gearSlotRT, null);
     }
     
-    private void HandleOnAddNewItemToInventory(GearType inventoryType, Vector2 pos, RectTransform itemRT ,ItemInstance item)
+    private void HandleOnAddFieldItemToInventory(GearType inventoryType, Vector2 pos, RectTransform itemRT ,ItemInstance item)
         //인벤토리에 아이템 추가(아이템 줍기, 보상 받기 등)
     {
         var itemDragHandlerInstance = InitItemDragHandler(item);
@@ -634,9 +656,9 @@ public class InventoryUIPresenter : MonoBehaviour
         _itemDragHandlers[id].SetStackAmountText(stackAmount);
     }
 
-    private void HandleOnUpdateWeaponMagCount(Guid id, bool hasChamber, int magazineCount)
+    private void HandleOnUpdateWeaponItemMagCount(Guid id, bool isFullyLoaded ,int magazineCount)
     {
-        _itemDragHandlers[id].SetMagazineCountText(hasChamber, magazineCount);
+        _itemDragHandlers[id].SetMagazineCountText(isFullyLoaded, magazineCount);
     }
     
     private void HandleOnRemoveItem(Guid id)
@@ -655,7 +677,7 @@ public class InventoryUIPresenter : MonoBehaviour
         if(!isAvailable) return;
 
         var invenItem = ItemInstance.CreateItemInstance(itemData);
-
+        
         var itemDrag = InitItemDragHandler(invenItem); 
         
         var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUIManager.CellSize;

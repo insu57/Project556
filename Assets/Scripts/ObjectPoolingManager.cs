@@ -31,8 +31,9 @@ public class ObjectPoolingManager : Singleton<ObjectPoolingManager>
     [SerializeField] private int itemPickupMaxSize = 200;
     private ObjectPool<ItemPickUp> _itemPickUpPool;
 
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
         InitBulletPools();
         InitItemDragHandlerPool();
         InitItemPickupPool(); //중복 개선? - 개수가 많아지면 수정
@@ -94,7 +95,7 @@ public class ObjectPoolingManager : Singleton<ObjectPoolingManager>
         }
     }
     
-    public ItemDragHandler GetItemDragHandler() => _itemDragHandlerPool.Get();
+    public ItemDragHandler GetItemDragHandler() => _itemDragHandlerPool.Get();//? Get불가
     public void ReleaseItemDragHandler(ItemDragHandler itemDragHandler) => _itemDragHandlerPool.Release(itemDragHandler);
 
     private void InitItemPickupPool()

@@ -32,7 +32,7 @@ public class WeaponInstance : ItemInstance
         else CurrentMagazineCount = MaxMagazineCount + 1;
     }
 
-    public bool IsFullyLoaded()
+    public bool IsFullyLoaded() //클로즈드 볼트일 때 탄약최대+약실 
     {
         if (WeaponData.IsOpenBolt) //오픈볼트면 약실에 없음
         {

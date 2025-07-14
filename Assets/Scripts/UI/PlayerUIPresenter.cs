@@ -12,12 +12,13 @@ public class PlayerUIPresenter : MonoBehaviour
         _playerUIManager = FindFirstObjectByType<PlayerUIManager>();
         
         _playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
-        _playerManager.OnUpdateMagazineCount += HandleOnUpdateMagazineCount;
+        _playerManager.OnUpdateMagazineCountUI += HandleOnUpdateMagazineCountUI;
     }
 
     private void OnDisable()
     {
-        
+        _playerManager.OnPlayerHealthChanged -= HandleOnUpdateHealthBar;
+        _playerManager.OnUpdateMagazineCountUI -= HandleOnUpdateMagazineCountUI;
     }
 
     private void HandleOnUpdateHealthBar(float health, float maxHealth)
@@ -25,7 +26,7 @@ public class PlayerUIPresenter : MonoBehaviour
         _playerUIManager.UpdateHealthBar(health, maxHealth);
     }
 
-    private void HandleOnUpdateMagazineCount(bool isFullyLoaded, int ammo)
+    private void HandleOnUpdateMagazineCountUI(bool isFullyLoaded, int ammo)
     {
         _playerUIManager.UpdateAmmoText(isFullyLoaded, ammo);
     }

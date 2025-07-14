@@ -50,9 +50,6 @@ namespace UI
         private void OnEnable()
         {
             if (!_inventoryUIPresenter) return;
-            _inventoryUIPresenter.OnDisableItemDragHandler(this);//이벤트 중복 구독 방지
-            UnsubscribeInputEvents();
-        
             _inventoryUIPresenter.InitItemDragHandler(this);
             SubscribeInputEvents();
         }

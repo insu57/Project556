@@ -36,7 +36,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private WeaponInstance _currentWeaponItem;
     private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
     public event Action<float, float> OnPlayerHealthChanged;
-    public event Action<bool, int> OnUpdateMagazineCount;
+    public event Action<bool, int> OnUpdateMagazineCountUI;
     public event Action OnReloadNoAmmo;
 
    
@@ -47,7 +47,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
     private readonly List<(bool available, ItemInteractType type)> _currentItemInteractList = new();
     private ItemPickUp _currentItemPickUp;
     private CellData _pickupTargetCell;
-    private (int firstIdx, RectTransform slotRT) _pickupTargetSlotInfo;
+    private (int firstIdx, RectTransform slotRT, Inventory inventory) _pickupTargetInvenSlotInfo;
     private bool _pickupTargetIsPocket;
 
     //UI Manager 개선?
@@ -116,10 +116,11 @@ public class PlayerManager : MonoBehaviour, IDamageable
         
         if (!isShoot) return;
         _currentWeaponItem.UseAmmo();
-        OnUpdateMagazineCount?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
+        OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
+        _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
     }
 
-    public int GetCurrentWeaponMagazineCount()
+    private int GetCurrentWeaponMagazineCount()
     {
         if (_currentWeaponItem != null)
         {
@@ -154,7 +155,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             if (canReload)
             {
                 _currentWeaponItem.ReloadAmmo();
-                OnUpdateMagazineCount?.Invoke(_currentWeaponItem.IsFullyLoaded(), currentAmmo + reloadAmmo);
+                OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), currentAmmo + reloadAmmo);
                 _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
             }
             
@@ -199,7 +200,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
             oneHandSprite.enabled = false;
             twoHandSprite.enabled = false;
-            OnUpdateMagazineCount?.Invoke(false, 0);
+            OnUpdateMagazineCountUI?.Invoke(false, 0);
             return;
         }
 
@@ -234,7 +235,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
         
         _playerWeapon.ChangeWeaponData(newWeaponData); //변경
         _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
-        OnUpdateMagazineCount?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
+        OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
     }
 
     public void ScrollItemPickup(float scrollDeltaY)
@@ -261,7 +262,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             var itemData = item.ItemData;
             bool canEquip = false;
             //장착
-            bool isGear = item.GearType != GearType.None;
+            bool isGear = item.GearType != GearType.None; //Gear인지 체크
             if (item.GearType is not GearType.None)
             {
                 var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
@@ -273,23 +274,25 @@ public class PlayerManager : MonoBehaviour, IDamageable
             }
             //inventory
             bool canPickup = false;
-            
-            //겹칠 때?
-            if (_inventoryManager.BackpackInventory)
+
+            Inventory inventory = null;
+
+            if (item.ItemData is AmmoData) //Ammo면 리그부터 검사
             {
-                var (isAvailable, firstIdx, slotRT) = 
-                    _inventoryManager.BackpackInventory.CheckCanAddItem(itemData);
-                canPickup = isAvailable;
-                _pickupTargetSlotInfo = (firstIdx, slotRT);
-                _pickupTargetIsPocket = false;
-                Debug.Log($"{itemPickUp.gameObject.name}, Item: {item.ItemData.ItemName}... firstIdx: " + firstIdx);
+                if(_inventoryManager.RigInventory) inventory = _inventoryManager.RigInventory;
+                else if(_inventoryManager.BackpackInventory) inventory = _inventoryManager.BackpackInventory;
             }
-            else if (_inventoryManager.RigInventory)
+            else //아니라면 가방부터
             {
-                var (isAvailable, firstIdx, sloRT) = 
-                    _inventoryManager.RigInventory.CheckCanAddItem(itemData);
+                if(_inventoryManager.BackpackInventory) inventory = _inventoryManager.BackpackInventory;
+                else if(_inventoryManager.RigInventory) inventory = _inventoryManager.RigInventory;
+            }
+
+            if (inventory) //가방이나 리그를 장착한 상태라면 (해당 inventory가 있음)
+            {
+                var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData); //빈 공간 검사
                 canPickup = isAvailable;
-                _pickupTargetSlotInfo = (firstIdx, sloRT);
+                _pickupTargetInvenSlotInfo = (firstIdx, slotRT, inventory);
                 _pickupTargetIsPocket = false;
             }
             else //리그, 가방에 공간이 없을 때
@@ -306,7 +309,7 @@ public class PlayerManager : MonoBehaviour, IDamageable
             
             _currentItemInteractList.Clear();
             _currentItemInteractIdx = 0;
-            if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip));
+            if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip)); //Pickup UI 리스트
             _currentItemInteractList.Add((canPickup, ItemInteractType.PickUp));
             
             _itemUIManager.ShowItemPickup(pos, _currentItemInteractList); //이벤트로 수정 예정
@@ -325,15 +328,12 @@ public class PlayerManager : MonoBehaviour, IDamageable
     public void GetFieldItem()
     {
         var item = _currentItemPickUp.GetItemInstance();
-       
-        //개선방안???? bool List에서 개선..?
+        
         //장비 - 장착/획득 순서
         //장비x - 획득만
         var (isAvailable, type) = _currentItemInteractList[_currentItemInteractIdx];
         
         if (!isAvailable) return;
-
-        //ItemInstance item = ItemInstance.CreateItemInstance(itemData);
       
         switch (type)
         {
@@ -352,7 +352,8 @@ public class PlayerManager : MonoBehaviour, IDamageable
             case ItemInteractType.PickUp:
                 if (!_pickupTargetIsPocket)
                 {
-                    _inventoryManager.AddNewItemToInventory(_pickupTargetSlotInfo.firstIdx, _pickupTargetSlotInfo.slotRT, item);
+                    var (firstIdx, slotRT, inventory) = _pickupTargetInvenSlotInfo;
+                    _inventoryManager.AddFieldItemToInventory(firstIdx, slotRT, inventory ,item);
                 }
                 else _inventoryManager.EquipFieldItem(_pickupTargetCell, item);
                 break;
