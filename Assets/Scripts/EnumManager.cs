@@ -68,6 +68,14 @@ public enum EquipWeaponIdx
     Secondary,
 }
 
+public enum QuickSlotIdx
+{
+    QuickSlot4 = 4,
+    QuickSlot5, 
+    QuickSlot6,
+    QuickSlot7 = 7
+}
+
 public class EnumManager : MonoBehaviour
 {
     public static AmmoCategory GetAmmoCategory(AmmoCaliber caliber)

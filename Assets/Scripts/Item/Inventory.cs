@@ -33,6 +33,7 @@ public class Inventory: MonoBehaviour
     public float Height { private set; get; }
     private float _cellSize;
     public Dictionary<Guid, (ItemInstance item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
+    public event Action<Guid> OnItemRemoved;
     //기존 슬롯->아이템 정보...
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
 
@@ -271,5 +272,6 @@ public class Inventory: MonoBehaviour
             } //회전된 아이템에서 버그... -> 들고있을때 회전 후 옮기기(회전 전 기준으로 비워야함....)
         }
         ItemDict.Remove(id); //Dict에서 제거
+        OnItemRemoved?.Invoke(id);
     }
 }

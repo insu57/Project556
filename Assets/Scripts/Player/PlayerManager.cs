@@ -63,9 +63,9 @@ public class PlayerManager : MonoBehaviour, IDamageable
         _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
         _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
         
-        IsUnarmed = true;
-        
-        _currentHealth = playerHealth;
+        ChangeCurrentWeapon(null); //비무장 초기화
+         
+        _currentHealth = playerHealth; //체력 초기화
         OnPlayerHealthChanged?.Invoke(_currentHealth, playerHealth);
     }
 
@@ -238,6 +238,14 @@ public class PlayerManager : MonoBehaviour, IDamageable
         OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
     }
 
+    public void HandleOnUseQuickSlot(QuickSlotIdx slotIdx)
+    {
+        if(!_inventoryManager.QuickSlotDict.TryGetValue(slotIdx, out var quickSlotInfo)) return;
+        var (id, inventory) = quickSlotInfo;
+        var (item, _, _) = inventory.ItemDict[id];
+        Debug.Log($"Quick Slot {slotIdx} Use : {item.ItemData.ItemName}");
+    }
+    
     public void ScrollItemPickup(float scrollDeltaY)
     {
         _currentItemInteractIdx += (int)scrollDeltaY;

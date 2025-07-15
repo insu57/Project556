@@ -13,14 +13,12 @@ public class ItemPickUp : MonoBehaviour
         _itemInstance = item;
         _spriteRenderer.sprite = item.ItemData.ItemSprite;
         _collider.size = _spriteRenderer.sprite.bounds.size;
-        //SetItemData(itemData);
     }
     
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _collider = GetComponent<BoxCollider2D>();
-        //ID = Guid.Empty;
     }
     private void Start()
     {

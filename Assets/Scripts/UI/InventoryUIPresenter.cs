@@ -85,7 +85,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnAddFieldItemToInventory += HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
         _inventoryManager.OnUpdateWeaponItemMagCount += HandleOnUpdateWeaponItemMagCount;
-        _inventoryManager.OnRemoveItem += HandleOnRemoveItem;
+        _inventoryManager.OnRemoveItem += HandleOnRemoveItemHandler;
+        _inventoryManager.OnRemoveQuickSlotItem += HandleOnRemoveQuickSlotItem;
         
         //test
         HandleOnInitInventory(crate01Test, null); //Loot
@@ -107,7 +108,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnAddFieldItemToInventory -= HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack -= HandleOnUpdateItemStack;
         _inventoryManager.OnUpdateWeaponItemMagCount -= HandleOnUpdateWeaponItemMagCount;
-        _inventoryManager.OnRemoveItem -= HandleOnRemoveItem;
+        _inventoryManager.OnRemoveItem -= HandleOnRemoveItemHandler;
+        _inventoryManager.OnRemoveQuickSlotItem -= HandleOnRemoveQuickSlotItem;
     }
 
     public void InitItemDragHandler(ItemDragHandler itemDrag) //아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
@@ -211,6 +213,7 @@ public class InventoryUIPresenter : MonoBehaviour
         }
     }
 
+    //정리?
     private void HandleOnEndDragItem(ItemDragHandler itemDrag) //아이템 드래그 End
     {
         _itemUIManager.ClearShowAvailable();
@@ -262,13 +265,12 @@ public class InventoryUIPresenter : MonoBehaviour
             else
             {
                 //drag 아이템 스택이 더 적으면
-                //origin...
-                if (!originInvenRT)
+                if (!originInvenRT) //GearSlot
                 {
                     var originCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
                     _inventoryManager.RemoveGearItem(originCell, _currentDragItem.InstanceID); //drag아이템 기존 슬롯에서 제거
                 }
-                else
+                else //Inventory
                 {
                     var originInven = _invenMap[originInvenRT];
 
@@ -385,9 +387,8 @@ public class InventoryUIPresenter : MonoBehaviour
             itemDrag.SetItemDragPos(targetPos, gearSlotRT.sizeDelta, gearSlotRT, null);
         }
         lootInven.RemoveItem(instanceID, false);
-        
     }
-
+    
     private void HandleOnQuickDropItem(ItemDragHandler itemDrag)
     {
         var instanceID = itemDrag.InstanceID;
@@ -401,8 +402,8 @@ public class InventoryUIPresenter : MonoBehaviour
         //메서드로?
         if(inventoryRT) _invenMap[inventoryRT].RemoveItem(instanceID, false);
         else _inventoryManager.RemoveGearItem(_inventoryManager.ItemDict[instanceID].cell, instanceID);
-        _itemDragHandlers.Remove(instanceID);
-        ObjectPoolingManager.Instance.ReleaseItemDragHandler(itemDrag);
+        
+        HandleOnRemoveItemHandler(instanceID);
         
         ItemPickUp itemPickUp =  ObjectPoolingManager.Instance.GetItemPickUp(); //Position?
         itemPickUp.transform.position = gameObject.transform.position + new Vector3(0, .5f, 0);
@@ -410,20 +411,26 @@ public class InventoryUIPresenter : MonoBehaviour
         item.RotateItem();
     }
     
-    private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, int quickSlotIdx) 
+    //추가사항...
+    //ItemDrag에 퀵슬롯 표시.
+    //아이템 사용 연동? -> 어떤 방법을?
+    private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, QuickSlotIdx quickSlotIdx) 
     {
         Debug.Log("HandleOnSetQuickSlot: " + quickSlotIdx);
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
         //아이템 사용 시 개선?
-        //QuickSlot 검사...
+        //QuickSlot 검사... 아이템 하나당 하나의 퀵슬롯(진행중)
+        
         if (inventoryRT == _itemUIManager.RigInvenParent)
         {
+           
             var item = _inventoryManager.RigInventory.ItemDict[instanceID].item;
             if (item.ItemData is MedicalData or FoodData)
             {
+                itemDrag.SetQuickSlotKey((int)quickSlotIdx);
                 _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, _inventoryManager.RigInventory);
-                _itemUIManager.UpdateQuickSlot(quickSlotIdx, item.IsStackable, 
+                _itemUIManager.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable, 
                     item.ItemData.ItemSprite, item.CurrentStackAmount);
             }
             
@@ -435,15 +442,15 @@ public class InventoryUIPresenter : MonoBehaviour
 
             if (item.ItemData is MedicalData or FoodData)
             {
+                itemDrag.SetQuickSlotKey((int)quickSlotIdx);
                 _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, null);
-                _itemUIManager.UpdateQuickSlot(quickSlotIdx, item.IsStackable,
+                _itemUIManager.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable,
                     item.ItemData.ItemSprite, item.CurrentStackAmount);
             }
             
         }
        
     }
-    
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
     {
         if (!_gearSlotsMap[matchRT].IsEmpty) //Empty가 아닐 때
@@ -661,11 +668,22 @@ public class InventoryUIPresenter : MonoBehaviour
         _itemDragHandlers[id].SetMagazineCountText(isFullyLoaded, magazineCount);
     }
     
-    private void HandleOnRemoveItem(Guid id)
+    private void HandleOnRemoveItemHandler(Guid id)
     {
         var itemDragHandler = _itemDragHandlers[id];
         ObjectPoolingManager.Instance.ReleaseItemDragHandler(itemDragHandler);
         _itemDragHandlers.Remove(id);
+    }
+
+    private void HandleOnRemoveQuickSlotItem(Guid id, QuickSlotIdx idx)
+    {
+        _itemUIManager.ClearQuickSlot((int)idx);
+        
+        //Use나 Drop이 아니라 단순히 Move인 경우
+        if (_itemDragHandlers.TryGetValue(id, out var itemDrag))
+        {
+            itemDrag.DisableQuickSlotKey();
+        }
     }
     
     //임시?

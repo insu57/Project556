@@ -34,7 +34,7 @@ public class InventoryManager : MonoBehaviour
     public Inventory LootInventory { get; private set; }
     
     //QuickSlot
-    public Dictionary<int, (Guid ID, Inventory inventory)> QuickSlotDict { get; } = new();
+    public Dictionary<QuickSlotIdx, (Guid ID, Inventory inventory)> QuickSlotDict { get; } = new();
    
 
     //ItemUI Presenter
@@ -45,6 +45,7 @@ public class InventoryManager : MonoBehaviour
     public event Action<Guid, int> OnUpdateItemStack;
     public event Action<Guid, bool, int> OnUpdateWeaponItemMagCount;
     public event Action<Guid> OnRemoveItem;
+    public event Action<Guid, QuickSlotIdx> OnRemoveQuickSlotItem;
     
     //PlayerManager
     public event Action<float> OnUpdateArmorAmount;
@@ -57,6 +58,11 @@ public class InventoryManager : MonoBehaviour
         {
             PocketSlots[i] = new CellData(GearType.None, Vector2.zero);
         }
+        
+        QuickSlotDict.Add(QuickSlotIdx.QuickSlot4, (Guid.Empty, null));
+        QuickSlotDict.Add(QuickSlotIdx.QuickSlot5, (Guid.Empty, null));
+        QuickSlotDict.Add(QuickSlotIdx.QuickSlot6, (Guid.Empty, null));
+        QuickSlotDict.Add(QuickSlotIdx.QuickSlot7, (Guid.Empty, null));
     }
     
     public void SetInventoryData(Inventory inventory, GearType gearType) 
@@ -67,6 +73,7 @@ public class InventoryManager : MonoBehaviour
             case GearType.ArmoredRig: 
             case GearType.UnarmoredRig:
                 RigInventory = inventory;
+                inventory.OnItemRemoved += CheckRemoveItemIsQuickSlot;
                 break;
             case GearType.Backpack:
                 BackpackInventory = inventory;
@@ -150,31 +157,58 @@ public class InventoryManager : MonoBehaviour
     {
         var gearType = ItemDict[itemID].item.GearType;
         
-        if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack)
+        switch (gearType)//슬롯 종류
         {
-            var inventory = ItemDict[itemID].item.ItemInventory;
-            inventory.gameObject.SetActive(false); //비활성
-        } //씬이동 시?... 데이터 저장(하위 아이템별?)
-
-        if (gearType is GearType.Weapon)
-        {
-            //비우기 무장해제
-            var cell = ItemDict[itemID].cell;
-            if (cell == PrimaryWeaponSlot)
+            case GearType.ArmoredRig or GearType.UnarmoredRig or GearType.Backpack:
             {
-                OnUnequipWeapon?.Invoke(EquipWeaponIdx.Primary);
+                //씬이동 시?... 데이터 저장(하위 아이템별?)
+                var inventory = ItemDict[itemID].item.ItemInventory;
+                inventory.gameObject.SetActive(false); //비활성
+                if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig)
+                {
+                    inventory.OnItemRemoved -= CheckRemoveItemIsQuickSlot;
+                }
+                break;
             }
-            else if (cell == SecondaryWeaponSlot)
+            case GearType.Weapon:
             {
-                OnUnequipWeapon?.Invoke(EquipWeaponIdx.Secondary);
+                //비우기 무장해제
+                var cell = ItemDict[itemID].cell;
+                if (cell == PrimaryWeaponSlot)
+                {
+                    OnUnequipWeapon?.Invoke(EquipWeaponIdx.Primary);
+                }
+                else if (cell == SecondaryWeaponSlot)
+                {
+                    OnUnequipWeapon?.Invoke(EquipWeaponIdx.Secondary);
+                }
+
+                break;
+            }
+            case GearType.None: //Pocket
+            {
+                CheckRemoveItemIsQuickSlot(itemID);
+                break;
             }
         }
-        
+
         ItemDict.Remove(itemID);
         gearSlot.SetEmpty(true, Guid.Empty);
         SetGearItemData(gearSlot, null);
     }
 
+    private void CheckRemoveItemIsQuickSlot(Guid id)
+    {
+        for (var idx = QuickSlotIdx.QuickSlot4; idx <= QuickSlotIdx.QuickSlot7; idx++)
+        {
+            var (itemID, inventory) = QuickSlotDict[idx];
+            if(!itemID.Equals(id)) continue;
+            QuickSlotDict[idx] = (Guid.Empty, null); //불가
+            OnRemoveQuickSlotItem?.Invoke(id, idx);
+            //return;
+        }
+    }
+    
     public void EquipFieldItem(CellData gearSlot, ItemInstance item)
     {
         SetGearItem(gearSlot, item);

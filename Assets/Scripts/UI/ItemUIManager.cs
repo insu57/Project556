@@ -41,7 +41,7 @@ namespace UI
         [SerializeField] private TMP_Text quickSlot06Count;
         [SerializeField] private Image quickSlot07;
         [SerializeField] private TMP_Text quickSlot07Count;
-        private Dictionary<int, (Image img, TMP_Text txt)> _quickSlotDict = new();
+        private readonly Dictionary<int, (Image img, TMP_Text txt)> _quickSlotDict = new();
     
         [Header("Player Inventory")]
         [Header("Left Panel")]
@@ -212,8 +212,7 @@ namespace UI
             }
             return (null,  false);
         }
-
-        //변형...
+        
         public Inventory SetInventorySlot(GameObject inventoryGO, GearType itemType, Guid instanceID, bool isInit)
         {
             //초기화...

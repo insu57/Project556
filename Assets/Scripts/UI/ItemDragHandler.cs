@@ -33,7 +33,9 @@ namespace UI
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Image highlightImage;
         [SerializeField] private TMP_Text countText;
-    
+        [SerializeField] private Image keyImage;
+        [SerializeField] private List<Sprite> keySprites;
+        
         private Dictionary<ItemDragAction, InputAction> _inputActions;
     
         private bool _isOnPointerEnter;
@@ -44,7 +46,7 @@ namespace UI
         public event Action<ItemDragHandler> OnRotateItem;
         public event Action<ItemDragHandler> OnQuickAddItem;
         public event Action<ItemDragHandler> OnQuickDropItem;
-        public event Action<ItemDragHandler, int> OnSetQuickSlot;
+        public event Action<ItemDragHandler, QuickSlotIdx> OnSetQuickSlot;
     
         //이벤트 구독
         private void OnEnable()
@@ -100,7 +102,8 @@ namespace UI
         
             if(item.IsStackable) countText.enabled = true; //Stack 표시용 TMP Text
             if (item is WeaponInstance) countText.enabled = true;
-        
+            keyImage.enabled = false;
+            
             _inputActions = inputActions;
             SubscribeInputEvents();
         }
@@ -155,7 +158,19 @@ namespace UI
                 countText.text = amount.ToString();
             }
         }
-    
+
+        public void SetQuickSlotKey(int keyNum)
+        {
+            int idx = keyNum - 4;//4~7
+            keyImage.sprite = keySprites[idx];
+            keyImage.enabled = true;
+        }
+
+        public void DisableQuickSlotKey()
+        {
+            keyImage.enabled = false;
+        }
+        
         public void OnPointerEnter(PointerEventData eventData)
         {
             highlightImage.enabled = true;
@@ -265,9 +280,8 @@ namespace UI
             if (!_isOnPointerEnter) return;
             if (context.control is not KeyControl key) return;
             
-            int keyNum = key.keyCode - Key.Digit1 + 1; //1~7
-            Debug.Log(keyNum);
-            OnSetQuickSlot?.Invoke(this, keyNum);
+            int keyNum = key.keyCode - Key.Digit1 + 1; //4~7
+            OnSetQuickSlot?.Invoke(this, (QuickSlotIdx)keyNum);
         }
     
         public void ReturnItemDrag() //회전된 상태 return -> 작음

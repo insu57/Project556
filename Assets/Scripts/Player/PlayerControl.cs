@@ -304,9 +304,8 @@ namespace Player
       private void OnQuickSlot(InputAction.CallbackContext context)
       {
          if(context.control is not KeyControl key) return;
-         var quickSlotIdx = key.keyCode - Key.Digit1 + 1; //
-         
-         Debug.Log($"QuickSlot-{quickSlotIdx}");
+         var idx = key.keyCode - Key.Digit1 + 1; //개선?
+         _playerManager.HandleOnUseQuickSlot((QuickSlotIdx)idx);
       }
    
       private void OnMove(InputAction.CallbackContext context) //플레이어 이동 입력
