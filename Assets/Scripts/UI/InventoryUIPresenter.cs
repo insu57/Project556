@@ -22,7 +22,7 @@ public class InventoryUIPresenter : MonoBehaviour
     private ItemInstance _currentDragItem; //현재 드래그 중인 아이템
     private bool _rotatedOnClick; //클릭 시 회전 상태
     private bool _targetIsAvailable; //타겟 슬롯(Cell)이 유효한지?
-    private bool _targetIsGearSlot; //타겟이 GearSlot인지
+    //private bool _targetIsGearSlot; //타겟이 GearSlot인지
     private RectTransform _matchRT; //해당 Match Slot의 RectTransform
     private CellData _targetGearSlot; //타겟인 GearSlot CellData
     private Inventory _targetInventory; //타겟인 Inventory
@@ -121,6 +121,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnQuickAddItem += HandleOnQuickAddItem;
         itemDrag.OnQuickDropItem += HandleOnQuickDropItem;
         itemDrag.OnSetQuickSlot += HandleOnSetQuickSlot;
+        itemDrag.OnOpenItemContextMenu += HandleOnOpenItemContextMenu;
     }
 
     public void OnDisableItemDragHandler(ItemDragHandler itemDrag)
@@ -132,6 +133,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnQuickAddItem -= HandleOnQuickAddItem;
         itemDrag.OnQuickDropItem -= HandleOnQuickDropItem;
         itemDrag.OnSetQuickSlot -= HandleOnSetQuickSlot;
+        itemDrag.OnOpenItemContextMenu -= HandleOnOpenItemContextMenu;
     }
     
     //OnPointerEnter -> 해당 아이템, 기존 슬롯 정보 캐싱
@@ -188,7 +190,7 @@ public class InventoryUIPresenter : MonoBehaviour
             return;
         }
 
-        _targetIsGearSlot = slotInfo.isGearSlot;
+        //_targetIsGearSlot = slotInfo.isGearSlot;
         _matchRT = slotInfo.matchSlot;
 
         ItemInstance dragItem;
@@ -218,9 +220,7 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         _itemUIManager.ClearShowAvailable();
 
-        //가방, 리그 등 이동할 때 고려(아이템 하위 인벤토리 관련).
-        //내용물은 어떻게????? Inventory(Mono) InventoryItem(not mono) ItemDragHandler(Mono)
-        //특히 가방 인벤토리에 가방 자신이 이동 -> 막기
+        //가방, 리그 등 이동할 때 고려(아이템 하위 인벤토리 관련). -> 저장은?
 
         if (!_targetIsAvailable) //unavailable itemDrag 원래대로
         {
@@ -238,7 +238,7 @@ public class InventoryUIPresenter : MonoBehaviour
         if (_targetCellItemID != Guid.Empty) //타겟CellItem이 동일한 stackable 아이템
         {
             ItemInstance targetCellItem;
-            if (_targetIsGearSlot) //타겟이 GearSlot
+            if (!_targetInventory) //타겟이 GearSlot
             {
                 targetCellItem = _inventoryManager.ItemDict[_targetCellItemID].item;
             }
@@ -253,18 +253,16 @@ public class InventoryUIPresenter : MonoBehaviour
             var remainingTargetCellAmount = maxStackAmount - targetCellStackAmount;
             //타겟 Cell 아이템의 최대까지 남은 스택
 
-            if (remainingTargetCellAmount < itemStackAmount)
+            if (remainingTargetCellAmount < itemStackAmount)//drag 아이템의 스택이 더 많으면 (target의 필요한 스택보다)
             {
-                //drag 아이템의 스택이 더 많으면
                 _currentDragItem.AdjustStackAmount(-remainingTargetCellAmount); //타겟 Cell의 부족한 스택만큼 빼기
                 itemDrag.SetStackAmountText(_currentDragItem.CurrentStackAmount);
                 targetCellItem.AdjustStackAmount(remainingTargetCellAmount); //Max까지
                 _itemDragHandlers[targetCellItem.InstanceID].SetStackAmountText(targetCellItem.CurrentStackAmount);
                 itemDrag.ReturnItemDrag();
             }
-            else
+            else  //drag 아이템 스택이 더 적으면
             {
-                //drag 아이템 스택이 더 적으면
                 if (!originInvenRT) //GearSlot
                 {
                     var originCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
@@ -290,7 +288,20 @@ public class InventoryUIPresenter : MonoBehaviour
             return;
         }
 
-        if (!originInvenRT)
+        //stackable이 아닌 경우, stackable이지만 target이 다른 아이템인 경우
+        //기존 인벤토리(슬롯)에서 제거
+        if (originInvenRT && _targetInventory && _invenMap[originInvenRT] == _targetInventory)//같은 인벤토리에서 이동
+        {
+            bool hasRotated = _rotatedOnClick != _currentDragItem.IsRotated; //드래그 중 회전 체크
+            var (targetPos, itemRT) = 
+                _targetInventory.MoveItem(_currentDragItem, _targetFirstIdx, _targetSlotRT, hasRotated);
+            var itemSize = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y)
+                           * _itemUIManager.CellSize;
+            itemDrag.SetItemDragPos(targetPos, itemSize, itemRT, _matchRT);
+            return; //제거없이 이동만...
+        }
+        
+        if (!originInvenRT) //GearSlot
         {
             var originGearCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
 
@@ -298,7 +309,7 @@ public class InventoryUIPresenter : MonoBehaviour
 
             //rig, backpack 장착해제 -> 인벤토리 해제...
         }
-        else
+        else //Inventory
         {
             var originInven = _invenMap[originInvenRT];
 
@@ -306,8 +317,7 @@ public class InventoryUIPresenter : MonoBehaviour
             originInven.RemoveItem(_currentDragItem.InstanceID, hasRotated); //기존 Inven에서 제거
         }
 
-
-        if (_targetIsGearSlot) //GearSlot일 때
+        if (!_targetInventory) //GearSlot일 때
         {
             if (_currentDragItem.IsRotated) //회전된 상태면 기본 상태로
             {
@@ -368,7 +378,7 @@ public class InventoryUIPresenter : MonoBehaviour
             targetRT = _itemUIManager.RigInvenParent;
         }
         
-        if (targetInven != null)
+        if (targetInven != null) //backpack or rig Inven
         {
             var (isAvailable,  firstIdx, slotRT) = targetInven.CheckCanAddItem(item.ItemData);
             if(!isAvailable) return;
@@ -411,48 +421,55 @@ public class InventoryUIPresenter : MonoBehaviour
         item.RotateItem();
     }
     
-    //추가사항...
-    //ItemDrag에 퀵슬롯 표시.
     //아이템 사용 연동? -> 어떤 방법을?
     private void HandleOnSetQuickSlot(ItemDragHandler itemDrag, QuickSlotIdx quickSlotIdx) 
     {
-        Debug.Log("HandleOnSetQuickSlot: " + quickSlotIdx);
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
-        //아이템 사용 시 개선?
-        //QuickSlot 검사... 아이템 하나당 하나의 퀵슬롯(진행중)
         
+        //아이템 사용 시 개선?
+        ItemInstance item;
+        Inventory targetInven;
         if (inventoryRT == _itemUIManager.RigInvenParent)
         {
-           
-            var item = _inventoryManager.RigInventory.ItemDict[instanceID].item;
-            if (item.ItemData is MedicalData or FoodData)
-            {
-                itemDrag.SetQuickSlotKey((int)quickSlotIdx);
-                _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, _inventoryManager.RigInventory);
-                _itemUIManager.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable, 
-                    item.ItemData.ItemSprite, item.CurrentStackAmount);
-            }
-            
+            item = _inventoryManager.RigInventory.ItemDict[instanceID].item;
+            targetInven = _inventoryManager.RigInventory;
         }
-
-        if (!inventoryRT)
+        else if (!inventoryRT)
         {
-            var item = _inventoryManager.ItemDict[instanceID].item;
-
-            if (item.ItemData is MedicalData or FoodData)
+            item = _inventoryManager.ItemDict[instanceID].item;
+            targetInven = null;
+        }
+        else return;
+        
+        if (item.ItemData is MedicalData or FoodData)
+        {
+            for (var idx = QuickSlotIdx.QuickSlot4; idx <= QuickSlotIdx.QuickSlot7; idx++)
             {
-                itemDrag.SetQuickSlotKey((int)quickSlotIdx);
-                _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, null);
-                _itemUIManager.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable,
-                    item.ItemData.ItemSprite, item.CurrentStackAmount);
+                if (item.InstanceID != _inventoryManager.QuickSlotDict[idx].ID) continue; 
+                //이미 기존 퀵슬롯에 있을 때...
+                _inventoryManager.QuickSlotDict[idx] = (Guid.Empty, null);
+                _itemUIManager.ClearQuickSlot((int)idx);
+                itemDrag.ClearQuickSlotKey();
+                
+                if (idx == quickSlotIdx) return; //같은 퀵슬롯으로 Invoke(등록 해제), 새로 등록하는 하단 코드를 실행하지않음
             }
             
+            itemDrag.SetQuickSlotKey((int)quickSlotIdx);
+            _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, targetInven);
+            _itemUIManager.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable,
+                item.ItemData.ItemSprite, item.CurrentStackAmount);
         }
-       
     }
+
+    private void HandleOnOpenItemContextMenu(ItemDragHandler itemDrag)
+    {
+        _itemUIManager.OpenItemContextMenu(itemDrag.transform.position);
+    }
+    
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
     {
+        _targetInventory = null;
         if (!_gearSlotsMap[matchRT].IsEmpty) //Empty가 아닐 때
         {
             if (!dragItem.IsStackable) return false; //stackable이 아니면 false 
@@ -677,13 +694,12 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnRemoveQuickSlotItem(Guid id, QuickSlotIdx idx)
     {
-        _itemUIManager.ClearQuickSlot((int)idx);
-        
         //Use나 Drop이 아니라 단순히 Move인 경우
         if (_itemDragHandlers.TryGetValue(id, out var itemDrag))
         {
-            itemDrag.DisableQuickSlotKey();
+            itemDrag.ClearQuickSlotKey();
         }
+        _itemUIManager.ClearQuickSlot((int)idx);
     }
     
     //임시?

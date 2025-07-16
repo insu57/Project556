@@ -15,7 +15,7 @@ namespace UI
     {
         private RectTransform _itemRT;
         private RectTransform _itemParentRT;
-
+        private CanvasGroup _canvasGroup;
         public RectTransform InventoryRT { get; private set; }
 
         private Transform _itemDraggingParent;
@@ -47,7 +47,13 @@ namespace UI
         public event Action<ItemDragHandler> OnQuickAddItem;
         public event Action<ItemDragHandler> OnQuickDropItem;
         public event Action<ItemDragHandler, QuickSlotIdx> OnSetQuickSlot;
-    
+        public event Action<ItemDragHandler> OnOpenItemContextMenu;
+        
+        private void Awake()
+        {
+            TryGetComponent(out _canvasGroup);
+        }
+        
         //이벤트 구독
         private void OnEnable()
         {
@@ -166,13 +172,15 @@ namespace UI
             keyImage.enabled = true;
         }
 
-        public void DisableQuickSlotKey()
+        public void ClearQuickSlotKey()
         {
             keyImage.enabled = false;
         }
         
+        //뒤에 있는 Cell 하이라이트 문제(안꺼짐)...raycast를 막으면 click 이벤트 불가...
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if(_isDragging) return;
             highlightImage.enabled = true;
             _isOnPointerEnter = true;
         }
@@ -185,6 +193,7 @@ namespace UI
     
         public void OnPointerDown(PointerEventData eventData)
         {
+            //itemImage.raycastTarget = false;
             highlightImage.enabled = false;
             _pointerDownPos = _itemRT.anchoredPosition;
             transform.SetParent(_itemDraggingParent); //Drag시 부모변경(RectMask때문에)
@@ -201,6 +210,7 @@ namespace UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            //itemImage.raycastTarget = true;
             _isDragging = false;
             backgroundImage.enabled = true;
         
@@ -218,6 +228,7 @@ namespace UI
             if (eventData.button == PointerEventData.InputButton.Right) //right-click
             {
                 Debug.Log("right-click");
+                OnOpenItemContextMenu?.Invoke(this);
             }
         }
 
@@ -235,7 +246,7 @@ namespace UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
-        
+            //itemImage.raycastTarget = true;
             if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                     _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
             {

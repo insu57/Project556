@@ -73,7 +73,7 @@ public class InventoryManager : MonoBehaviour
             case GearType.ArmoredRig: 
             case GearType.UnarmoredRig:
                 RigInventory = inventory;
-                inventory.OnItemRemoved += CheckRemoveItemIsQuickSlot;
+                inventory.OnItemRemovedCheckQuickSlot += CheckRemoveItemIsQuickSlot;
                 break;
             case GearType.Backpack:
                 BackpackInventory = inventory;
@@ -166,7 +166,7 @@ public class InventoryManager : MonoBehaviour
                 inventory.gameObject.SetActive(false); //비활성
                 if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig)
                 {
-                    inventory.OnItemRemoved -= CheckRemoveItemIsQuickSlot;
+                    inventory.OnItemRemovedCheckQuickSlot -= CheckRemoveItemIsQuickSlot;
                 }
                 break;
             }
@@ -199,12 +199,12 @@ public class InventoryManager : MonoBehaviour
 
     private void CheckRemoveItemIsQuickSlot(Guid id)
     {
-        for (var idx = QuickSlotIdx.QuickSlot4; idx <= QuickSlotIdx.QuickSlot7; idx++)
+        for (var slotIdx = QuickSlotIdx.QuickSlot4; slotIdx <= QuickSlotIdx.QuickSlot7; slotIdx++)
         {
-            var (itemID, inventory) = QuickSlotDict[idx];
+            var (itemID, inventory) = QuickSlotDict[slotIdx];
             if(!itemID.Equals(id)) continue;
-            QuickSlotDict[idx] = (Guid.Empty, null); //불가
-            OnRemoveQuickSlotItem?.Invoke(id, idx);
+            QuickSlotDict[slotIdx] = (Guid.Empty, null); //불가
+            OnRemoveQuickSlotItem?.Invoke(id, slotIdx);
             //return;
         }
     }

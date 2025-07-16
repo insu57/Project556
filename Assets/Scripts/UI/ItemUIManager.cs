@@ -90,10 +90,12 @@ namespace UI
         private GameObject _lootSlotInstance;
     
         [SerializeField, Space] private Image slotAvailable;
-    
+        [SerializeField] private GameObject itemContextMenu;
+        
         private readonly List<RectTransform> _gearSlotRT = new();
         private readonly List<RectTransform> _inventoriesRT = new();
        
+        
         private void Awake()
         {
             _panelSlotPadding = cellSize * 3;
@@ -303,6 +305,12 @@ namespace UI
         {
             _quickSlotDict[idx].img.enabled = false;
             _quickSlotDict[idx].txt.enabled = false;
+        }
+
+        public void OpenItemContextMenu(Vector2 pos)
+        {
+            itemContextMenu.SetActive(true);
+            itemContextMenu.transform.position = pos;
         }
     }
 }

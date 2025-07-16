@@ -33,7 +33,7 @@ public class Inventory: MonoBehaviour
     public float Height { private set; get; }
     private float _cellSize;
     public Dictionary<Guid, (ItemInstance item, RectTransform slotRT, int firstIdx)> ItemDict { get; } = new();
-    public event Action<Guid> OnItemRemoved;
+    public event Action<Guid> OnItemRemovedCheckQuickSlot;
     //기존 슬롯->아이템 정보...
     //스테이지에서 버리고 줍는것 생각하기...(인스턴스 생성관련...)
 
@@ -184,9 +184,8 @@ public class Inventory: MonoBehaviour
         if (x < 0 || x >= slotSize.x || y < 0 || y >= slotSize.y) firstIdx = -1;
     }
     
-    public (Vector2 pos, RectTransform slotItemRT) AddItem(ItemInstance item, int firstIdx, RectTransform slotRT)
+    public (Vector2 pos, RectTransform slotItemRT) AddItem(ItemInstance item, int firstIdx, RectTransform slotRT) //Available인경우만
     {
-        //중첩for문 개선???
         var itemCount = item.ItemCellCount;
 
         var (cells, slotCount, itemRT) = SlotDict[slotRT];
@@ -250,6 +249,48 @@ public class Inventory: MonoBehaviour
 
         return (false, -1, null);
     }
+
+    public (Vector2 pos, RectTransform slotItemRT) 
+        MoveItem(ItemInstance item, int firstIdx, RectTransform slotRT, bool hasRotated)//같은 인벤토리에서 이동
+    {
+        var itemCount = item.ItemCellCount;
+
+        var originItemCount = itemCount;
+        var originSlotRT = ItemDict[item.InstanceID].slotRT;
+        var originFirstIdx = ItemDict[item.InstanceID].firstIdx;
+        
+        if(hasRotated)
+            originItemCount = new Vector2Int(itemCount.y, itemCount.x);
+
+        for (int y = 0; y < originItemCount.y; y++)
+        {
+            for (int x = 0; x < originItemCount.x; x++)
+            {
+                var idx = originFirstIdx + x  + y * SlotDict[originSlotRT].slotCount.x;
+                SlotDict[originSlotRT].cells[idx].SetEmpty(true, item.InstanceID);
+            }
+        }
+        
+        var (cells, slotCount, itemRT) = SlotDict[slotRT];
+        
+        for (int y = 0; y < itemCount.y; y++)//새로운 위치로 이동
+        {
+            for (int x = 0; x < itemCount.x; x++)
+            {
+                var idx = firstIdx + x + y * slotCount.x;
+                cells[idx].SetEmpty(false, item.InstanceID);//Cell 채우기
+            }
+        }
+        
+        ItemDict[item.InstanceID] = (item, slotRT, firstIdx);
+       
+        var minPos = cells[firstIdx].MinPos; //CellRT.anchoredPosition;
+        var maxPos = cells[firstIdx + itemCount.x -1 + slotCount.x * (itemCount.y - 1)]
+            .MinPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
+        var targetPos = (minPos + maxPos) / 2;
+        
+        return (targetPos, itemRT);
+    }
     
     public void RemoveItem(Guid id, bool hasRotated)
     {
@@ -272,6 +313,6 @@ public class Inventory: MonoBehaviour
             } //회전된 아이템에서 버그... -> 들고있을때 회전 후 옮기기(회전 전 기준으로 비워야함....)
         }
         ItemDict.Remove(id); //Dict에서 제거
-        OnItemRemoved?.Invoke(id);
+        OnItemRemovedCheckQuickSlot?.Invoke(id);
     }
 }
