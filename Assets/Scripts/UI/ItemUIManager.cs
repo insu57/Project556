@@ -2,28 +2,15 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI
 {
-    public class ItemUIManager : MonoBehaviour
+    public class ItemUIManager : MonoBehaviour, IPointerClickHandler
     {
-        [SerializeField] private TMP_Text ammoText;
         [SerializeField] private GameObject playerUI;
-    
-        [SerializeField, Space] private RectTransform pickupUI;
-        private readonly List<TMP_Text> _pickupTextList = new();
-        [SerializeField] private TMP_Text equipText;
-        [SerializeField] private TMP_Text pickupText;
-        [SerializeField] private float pickupTextSize = 50f;
-        [SerializeField] private RectTransform itemInteractUI;
-        [SerializeField] private Image pickupHighlight;
-        [SerializeField] private Color pickupHighlightAvailableColor;
-        [SerializeField] private Color pickupHighlightUnavailableColor;
-        private List<(bool isAvailable, ItemInteractType type)> _pickupAvailableList;
-        private int _pickupTextListCount;
-        private int _pickupCurrentIdx;
     
         [Header("Slot")]
         [SerializeField, Space] private float cellSize = 50f;
@@ -90,7 +77,12 @@ namespace UI
         private GameObject _lootSlotInstance;
     
         [SerializeField, Space] private Image slotAvailable;
-        [SerializeField] private GameObject itemContextMenu;
+        [SerializeField] private RectTransform itemContextMenu;
+        [SerializeField] private Button itemContextInfo;
+        [SerializeField] private Button itemContextUse;
+        [SerializeField] private Button itemContextEquip;
+        [SerializeField] private Button itemContextDrop;
+        public event Action<ItemContextType> OnItemContextMenuClick;
         
         private readonly List<RectTransform> _gearSlotRT = new();
         private readonly List<RectTransform> _inventoriesRT = new();
@@ -117,10 +109,6 @@ namespace UI
             _inventoriesRT.Add(rigInvenParent);
             _inventoriesRT.Add(packInvenParent);
             _inventoriesRT.Add(lootSlotParent);
-        
-            //ItemInteract UI
-            _pickupTextList.Add(equipText);
-            _pickupTextList.Add(pickupText);
             
             //QuickSlot
             _quickSlotDict.Add(4, (quickSlot04, quickSlot04Count));
@@ -129,62 +117,36 @@ namespace UI
             _quickSlotDict.Add(7, (quickSlot07, quickSlot07Count));
         }
 
+        private void OnEnable()
+        {
+            //ItemContextMenu
+            itemContextInfo.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Info));
+            itemContextUse.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Use));
+            itemContextEquip.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Equip));
+            itemContextDrop.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Drop));
+        }
+
+        private void OnDisable()
+        {
+            //ItemContextMenu
+            itemContextInfo.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Info));
+            itemContextUse.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Use));
+            itemContextEquip.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Equip));
+            itemContextDrop.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Drop));
+        }
+
         public void OpenPlayerUI(bool isOpen) //PlayerUI
         {
             playerUI.SetActive(isOpen);
+            CloseItemContextMenu();//ContextMenu닫기
         }
-    
-        public void ShowItemPickup (Vector2 position, List<(bool, ItemInteractType)> availableList)
+
+        private void OnItemContextMenu(ItemContextType contextType)
         {
-            //설정...아이템 따라
-            pickupUI.gameObject.SetActive(true);
-            itemInteractUI.anchoredPosition = Vector2.zero;
-
-            pickupUI.position = position; //개선...WorldCanvas로 따로?
-        
-            _pickupAvailableList = availableList;
-
-            foreach (var text in _pickupTextList)
-            {
-                text.gameObject.SetActive(false);
-            }
-        
-            foreach (var (_, type) in _pickupAvailableList) //여기가 문제... 색만 변경
-            {
-                switch (type)
-                {
-                    case ItemInteractType.Equip:
-                        equipText.gameObject.SetActive(true);
-                        break;
-                    case ItemInteractType.PickUp:
-                        pickupText.gameObject.SetActive(true);
-                        break;
-                    default:
-                        Debug.LogWarning("ItemInteractType Error: None.");
-                        break;
-                }
-            }
-            LayoutRebuilder.ForceRebuildLayoutImmediate(pickupUI);
-        
-            pickupHighlight.color = _pickupAvailableList[0].isAvailable
-                ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
+            OnItemContextMenuClick?.Invoke(contextType);
+            CloseItemContextMenu();
         }
-
-        public void HideItemPickup()
-        {
-            pickupUI.gameObject.SetActive(false); //버그?
-        }
-    
-        public void ScrollItemPickup(int idx)
-        {
-            var uiPos = itemInteractUI.anchoredPosition;
-
-            uiPos.y = -idx * pickupTextSize;
-            var isAvailable = _pickupAvailableList[idx];
-            pickupHighlight.color = isAvailable.isAvailable ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
-            itemInteractUI.anchoredPosition =  uiPos;
-        }
-
+        
         public void ShowSlotAvailable(bool isAvailable, Vector2 position, Vector2 size)
         {
             var slotColor = isAvailable ? availableColor : unavailableColor;
@@ -307,10 +269,33 @@ namespace UI
             _quickSlotDict[idx].txt.enabled = false;
         }
 
-        public void OpenItemContextMenu(Vector2 pos)
+        public void OpenItemContextMenu(Vector3 pos, bool isAvailable, bool isGear)
         {
-            itemContextMenu.SetActive(true);
+            itemContextMenu.gameObject.SetActive(true);
+            if (isGear)
+            {
+                itemContextEquip.gameObject.SetActive(true);
+                itemContextUse.gameObject.SetActive(false);
+                itemContextEquip.interactable = isAvailable;
+            }
+            else
+            {
+                itemContextEquip.gameObject.SetActive(false);
+                itemContextUse.gameObject.SetActive(true);
+                itemContextUse.interactable = isAvailable;
+            }
             itemContextMenu.transform.position = pos;
+        }
+
+        private void CloseItemContextMenu()
+        {
+            if (!itemContextMenu.gameObject.activeSelf) return; 
+            itemContextMenu.gameObject.SetActive(false);
+        }
+        
+        public void OnPointerClick(PointerEventData eventData) //ClickEvent
+        {
+            CloseItemContextMenu();//ContextMenu가 enable이면 클릭으로 닫기
         }
     }
 }

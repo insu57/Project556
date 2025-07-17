@@ -18,17 +18,19 @@ public class InventoryUIPresenter : MonoBehaviour
     private readonly Dictionary<Guid, ItemDragHandler> _itemDragHandlers = new();
 
     public float CellSize => _itemUIManager.CellSize;
-    
+    //ItemDrag
     private ItemInstance _currentDragItem; //현재 드래그 중인 아이템
     private bool _rotatedOnClick; //클릭 시 회전 상태
     private bool _targetIsAvailable; //타겟 슬롯(Cell)이 유효한지?
-    //private bool _targetIsGearSlot; //타겟이 GearSlot인지
     private RectTransform _matchRT; //해당 Match Slot의 RectTransform
     private CellData _targetGearSlot; //타겟인 GearSlot CellData
     private Inventory _targetInventory; //타겟인 Inventory
     private RectTransform _targetSlotRT; //타겟 Inventory의 SlotRT
     private int _targetFirstIdx; //타겟의 Cell Idx(아이템 좌상단, 첫번째 인덱스)
     private Guid _targetCellItemID; //타겟인 Cell의 아이템ID(Stack아이템 용)
+    //ItemContextMenu
+    private ItemInstance _currentCotextMenuItem;
+    
     
     //test
     [SerializeField, Space] private GameObject crate01Test;
@@ -76,17 +78,6 @@ public class InventoryUIPresenter : MonoBehaviour
         _invenMap[_itemUIManager.RigInvenParent] = null;
         _invenMap[_itemUIManager.BackpackInvenParent] = null;
         _invenMap[_itemUIManager.LootSlotParent] = null;
-
-        //Event
-        //InventoryManager
-        _inventoryManager.OnInitInventory += HandleOnInitInventory;
-        _inventoryManager.OnShowInventory += HandleOnShowInventory;
-        _inventoryManager.OnEquipFieldItem += HandleOnEquipFieldItem;
-        _inventoryManager.OnAddFieldItemToInventory += HandleOnAddFieldItemToInventory;
-        _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
-        _inventoryManager.OnUpdateWeaponItemMagCount += HandleOnUpdateWeaponItemMagCount;
-        _inventoryManager.OnRemoveItem += HandleOnRemoveItemHandler;
-        _inventoryManager.OnRemoveQuickSlotItem += HandleOnRemoveQuickSlotItem;
         
         //test
         HandleOnInitInventory(crate01Test, null); //Loot
@@ -99,9 +90,27 @@ public class InventoryUIPresenter : MonoBehaviour
         SetItemToInventory(rigTanTestData);
     }
 
-    private void OnDestroy()
+    private void OnEnable()
+    {
+        //Event
+        //InventoryManager
+        _inventoryManager.OnInitInventory += HandleOnInitInventory;
+        _inventoryManager.OnShowInventory += HandleOnShowInventory;
+        _inventoryManager.OnEquipFieldItem += HandleOnEquipFieldItem;
+        _inventoryManager.OnAddFieldItemToInventory += HandleOnAddFieldItemToInventory;
+        _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
+        _inventoryManager.OnUpdateWeaponItemMagCount += HandleOnUpdateWeaponItemMagCount;
+        _inventoryManager.OnRemoveItem += HandleOnRemoveItemHandler;
+        _inventoryManager.OnRemoveQuickSlotItem += HandleOnRemoveQuickSlotItem;
+        
+        //ItemUIManager
+        _itemUIManager.OnItemContextMenuClick += HandleOnItemContextMenuClick;
+    }
+    
+    private void OnDisable()
     {
         //Event unsubscribe
+        //InventoryManager
         _inventoryManager.OnInitInventory -= HandleOnInitInventory;
         _inventoryManager.OnShowInventory -= HandleOnShowInventory;
         _inventoryManager.OnEquipFieldItem -= HandleOnEquipFieldItem;
@@ -110,6 +119,9 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnUpdateWeaponItemMagCount -= HandleOnUpdateWeaponItemMagCount;
         _inventoryManager.OnRemoveItem -= HandleOnRemoveItemHandler;
         _inventoryManager.OnRemoveQuickSlotItem -= HandleOnRemoveQuickSlotItem;
+        
+        //ItemUIManager
+        _itemUIManager.OnItemContextMenuClick -= HandleOnItemContextMenuClick;
     }
 
     public void InitItemDragHandler(ItemDragHandler itemDrag) //아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
@@ -122,6 +134,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnQuickDropItem += HandleOnQuickDropItem;
         itemDrag.OnSetQuickSlot += HandleOnSetQuickSlot;
         itemDrag.OnOpenItemContextMenu += HandleOnOpenItemContextMenu;
+        itemDrag.OnShowItemInfo += HandleOnShowItemInfo;
     }
 
     public void OnDisableItemDragHandler(ItemDragHandler itemDrag)
@@ -134,6 +147,7 @@ public class InventoryUIPresenter : MonoBehaviour
         itemDrag.OnQuickDropItem -= HandleOnQuickDropItem;
         itemDrag.OnSetQuickSlot -= HandleOnSetQuickSlot;
         itemDrag.OnOpenItemContextMenu -= HandleOnOpenItemContextMenu;
+        itemDrag.OnShowItemInfo -= HandleOnShowItemInfo;
     }
     
     //OnPointerEnter -> 해당 아이템, 기존 슬롯 정보 캐싱
@@ -464,7 +478,55 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnOpenItemContextMenu(ItemDragHandler itemDrag)
     {
-        _itemUIManager.OpenItemContextMenu(itemDrag.transform.position);
+        var instanceID = itemDrag.InstanceID;
+        ItemInstance item;
+        if (itemDrag.InventoryRT)
+        {
+            var inven = _invenMap[itemDrag.InventoryRT];
+            item = inven.ItemDict[instanceID].item;
+        }
+        else
+        {
+            item = _inventoryManager.ItemDict[instanceID].item;
+        }
+
+        _currentCotextMenuItem = item;
+        
+        bool isGear = item.GearType != GearType.None;
+        bool isAvailable; //사용가능한 아이템 만...(의약품, 음식)..
+        if (isGear)
+        {
+            var cell = _inventoryManager.CheckCanEquipItem(item.GearType);
+            isAvailable = cell != null; //null이 아니면 유효.
+        }
+        else isAvailable = true;
+        
+        _itemUIManager.OpenItemContextMenu(itemDrag.transform.position, isAvailable, isGear);//List 설정
+        
+    }
+    
+    private void HandleOnItemContextMenuClick(ItemContextType contextType)
+    {
+        Debug.Log("Item Context Click: " + contextType);
+        var instanceID = _currentCotextMenuItem.InstanceID;
+        var itemDrag = _itemDragHandlers[instanceID];
+        switch (contextType)
+        {
+            case ItemContextType.Info:
+                HandleOnShowItemInfo(itemDrag);
+                break;
+            case ItemContextType.Use:
+                break;
+            case ItemContextType.Equip:
+                break;
+            case ItemContextType.Drop:
+                break;
+        }
+    }
+
+    private void HandleOnShowItemInfo(ItemDragHandler itemDrag)
+    {
+        Debug.Log("Show Item Info");
     }
     
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
@@ -701,6 +763,8 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         _itemUIManager.ClearQuickSlot((int)idx);
     }
+
+    
     
     //임시?
     private void SetItemToInventory(BaseItemDataSO itemData)

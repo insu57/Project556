@@ -48,6 +48,7 @@ namespace UI
         public event Action<ItemDragHandler> OnQuickDropItem;
         public event Action<ItemDragHandler, QuickSlotIdx> OnSetQuickSlot;
         public event Action<ItemDragHandler> OnOpenItemContextMenu;
+        public event Action<ItemDragHandler> OnShowItemInfo;
         
         private void Awake()
         {
@@ -193,13 +194,17 @@ namespace UI
     
         public void OnPointerDown(PointerEventData eventData)
         {
-            //itemImage.raycastTarget = false;
             highlightImage.enabled = false;
             _pointerDownPos = _itemRT.anchoredPosition;
             transform.SetParent(_itemDraggingParent); //Drag시 부모변경(RectMask때문에)
         
             _itemRT.sizeDelta = _defaultImageSize; // 클릭 시 원래 아이템 사이즈로
-            backgroundImage.enabled = false; //배경 끄기
+            
+            itemImage.raycastTarget = false;
+            //배경 투명화
+            var transparent = backgroundImage.color;
+            transparent.a = 0;
+            backgroundImage.color = transparent;
         
             itemImage.rectTransform.sizeDelta = !_isRotated ? _defaultImageSize 
                 :new Vector2(_defaultImageSize.y, _defaultImageSize.x);
@@ -210,9 +215,12 @@ namespace UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            //itemImage.raycastTarget = true;
+            itemImage.raycastTarget = true;
             _isDragging = false;
-            backgroundImage.enabled = true;
+            //배경 투명화
+            var transparent = backgroundImage.color;
+            transparent.a = 1;
+            backgroundImage.color = transparent;
         
             ReturnItemDrag();
         }
@@ -223,11 +231,11 @@ namespace UI
             if (eventData.clickCount == 2)//double click
             {
                 Debug.Log("double click");
+                OnShowItemInfo?.Invoke(this);
             }
 
             if (eventData.button == PointerEventData.InputButton.Right) //right-click
             {
-                Debug.Log("right-click");
                 OnOpenItemContextMenu?.Invoke(this);
             }
         }
@@ -246,7 +254,13 @@ namespace UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            //itemImage.raycastTarget = true;
+            itemImage.raycastTarget = true;
+            //배경 투명화
+            var transparent = backgroundImage.color;
+            transparent.a = 1;
+            backgroundImage.color = transparent;
+            
+            _isDragging = false;
             if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
                     _itemRT, eventData.position, eventData.pressEventCamera, out var globalMousePos))
             {
@@ -254,8 +268,7 @@ namespace UI
             }
         
             OnEndDragEvent?.Invoke(this);
-            backgroundImage.enabled = true; //배경 다시 키기
-            _isDragging = false;
+            
         }
 
         private void OnRotateItemAction(InputAction.CallbackContext context)
@@ -274,7 +287,6 @@ namespace UI
             {
                 OnQuickAddItem?.Invoke(this);
             }
-            
         }
 
         private void OnQuickDropItemAction(InputAction.CallbackContext context)

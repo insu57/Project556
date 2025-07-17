@@ -14,6 +14,14 @@ public enum ItemInteractType
     Use,
 }
 
+public enum ItemContextType
+{
+    Info = 0,
+    Use,
+    Equip,
+    Drop
+}
+
 public enum WeaponType
 {
     Pistol = 0,
