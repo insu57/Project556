@@ -338,10 +338,8 @@ public class InventoryUIPresenter : MonoBehaviour
                 HandleOnRotateItem(itemDrag); 
             }
 
-            _inventoryManager.SetGearItem(_targetGearSlot, _currentDragItem); //장비 설정
-            Vector2 targetPos = new Vector2(_matchRT.sizeDelta.x, -_matchRT.sizeDelta.y) / 2; //좌표
-            itemDrag.SetItemDragPos(targetPos, _matchRT.sizeDelta, _matchRT, //itemDrag 설정
-                null);
+            SetGearItem(itemDrag, _targetGearSlot, _currentDragItem);
+            
         }
         else
         {
@@ -367,6 +365,15 @@ public class InventoryUIPresenter : MonoBehaviour
         //GearSlot rotate 해제...
     }
 
+    private void SetGearItem(ItemDragHandler itemDrag, CellData gearSlot ,ItemInstance itemInstance)
+    {
+        _inventoryManager.SetGearItem(gearSlot, itemInstance); //장비 설정
+        var gearRT = _gearRTMap[gearSlot];
+        var size = gearRT.sizeDelta;
+        var pos = new Vector2(size.x, -size.y) / 2; //좌표
+        itemDrag.SetItemDragPos(pos, size, gearRT,null);//itemDrag 설정
+    }
+    
     private void HandleOnQuickAddItem(ItemDragHandler itemDrag)//빠른 획득
     {
         var instanceID = itemDrag.InstanceID;
@@ -405,10 +412,7 @@ public class InventoryUIPresenter : MonoBehaviour
         {
             var cell = _inventoryManager.CheckCanEquipItem(GearType.None); //Pocket
             if(cell == null) return;
-            _inventoryManager.SetGearItem(cell, item);
-            var gearSlotRT = _gearRTMap[cell];
-            var targetPos = new Vector2(gearSlotRT.sizeDelta.x, -gearSlotRT.sizeDelta.y) / 2;
-            itemDrag.SetItemDragPos(targetPos, gearSlotRT.sizeDelta, gearSlotRT, null);
+            SetGearItem(itemDrag, cell, item);
         }
         lootInven.RemoveItem(instanceID, false);
     }
@@ -420,7 +424,11 @@ public class InventoryUIPresenter : MonoBehaviour
         
         if(inventoryRT == _itemUIManager.LootSlotParent) return;
         ItemInstance item;
-        if (inventoryRT)  item = _invenMap[inventoryRT].ItemDict[instanceID].item;
+        if (inventoryRT)
+        {
+            var inventory = _invenMap[inventoryRT];
+            item = inventory.ItemDict[instanceID].item;
+        }
         else item = _inventoryManager.ItemDict[instanceID].item;
         
         //메서드로?
@@ -432,7 +440,7 @@ public class InventoryUIPresenter : MonoBehaviour
         ItemPickUp itemPickUp =  ObjectPoolingManager.Instance.GetItemPickUp(); //Position?
         itemPickUp.transform.position = gameObject.transform.position + new Vector3(0, .5f, 0);
         itemPickUp.Init(item);
-        item.RotateItem();
+        if(item.IsRotated) item.RotateItem(); //회전했으면 기본으로
     }
     
     //아이템 사용 연동? -> 어떤 방법을?
@@ -476,11 +484,11 @@ public class InventoryUIPresenter : MonoBehaviour
         }
     }
 
-    private void HandleOnOpenItemContextMenu(ItemDragHandler itemDrag)
+    private void HandleOnOpenItemContextMenu(ItemDragHandler itemDrag) //ContextMenu 열기(ItemDrag 우클릭)
     {
         var instanceID = itemDrag.InstanceID;
         ItemInstance item;
-        if (itemDrag.InventoryRT)
+        if (itemDrag.InventoryRT) //InvenRT따라 
         {
             var inven = _invenMap[itemDrag.InventoryRT];
             item = inven.ItemDict[instanceID].item;
@@ -493,13 +501,16 @@ public class InventoryUIPresenter : MonoBehaviour
         _currentCotextMenuItem = item;
         
         bool isGear = item.GearType != GearType.None;
-        bool isAvailable; //사용가능한 아이템 만...(의약품, 음식)..
+        bool isAvailable; 
         if (isGear)
         {
             var cell = _inventoryManager.CheckCanEquipItem(item.GearType);
-            isAvailable = cell != null; //null이 아니면 유효.
+            isAvailable = cell != null; //null이 아니면 유효.(장착가능)
         }
-        else isAvailable = true;
+        else
+        {
+            isAvailable = item.ItemData is MedicalData or FoodData;//사용가능한 아이템 만...(의약품, 음식)..
+        }
         
         _itemUIManager.OpenItemContextMenu(itemDrag.transform.position, isAvailable, isGear);//List 설정
         
@@ -518,8 +529,11 @@ public class InventoryUIPresenter : MonoBehaviour
             case ItemContextType.Use:
                 break;
             case ItemContextType.Equip:
+                var cell = _inventoryManager.CheckCanEquipItem(_currentCotextMenuItem.GearType);
+                SetGearItem(itemDrag, cell, _currentCotextMenuItem);
                 break;
             case ItemContextType.Drop:
+                HandleOnQuickDropItem(itemDrag);
                 break;
         }
     }
@@ -763,7 +777,6 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         _itemUIManager.ClearQuickSlot((int)idx);
     }
-
     
     
     //임시?
@@ -813,9 +826,6 @@ public class InventoryUIPresenter : MonoBehaviour
 
         var itemDrag = InitItemDragHandler(invenItem);
         
-        var size = gearSlot.sizeDelta;
-        var pos = new Vector2(gearSlot.sizeDelta.x, -gearSlot.sizeDelta.y) / 2;
-        itemDrag.SetItemDragPos(pos, size, gearSlot, null);
-        _inventoryManager.SetGearItem(gearCell, invenItem);
+        SetGearItem(itemDrag, gearCell, invenItem);
     }
 }

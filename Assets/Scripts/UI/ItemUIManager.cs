@@ -190,6 +190,7 @@ namespace UI
             {
                 case GearType.ArmoredRig:
                 case GearType.UnarmoredRig:
+                {
                     if (isInit)
                     {
                         _rigSlotInstance = Instantiate(inventoryGO, rigInvenParent);
@@ -217,10 +218,23 @@ namespace UI
                         chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
                     }
                     break;
+                }
                 case GearType.Backpack:
-                    _backpackSlotInstance = Instantiate(inventoryGO, packInvenParent);
-                    _backpackSlotInstance.TryGetComponent(out inventory);
-                    inventory.Init(CellSize, instanceID);
+                {
+                    if (isInit)
+                    {
+                        _backpackSlotInstance = Instantiate(inventoryGO, packInvenParent);
+                        _backpackSlotInstance.TryGetComponent(out inventory);
+                        inventory.Init(CellSize, instanceID);
+                    }
+                    else
+                    {
+                        _backpackSlotInstance = inventoryGO;
+                        _backpackSlotInstance.TryGetComponent(out inventory);
+                        _backpackSlotInstance.SetActive(true);
+                        _backpackSlotInstance.transform.SetParent(packInvenParent);
+                    }
+                    
                     slotPrefabHeight = inventory.Height;
                     
                     packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
@@ -233,8 +247,11 @@ namespace UI
                     {
                         backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
                     }
-                    break;
+                    break; 
+                }
+
                 case GearType.None:
+                {
                     _lootSlotInstance = Instantiate(inventoryGO, lootSlotParent);
                     _lootSlotInstance.TryGetComponent(out inventory);
                     inventory.Init(CellSize, instanceID);
@@ -250,6 +267,8 @@ namespace UI
                         lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
                     }
                     break;
+                }
+                    
             }
             return inventory;
         }

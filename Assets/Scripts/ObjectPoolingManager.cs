@@ -34,6 +34,7 @@ public class ObjectPoolingManager : Singleton<ObjectPoolingManager>
     protected override void Awake()
     {
         base.Awake();
+        
         InitBulletPools();
         InitItemDragHandlerPool();
         InitItemPickupPool(); //중복 개선? - 개수가 많아지면 수정

@@ -22,7 +22,10 @@ public class ItemPickUp : MonoBehaviour
     }
     private void Start()
     {
-        SetItemData(itemData);
+        if (_itemInstance == null && itemData)
+        {
+            SetItemData(itemData);
+        }
     }
 
     private void SetItemData(BaseItemDataSO newItemData)

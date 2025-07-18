@@ -40,6 +40,7 @@ namespace UI
     
         private bool _isOnPointerEnter;
         private bool _isDragging;
+        private bool _isSubscribed;
         public event Action<ItemDragHandler> OnPointerDownEvent;
         public event Action<ItemDragHandler, Vector2> OnDragEvent;
         public event Action<ItemDragHandler> OnEndDragEvent;
@@ -59,27 +60,29 @@ namespace UI
         private void OnEnable()
         {
             if (!_inventoryUIPresenter) return;
-            _inventoryUIPresenter.InitItemDragHandler(this);
-            SubscribeInputEvents();
+            if(_isSubscribed) return; //이미 구독된 상태면 스킵
+            SubscribeEvents();
         }
 
         private void OnDisable()
         {
             if (!_inventoryUIPresenter) return;
-            _inventoryUIPresenter.OnDisableItemDragHandler(this);
-            UnsubscribeInputEvents();
+            UnsubscribeEvents();
+            _isSubscribed = false;
         }
 
-        private void SubscribeInputEvents()
+        private void SubscribeEvents()
         {
+            _inventoryUIPresenter.InitItemDragHandler(this);
             _inputActions[ItemDragAction.Rotate].performed += OnRotateItemAction;
             _inputActions[ItemDragAction.QuickAddItem].performed += OnQuickAddItemAction;
             _inputActions[ItemDragAction.QuickDropItem].performed += OnQuickDropItemAction;
             _inputActions[ItemDragAction.SetQuickSlot].performed += OnSetQuickSlotAction;
         }
 
-        private void UnsubscribeInputEvents()
+        private void UnsubscribeEvents()
         {
+            _inventoryUIPresenter.OnDisableItemDragHandler(this);
             _inputActions[ItemDragAction.Rotate].performed -= OnRotateItemAction;
             _inputActions[ItemDragAction.QuickAddItem].performed -= OnQuickAddItemAction;
             _inputActions[ItemDragAction.QuickDropItem].performed -= OnQuickDropItemAction;
@@ -89,8 +92,6 @@ namespace UI
         public void Init(ItemInstance item, InventoryUIPresenter presenter, 
             Dictionary<ItemDragAction, InputAction> inputActions, Transform uiParent)
         {
-            _inventoryUIPresenter = presenter;
-            _inventoryUIPresenter.InitItemDragHandler(this); //Enable인데 시작하면 안됨/disable이면 enable될 때 한번 더 -> 두번 호출
             var cellSize = presenter.CellSize;
 
             _itemRT = GetComponent<RectTransform>();
@@ -111,8 +112,12 @@ namespace UI
             if (item is WeaponInstance) countText.enabled = true;
             keyImage.enabled = false;
             
+            //Set
+            _inventoryUIPresenter = presenter;
             _inputActions = inputActions;
-            SubscribeInputEvents();
+            //초기 이벤트 구독
+            SubscribeEvents();
+            _isSubscribed = true;
         }
         public void SetItemDragPos(Vector2 targetPos, Vector2 size, RectTransform itemParentRT, RectTransform inventoryRT)
         {

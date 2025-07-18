@@ -115,14 +115,14 @@ public class InventoryManager : MonoBehaviour
                 {
                     return SecondaryWeaponSlot;
                 }
-                return null;
+                break;
             case GearType.None:
-                //if()
+                //if()크기?
                 for (int i = 0; i < 4; i++)
                 {
                     if (PocketSlots[i].IsEmpty) return PocketSlots[i];
                 }
-                return null;
+                break;
         }
         return null;
     }
@@ -143,7 +143,7 @@ public class InventoryManager : MonoBehaviour
                 if (item.ItemInventory) //이미 인벤토리를 생성했다면
                 {
                     OnShowInventory?.Invoke(item);
-                    return;
+                    break;
                 }
                 var gearData = item.ItemData as GearData;
                 if(gearData) OnInitInventory?.Invoke(gearData.SlotPrefab, item); 
@@ -235,6 +235,7 @@ public class InventoryManager : MonoBehaviour
         else Debug.LogWarning("Add Field Item To Inventory Error : Inventory is null.");
         
         var (pos, itemRT) = inventory.AddItem(item, firstIdx, slotRT);
+        
         OnAddFieldItemToInventory?.Invoke(inventoryType, pos, itemRT, item);
     }
     
