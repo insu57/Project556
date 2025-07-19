@@ -15,7 +15,6 @@ namespace UI
     {
         private RectTransform _itemRT;
         private RectTransform _itemParentRT;
-        private CanvasGroup _canvasGroup;
         public RectTransform InventoryRT { get; private set; }
 
         private Transform _itemDraggingParent;
@@ -50,11 +49,6 @@ namespace UI
         public event Action<ItemDragHandler, QuickSlotIdx> OnSetQuickSlot;
         public event Action<ItemDragHandler> OnOpenItemContextMenu;
         public event Action<ItemDragHandler> OnShowItemInfo;
-        
-        private void Awake()
-        {
-            TryGetComponent(out _canvasGroup);
-        }
         
         //이벤트 구독
         private void OnEnable()

@@ -77,12 +77,20 @@ namespace UI
         private GameObject _lootSlotInstance;
     
         [SerializeField, Space] private Image slotAvailable;
-        [SerializeField] private RectTransform itemContextMenu;
+        
+        [SerializeField,Space] private RectTransform itemContextMenu;
         [SerializeField] private Button itemContextInfo;
         [SerializeField] private Button itemContextUse;
         [SerializeField] private Button itemContextEquip;
         [SerializeField] private Button itemContextDrop;
         public event Action<ItemContextType> OnItemContextMenuClick;
+        public event Action OnCloseItemContextMenu;
+
+        [SerializeField, Space] private RectTransform itemInfoMenu;
+        [SerializeField] private TMP_Text itemInfoNameTxt;
+        [SerializeField] private Button itemInfoCloseBtn;
+        [SerializeField] private Image itemInfoIcon;
+        
         
         private readonly List<RectTransform> _gearSlotRT = new();
         private readonly List<RectTransform> _inventoriesRT = new();
@@ -124,6 +132,9 @@ namespace UI
             itemContextUse.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Use));
             itemContextEquip.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Equip));
             itemContextDrop.onClick.AddListener(() => OnItemContextMenu(ItemContextType.Drop));
+            
+            //ItemInfoMenu
+            itemInfoCloseBtn.onClick.AddListener(CloseItemInfo);
         }
 
         private void OnDisable()
@@ -133,6 +144,9 @@ namespace UI
             itemContextUse.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Use));
             itemContextEquip.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Equip));
             itemContextDrop.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Drop));
+            
+            //ItemInfoMenu
+            itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);
         }
 
         public void OpenPlayerUI(bool isOpen) //PlayerUI
@@ -144,7 +158,7 @@ namespace UI
         private void OnItemContextMenu(ItemContextType contextType)
         {
             OnItemContextMenuClick?.Invoke(contextType);
-            CloseItemContextMenu();
+            OnCloseItemContextMenu?.Invoke();
         }
         
         public void ShowSlotAvailable(bool isAvailable, Vector2 position, Vector2 size)
@@ -306,15 +320,29 @@ namespace UI
             itemContextMenu.transform.position = pos;
         }
 
-        private void CloseItemContextMenu()
+        public void CloseItemContextMenu()
         {
-            if (!itemContextMenu.gameObject.activeSelf) return; 
             itemContextMenu.gameObject.SetActive(false);
         }
         
         public void OnPointerClick(PointerEventData eventData) //ClickEvent
         {
-            CloseItemContextMenu();//ContextMenu가 enable이면 클릭으로 닫기
+            if (!itemContextMenu.gameObject.activeSelf) return; 
+            OnCloseItemContextMenu?.Invoke();//ContextMenu가 enable이면 클릭으로 닫기
+        }
+
+        public void OpenItemInfo(ItemInstance item)
+        {
+            itemInfoMenu.localPosition = Vector3.zero;
+            itemInfoMenu.gameObject.SetActive(true);
+            //item info Set...
+            itemInfoNameTxt.text = item.ItemData.ItemName;
+            itemInfoIcon.sprite = item.ItemData.ItemSprite;
+        }
+
+        public void CloseItemInfo()
+        {
+            itemInfoMenu.gameObject.SetActive(false);
         }
     }
 }

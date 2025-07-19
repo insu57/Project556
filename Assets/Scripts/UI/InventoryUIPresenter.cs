@@ -31,7 +31,6 @@ public class InventoryUIPresenter : MonoBehaviour
     //ItemContextMenu
     private ItemInstance _currentCotextMenuItem;
     
-    
     //test
     [SerializeField, Space] private GameObject crate01Test;
     [SerializeField] private BaseItemDataSO pistolTestData;
@@ -105,6 +104,7 @@ public class InventoryUIPresenter : MonoBehaviour
         
         //ItemUIManager
         _itemUIManager.OnItemContextMenuClick += HandleOnItemContextMenuClick;
+        _itemUIManager.OnCloseItemContextMenu += HandleOnCloseItemContextMenu;
     }
     
     private void OnDisable()
@@ -122,6 +122,7 @@ public class InventoryUIPresenter : MonoBehaviour
         
         //ItemUIManager
         _itemUIManager.OnItemContextMenuClick -= HandleOnItemContextMenuClick;
+        _itemUIManager.OnCloseItemContextMenu -= HandleOnCloseItemContextMenu;
     }
 
     public void InitItemDragHandler(ItemDragHandler itemDrag) //아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
@@ -498,6 +499,12 @@ public class InventoryUIPresenter : MonoBehaviour
             item = _inventoryManager.ItemDict[instanceID].item;
         }
 
+        if (item == _currentCotextMenuItem)
+        {
+            HandleOnCloseItemContextMenu();
+            return;
+        }
+        
         _currentCotextMenuItem = item;
         
         bool isGear = item.GearType != GearType.None;
@@ -515,18 +522,24 @@ public class InventoryUIPresenter : MonoBehaviour
         _itemUIManager.OpenItemContextMenu(itemDrag.transform.position, isAvailable, isGear);//List 설정
         
     }
+
+    private void HandleOnCloseItemContextMenu()
+    {
+        _currentCotextMenuItem = null;
+        _itemUIManager.CloseItemContextMenu();
+    }
     
     private void HandleOnItemContextMenuClick(ItemContextType contextType)
     {
-        Debug.Log("Item Context Click: " + contextType);
         var instanceID = _currentCotextMenuItem.InstanceID;
         var itemDrag = _itemDragHandlers[instanceID];
         switch (contextType)
         {
             case ItemContextType.Info:
-                HandleOnShowItemInfo(itemDrag);
+                _itemUIManager.OpenItemInfo(_currentCotextMenuItem);
                 break;
             case ItemContextType.Use:
+                //use
                 break;
             case ItemContextType.Equip:
                 var cell = _inventoryManager.CheckCanEquipItem(_currentCotextMenuItem.GearType);
@@ -540,7 +553,13 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnShowItemInfo(ItemDragHandler itemDrag)
     {
-        Debug.Log("Show Item Info");
+        var id = itemDrag.InstanceID;
+        
+        ItemInstance item;
+        if(itemDrag.InventoryRT) item = _invenMap[itemDrag.InventoryRT].ItemDict[id].item;
+        else item = _inventoryManager.ItemDict[id].item;
+        
+        _itemUIManager.OpenItemInfo(item);
     }
     
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
