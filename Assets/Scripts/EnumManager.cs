@@ -57,6 +57,13 @@ public enum AmmoCategory
     Buckshot,
 }
 
+public enum WeaponSelector
+{
+    Single,
+    Auto,
+    Burst
+}
+
 public enum GearType
 {
     None,
@@ -84,6 +91,18 @@ public enum QuickSlotIdx
     QuickSlot7 = 7
 }
 
+public enum SFX
+{
+    FootstepDirt, FootstepRock, //
+    PistolShoot, ARShoot, //
+    //UI...
+}
+
+public enum BGM
+{
+    //    
+}
+
 public class EnumManager : MonoBehaviour
 {
     public static AmmoCategory GetAmmoCategory(AmmoCaliber caliber)
@@ -94,6 +113,7 @@ public class EnumManager : MonoBehaviour
             case AmmoCaliber._762x51mm:
             case AmmoCaliber._545x39mm:
             case AmmoCaliber._762x39mm:
+            case AmmoCaliber._762x54mmR:    
                 return AmmoCategory.Rifle;
             case AmmoCaliber._9x19mm:
             case AmmoCaliber._45Acp:
@@ -105,5 +125,25 @@ public class EnumManager : MonoBehaviour
             default:
                 return AmmoCategory.Rifle;
         }
+    }
+
+    public static string AmmoCaliberToString(AmmoCaliber caliber)
+    {
+        switch (caliber)
+        {
+            case AmmoCaliber._556x45mm: return "5.56x45mm";
+            case AmmoCaliber._762x51mm: return "7.62x51mm";
+            case AmmoCaliber._545x39mm: return "5.45x39mm";
+            case AmmoCaliber._762x39mm: return "7.62x39mm";
+            case AmmoCaliber._762x54mmR: return "7.62x54mmR";
+            case AmmoCaliber._50BMG: return ".50BMG";
+            case AmmoCaliber._9x19mm: return "9x19mm";
+            case AmmoCaliber._45Acp: return ".45Acp";
+            case AmmoCaliber._46x30mm: return "4.6x30mm";
+            case AmmoCaliber._57x28mm: return "5.7x28mm";
+            case AmmoCaliber._12Gauge: return "12Gauge";
+        }
+
+        return "None";
     }
 }

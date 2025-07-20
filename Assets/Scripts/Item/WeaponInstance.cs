@@ -8,11 +8,14 @@ public class WeaponInstance : ItemInstance
     public int CurrentMagazineCount { get; private set; }
     private int MaxMagazineCount { get; }
     public bool HasChamber {get; private set;}
+    public WeaponSelector WeaponSelector  {get; private set;}
     public WeaponInstance( WeaponData weaponData) : base(weaponData)
     {
         WeaponData = weaponData;
         
         MaxMagazineCount = weaponData.DefaultMagazineSize;
+
+        WeaponSelector = WeaponSelector.Single;
     }
 
     public void SetMagazineCount(int magazineCount)
@@ -40,5 +43,10 @@ public class WeaponInstance : ItemInstance
         }
 
         return CurrentMagazineCount > WeaponData.DefaultMagazineSize; //총알이 없으면 약실에 없음
+    }
+
+    public void ChangeSelector(WeaponSelector selector)
+    {
+        WeaponSelector = selector; //수정?
     }
 }

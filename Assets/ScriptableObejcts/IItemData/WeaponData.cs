@@ -47,7 +47,7 @@ public class WeaponData : BaseItemDataSO
     //방어관통 : 탄환만
     //사거리 (고려x)
     //기타: 소음, 무게
-    [ShowInInspector] private float RPM => 1 / FireRate * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
+    [ShowInInspector] public float RPM => 1 / FireRate * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
 
     public override Sprite ItemSprite => itemSprite;
     public override int ItemWidth => itemWidth;

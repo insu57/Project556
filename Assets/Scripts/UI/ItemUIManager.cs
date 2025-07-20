@@ -90,6 +90,7 @@ namespace UI
         [SerializeField] private TMP_Text itemInfoNameTxt;
         [SerializeField] private Button itemInfoCloseBtn;
         [SerializeField] private Image itemInfoIcon;
+        [SerializeField] private TMP_Text itemInfoDescriptionTxt;
         
         
         private readonly List<RectTransform> _gearSlotRT = new();
@@ -331,13 +332,67 @@ namespace UI
             OnCloseItemContextMenu?.Invoke();//ContextMenu가 enable이면 클릭으로 닫기
         }
 
-        public void OpenItemInfo(ItemInstance item)
+        public void OpenItemInfo(ItemInstance item) //다른 방법?
         {
             itemInfoMenu.localPosition = Vector3.zero;
             itemInfoMenu.gameObject.SetActive(true);
-            //item info Set...
+          
+            //ItemInfo Set...
             itemInfoNameTxt.text = item.ItemData.ItemName;
             itemInfoIcon.sprite = item.ItemData.ItemSprite;
+            //item type...
+            var infoTxt = "";
+            var gearType = item.ItemData.GearType;
+            switch (gearType)
+            {
+                case GearType.ArmoredRig or GearType.BodyArmor or GearType.HeadWear or GearType.EyeWear:
+                {
+                    var gearData = item.ItemData as GearData;
+                    infoTxt += $"방어도: {gearData?.ArmorAmount}";
+                    break;
+                }
+                case GearType.Weapon:
+                {
+                    var weaponData = item.ItemData as WeaponData;
+                    if(item is not WeaponInstance weapon || !weaponData) return; //null이면 return
+                
+                    infoTxt += $"탄종: {EnumManager.AmmoCaliberToString(weaponData.AmmoCaliber)}\n"; //개선(enum)
+                    infoTxt += $"장탄: {weapon.CurrentMagazineCount} ";
+                    infoTxt += $"탄창 크기: {weaponData.DefaultMagazineSize}\n";
+                    infoTxt += $"RPM: {weaponData.RPM}";
+                    break;
+                }
+                case GearType.None:
+                {
+                    if (item.IsStackable)
+                    {
+                        infoTxt += $"수량: {item.CurrentStackAmount} ";
+                        infoTxt += $"최대 수량: {item.MaxStackAmount}\n";
+                    }
+
+                    switch (item.ItemData)
+                    {
+                        case AmmoData ammoData:
+                            infoTxt += $"탄종: {EnumManager.AmmoCaliberToString(ammoData.AmmoCaliber)}\n";
+                            //세부 스탯...
+                            break;
+                        case MedicalData medicalData:
+                            infoTxt += $"체력 회복량: {medicalData.HealAmount}\n";
+                            //상태 이상 회복 등
+                            break;
+                        case FoodData foodData:
+                            if(foodData.EnergyAmount != 0) infoTxt += $"에너지 회복량: {foodData.EnergyAmount}\n";
+                            if (foodData.HydrationAmount != 0) infoTxt += $"수분 회복량: {foodData.HydrationAmount}\n";
+                            //추가?
+                            break;
+                    }
+                    break;
+            }
+            }
+            
+            
+            
+            itemInfoDescriptionTxt.text = infoTxt;
         }
 
         public void CloseItemInfo()
