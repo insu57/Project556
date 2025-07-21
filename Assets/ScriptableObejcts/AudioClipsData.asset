@@ -12,5 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7257a6d69f685d248be18cabe47267d8, type: 3}
   m_Name: AudioClipsData
   m_EditorClassIdentifier: 
-  bgmClipMap: []
-  sfxClipMap: []
+  bgmClipMap:
+  - clip: {fileID: 0}
+    bgm: 0
+  footstepSFXClipMap:
+  - clip: {fileID: 8300000, guid: 9ed63341390d4dd4d8013f99a40c62e7, type: 3}
+    sfx: 0
+  weaponSFXClipMap:
+  - clip: {fileID: 8300000, guid: 585000aa0304aff4bb97acce9f0aa91e, type: 3}
+    sfx: 2
+  uiSFXClipMap: []

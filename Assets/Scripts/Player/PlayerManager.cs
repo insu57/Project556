@@ -34,6 +34,10 @@ namespace Player
     
         private WeaponInstance _currentWeaponItem;
         private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
+
+        [SerializeField] private AudioSource loopSource;
+        [SerializeField] private AudioSource oneShotSource;
+        
         public event Action<float, float> OnPlayerHealthChanged;
         public event Action<bool, int> OnUpdateMagazineCountUI;
     
@@ -56,7 +60,6 @@ namespace Player
         //UI Manager 개선?
         private void Awake()
         {
-            //_itemUIManager = FindFirstObjectByType<ItemUIManager>();
             TryGetComponent(out _playerAnimation);
             TryGetComponent(out _playerWeapon);
             _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
@@ -115,6 +118,7 @@ namespace Player
         {
             //총알 데이터..?
             if(GetCurrentWeaponMagazineCount() <= 0) return;
+            AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, SFX.PistolShoot); //수정????
             bool isShoot = _playerWeapon.Shoot(isFlipped, shootAngle);
         
             if (!isShoot) return;

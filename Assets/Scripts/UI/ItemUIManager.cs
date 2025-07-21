@@ -154,6 +154,7 @@ namespace UI
         {
             playerUI.SetActive(isOpen);
             CloseItemContextMenu();//ContextMenu닫기
+            CloseItemInfo();
         }
 
         private void OnItemContextMenu(ItemContextType contextType)
@@ -395,7 +396,7 @@ namespace UI
             itemInfoDescriptionTxt.text = infoTxt;
         }
 
-        public void CloseItemInfo()
+        private void CloseItemInfo()
         {
             itemInfoMenu.gameObject.SetActive(false);
         }

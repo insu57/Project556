@@ -35,8 +35,12 @@ public class AudioClipsData : ScriptableObject
     }
     
     [Header("SFX")]
-    [SerializeField] private SFXClipMap[] sfxClipMap;
-    public Dictionary<SFX, AudioClip> SFXClips => SFXClipMapping(sfxClipMap);
+    [SerializeField] private SFXClipMap[] footstepSFXClipMap;
+    public Dictionary<SFX, AudioClip> FootstepSFXMap => SFXClipMapping(footstepSFXClipMap);
+    [SerializeField] private SFXClipMap[] weaponSFXClipMap;
+    public Dictionary<SFX, AudioClip> WeaponSFXMap => SFXClipMapping(weaponSFXClipMap);
+    [SerializeField] private SFXClipMap[] uiSFXClipMap;
+    public Dictionary<SFX,AudioClip> UISfxClipMap => SFXClipMapping(uiSFXClipMap);
 
     private static Dictionary<SFX, AudioClip> SFXClipMapping(SFXClipMap[] clipMap)
     {

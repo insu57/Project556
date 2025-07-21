@@ -4007,6 +4007,8 @@ MonoBehaviour:
   twoHandSprite: {fileID: 7509388812552137820}
   twoHandMuzzleTransform: {fileID: 400114863970099428}
   muzzleFlashVFX: {fileID: 3203284925882852156}
+  loopSource: {fileID: 0}
+  oneShotSource: {fileID: 0}
 --- !u!114 &7335346116044284726
 MonoBehaviour:
   m_ObjectHideFlags: 0

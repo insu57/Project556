@@ -91,16 +91,27 @@ public enum QuickSlotIdx
     QuickSlot7 = 7
 }
 
+public enum AudioType
+{
+    Master, BGM, SFX, //Voice?...
+}
+
+public enum SFXType
+{
+    Footstep, Weapon, UI, //...
+}
+
 public enum SFX
 {
-    FootstepDirt, FootstepRock, //
-    PistolShoot, ARShoot, //
+    FootstepDirt, FootstepRock, //Footstep
+    PistolShoot, ARShoot, //Weapon
     //UI...
 }
 
 public enum BGM
 {
-    //    
+    //BGM
+    ForestEnvironment,
 }
 
 public class EnumManager : MonoBehaviour

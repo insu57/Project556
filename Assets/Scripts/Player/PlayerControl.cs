@@ -52,7 +52,7 @@ namespace Player
    
       public event Action<bool> OnPlayerMove;
       public event Action OnPlayerReload;
-   
+      
       private void Awake()
       {
          TryGetComponent(out _playerManager);
@@ -263,14 +263,15 @@ namespace Player
    
       private void OnOpenUI(InputAction.CallbackContext context) //플레이어 정보(인벤토리 창), Default Tab키
       {
-         //_openUIAction.Reset();
          BlockControl(true); //컨트롤 입력 제한
-         _uiControl.OnOpenUI();
+         _uiControl.OnOpenPlayerUI();
       }
 
       private void OnOpenSetting(InputAction.CallbackContext context)
       {
          Debug.Log("OnOpenSetting- ESC"); //설정창
+         BlockControl(true);
+         _uiControl.OnOpenSettingsUI();
       }
 
       private void OnScrollWheel(InputAction.CallbackContext context)

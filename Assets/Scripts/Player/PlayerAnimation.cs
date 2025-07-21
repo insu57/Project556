@@ -30,19 +30,23 @@ public class PlayerAnimation : MonoBehaviour
 
     private PlayerControl _playerControl;//플레이어 조작관련
     
-    private WeaponType _currentWeaponType = WeaponType.Pistol; //현재 들고있는 무기 종류 - Manager에서 관리하니 제거?
+    private WeaponType _currentWeaponType; //현재 들고있는 무기 종류 - Manager에서 관리하니 제거?
     //하반신 애니메이터 별도로..
     
     private void Awake()
     {
-        _playerControl = GetComponent<PlayerControl>();
+        TryGetComponent(out _playerControl);
+        var behaviours = upperAnimator.GetBehaviours<PlayerSMB>();
+        foreach (var behaviour in behaviours)
+        {
+            behaviour.SetPlayerControl(_playerControl);
+        }
     }
 
     private void Start()
     {
         _playerControl.OnPlayerMove += HandlePlayerMove; //이동 이벤트
         _playerControl.OnPlayerReload += HandlePlayerReload; //장전 이벤트
-        //ChangeWeapon(WeaponType.Pistol); //무기교체 - 애니메이션 전환
     }
     
     private void HandlePlayerMove(bool isMove)
