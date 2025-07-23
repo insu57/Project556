@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace UI
         private List<(bool isAvailable, ItemInteractType type)> _pickupAvailableList;
         private int _pickupTextListCount;
         private int _pickupCurrentIdx;
+        [SerializeField] private GameObject noAmmoWarning;
 
         private void Awake()
         {
@@ -97,6 +99,18 @@ namespace UI
             var isAvailable = _pickupAvailableList[idx];
             pickupHighlight.color = isAvailable.isAvailable ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
             itemInteractUI.anchoredPosition =  uiPos;
+        }
+
+        public void ShowNoAmmoWarning()
+        {
+            StartCoroutine(NoAmmoWarningCoroutine());
+        }
+
+        private IEnumerator NoAmmoWarningCoroutine()
+        {
+            noAmmoWarning.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            noAmmoWarning.SetActive(false);
         }
     }
 }

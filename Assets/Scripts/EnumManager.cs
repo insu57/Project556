@@ -104,7 +104,7 @@ public enum SFXType
 public enum SFX
 {
     FootstepDirt, FootstepRock, //Footstep
-    PistolShoot, ARShoot, //Weapon
+    PistolShoot, ARShoot, PistolReload, ARReload //Weapon
     //UI...
 }
 

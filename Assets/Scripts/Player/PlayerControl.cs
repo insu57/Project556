@@ -200,16 +200,16 @@ namespace Player
             angle = Mathf.Clamp(angle, -40f, 40f); //85f center -125~-45
             _shootAngle = angle;
          
-            float t = Mathf.InverseLerp(-40f, 40f, -angle);
-            float targetAngle = Mathf.Lerp(-90, 70, t); //RightArm 회전보간
+            float t = Mathf.InverseLerp(-40f, 40f, -angle); //현재 조준각도의 보간치 
+            float targetAngle = Mathf.Lerp(-90, 70, t); //조준각도의 보간치에 맞추어 RightArm 회전보간
 
-            float positionThreshold = 37f;
-            //해당 각도보다 크면 팔 위치 변경         
-            if (targetAngle > positionThreshold)
+            float angleThreshold = 37f;  //해당 각도보다 크면(임계치) rightArm Position 또한 변경         
+            if (targetAngle > angleThreshold)
             {
-               float pt = Mathf.InverseLerp(positionThreshold, 70, targetAngle ); //보간
+               float pt = Mathf.InverseLerp(angleThreshold, 70, targetAngle ); //임계치-최댓값에 현재 각도 보간치
                rightArm.transform.localPosition = Vector3.Lerp(_baseRArmPosition, new Vector3(-0.272f, -0.072f, 0f), pt);
-               //기본 -0.161(x), 0.037 -> -0.2~-0.25 -> -0.272 -0.072
+               //보간치에 따라 position 벡터 계산
+               //기본 (-0.161, 0.037) -> (-0.2, -0.25) -> (-0.272 -0.072) 개선?
                //무기마다 세부설정 -> Animation Curve? struct로 저장해서 불러오기
             }
             else

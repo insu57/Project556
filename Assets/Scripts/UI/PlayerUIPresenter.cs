@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Player;
 using UnityEngine;
@@ -14,11 +15,17 @@ namespace UI
             TryGetComponent(out _playerManager);
             _playerUIManager = FindFirstObjectByType<PlayerUIManager>();
         
+            
+        }
+
+        private void OnEnable()
+        {
             _playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
             _playerManager.OnUpdateMagazineCountUI += HandleOnUpdateMagazineCountUI;
             _playerManager.OnShowItemPickup += HandleOnShowItemPickup;
             _playerManager.OnScrollItemPickup += HandleOnScrollItemPickup;
             _playerManager.OnHideItemPickup += HandleOnHideItemPickup;
+            _playerManager.OnReloadNoAmmo += HandleOnReloadNoAmmo;
         }
 
         private void OnDisable()
@@ -28,6 +35,7 @@ namespace UI
             _playerManager.OnShowItemPickup -= HandleOnShowItemPickup;
             _playerManager.OnScrollItemPickup -= HandleOnScrollItemPickup;
             _playerManager.OnHideItemPickup -= HandleOnHideItemPickup;
+            _playerManager.OnReloadNoAmmo -= HandleOnReloadNoAmmo;
         }
 
         private void HandleOnUpdateHealthBar(float health, float maxHealth)
@@ -53,6 +61,11 @@ namespace UI
         private void HandleOnHideItemPickup()
         {
             _playerUIManager.HideItemPickup();
+        }
+
+        private void HandleOnReloadNoAmmo()
+        {
+            _playerUIManager.ShowNoAmmoWarning();
         }
     }
 }

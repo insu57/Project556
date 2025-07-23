@@ -22,7 +22,11 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private float bulletSpeed; //Bullet에 따로?
     
     [SerializeField] private Sprite itemSprite;
-  
+    [SerializeField] private SFX shootSFX;
+    [SerializeField] private SFX reloadSFX;
+    [Tooltip("Seconds")]
+    [SerializeField] private float reloadTime;
+    
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
     [SerializeField] private float itemWeight;
@@ -34,7 +38,10 @@ public class WeaponData : BaseItemDataSO
     public WeaponType WeaponType => weaponType;
     public AmmoCaliber AmmoCaliber => ammoCaliber;
     public int DefaultMagazineSize => defaultMagazineSize;
-
+    public SFX ShootSFX => shootSFX;
+    public SFX ReloadSFX => reloadSFX;
+    public float ReloadTime => reloadTime;
+    
     public bool CanFullAuto => canFullAuto;
     public bool IsOneHanded => isOneHanded;
     public bool IsOpenBolt => isOpenBolt;

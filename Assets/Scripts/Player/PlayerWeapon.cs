@@ -10,8 +10,6 @@ public class PlayerWeapon : MonoBehaviour
     private WeaponData _weaponData;
     private Transform _muzzleTransform;
     
-    private int _currentMagazineAmmo;
-    
     private bool _canShoot = true;
     
     private AmmoCategory _ammoCategory;
@@ -25,7 +23,6 @@ public class PlayerWeapon : MonoBehaviour
     public void ChangeWeaponData(WeaponData weaponData)
     {
         _weaponData = weaponData;
-        _currentMagazineAmmo = weaponData.DefaultMagazineSize;
 
         _ammoCategory = EnumManager.GetAmmoCategory(weaponData.AmmoCaliber);
         _normalizedAccuracy = Mathf.Clamp01(weaponData.Accuracy / MaxAccuracy); //정확도 정규화

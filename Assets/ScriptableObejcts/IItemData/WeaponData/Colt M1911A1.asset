@@ -17,14 +17,17 @@ MonoBehaviour:
   weaponType: 0
   ammoCaliber: 3
   defaultMagazineSize: 7
-  damage: 20
   canFullAuto: 0
   isOneHanded: 1
+  isOpenBolt: 0
   fireRate: 0.2
   accuracy: 70
   bulletSpeed: 10
   itemSprite: {fileID: 3612897601756222204, guid: 007f4cb0b2211ac4088450706eb81205, type: 3}
-  pickUpColliderSize: {x: 0.5, y: 0.4}
+  shootSFX: 2
+  reloadSFX: 4
+  reloadTime: 0.7
   itemWidth: 2
   itemHeight: 1
+  itemWeight: 0
   weaponSetup: {fileID: 3063553813133086745, guid: b7c7655962c7aa14ea26b98b21f3d789, type: 3}

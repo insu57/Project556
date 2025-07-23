@@ -5658,9 +5658,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 1439863517}
   audioMixer: {fileID: 24100000, guid: ab1afad9da12e8c489d5b52b8db02d17, type: 2}
-  masterGroup: {fileID: 0}
-  bgmGroup: {fileID: 0}
-  sfxGroup: {fileID: 0}
+  masterGroup: {fileID: 24300002, guid: ab1afad9da12e8c489d5b52b8db02d17, type: 2}
+  bgmGroup: {fileID: 6136519341854955360, guid: ab1afad9da12e8c489d5b52b8db02d17, type: 2}
+  sfxGroup: {fileID: -365536220712345562, guid: ab1afad9da12e8c489d5b52b8db02d17, type: 2}
   minVolumedB: -80
   maxVolumedB: 0
   audioClipsData: {fileID: 11400000, guid: 8dede4af149f3c8429c65af24c81920f, type: 2}

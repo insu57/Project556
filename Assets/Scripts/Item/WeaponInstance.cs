@@ -28,11 +28,9 @@ public class WeaponInstance : ItemInstance
         CurrentMagazineCount--;
     }
 
-    public void ReloadAmmo() //주머니 탄 소모...
+    public void ReloadAmmo(int reloadAmmo) //주머니 탄 소모...
     {
-        if (WeaponData.IsOpenBolt)
-            CurrentMagazineCount = MaxMagazineCount;
-        else CurrentMagazineCount = MaxMagazineCount + 1;
+        CurrentMagazineCount = reloadAmmo;
     }
 
     public bool IsFullyLoaded() //클로즈드 볼트일 때 탄약최대+약실 
@@ -41,8 +39,8 @@ public class WeaponInstance : ItemInstance
         {
             return false;
         }
-
-        return CurrentMagazineCount > WeaponData.DefaultMagazineSize; //총알이 없으면 약실에 없음
+    
+        return CurrentMagazineCount > MaxMagazineCount; //총알이 없으면 약실에 없음
     }
 
     public void ChangeSelector(WeaponSelector selector)

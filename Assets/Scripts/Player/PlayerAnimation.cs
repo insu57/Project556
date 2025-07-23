@@ -8,7 +8,7 @@ public class PlayerAnimation : MonoBehaviour
 {
     private static readonly int Idle = Animator.StringToHash("IDLE");
     private static readonly int IsMove = Animator.StringToHash("isMove");
-    private static readonly int Reload = Animator.StringToHash("Reload");
+    private static readonly int IsReload = Animator.StringToHash("isReload");
     public const string Walk = "Walk";
     public const string Run = "Run";
     public const string Climb = "Climb";
@@ -36,11 +36,10 @@ public class PlayerAnimation : MonoBehaviour
     private void Awake()
     {
         TryGetComponent(out _playerControl);
-        var behaviours = upperAnimator.GetBehaviours<PlayerSMB>();
-        foreach (var behaviour in behaviours)
-        {
-            behaviour.SetPlayerControl(_playerControl);
-        }
+        TryGetComponent(out PlayerManager playerManager);
+        var reloadAnimationBehaviour = upperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
+        reloadAnimationBehaviour.Init(_playerControl, playerManager);
+        
     }
 
     private void Start()
@@ -57,7 +56,7 @@ public class PlayerAnimation : MonoBehaviour
 
     private void HandlePlayerReload()
     {
-        upperAnimator.SetTrigger(Reload);
+        upperAnimator.SetBool(IsReload, true);
     }
 
     public void ChangeWeapon(WeaponType newWeaponType) //애니메이션 전환

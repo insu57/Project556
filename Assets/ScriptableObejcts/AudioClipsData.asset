@@ -21,4 +21,10 @@ MonoBehaviour:
   weaponSFXClipMap:
   - clip: {fileID: 8300000, guid: 585000aa0304aff4bb97acce9f0aa91e, type: 3}
     sfx: 2
+  - clip: {fileID: 8300000, guid: 85be69e4159ec5a4796521c81c25cb40, type: 3}
+    sfx: 3
+  - clip: {fileID: 8300000, guid: 3ea470915b435a647b5134b6451e8f97, type: 3}
+    sfx: 4
+  - clip: {fileID: 8300000, guid: 7ad1dc5912ee0024cbf5ab4105ad4f07, type: 3}
+    sfx: 5
   uiSFXClipMap: []

@@ -113,15 +113,28 @@ namespace Player
                 return weaponData.IsOneHanded;
             return false;
         }
+        
+        private void PlayShootSFX()
+        {
+            AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon ,_currentWeaponItem.WeaponData.ShootSFX);
+        }
+
+        public float PlayReloadSFX()
+        {
+            AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponItem.WeaponData.ReloadSFX);
+            return _currentWeaponItem.WeaponData.ReloadTime;
+        }
     
         public void Shoot(bool isFlipped, float shootAngle) //사격
         {
             //총알 데이터..?
             if(GetCurrentWeaponMagazineCount() <= 0) return;
-            AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, SFX.PistolShoot); //수정????
+           
             bool isShoot = _playerWeapon.Shoot(isFlipped, shootAngle);
         
             if (!isShoot) return;
+            PlayShootSFX();
+            //_playerAudio.PlayOneShotSFX(SFXType.Weapon, _currentWeaponItem.WeaponData.ShootSFX);
             _currentWeaponItem.UseAmmo();
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
             _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
@@ -136,7 +149,7 @@ namespace Player
             return -1;
         }
     
-        public void Reload() //여기서?
+        public void Reload() //개선?
         {
             //Inven -> weapon
             if (_currentWeaponItem != null)
@@ -161,12 +174,14 @@ namespace Player
 
                 if (canReload)
                 {
-                    _currentWeaponItem.ReloadAmmo();
-                    OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), currentAmmo + reloadAmmo);
+                    _currentWeaponItem.ReloadAmmo(currentAmmo + reloadAmmo);
+                    OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), _currentWeaponItem.CurrentMagazineCount);
                     _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
                 }
-            
-                //장전할 탄이 하나도 없으면 경고문구 띄우기
+                else
+                {
+                    OnReloadNoAmmo?.Invoke(); //장전할 탄이 하나도 없으면 경고문구 띄우기 -> 개선??
+                }
                 //장전 제어?
             }
         }
