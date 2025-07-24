@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -18,25 +19,6 @@ public class AudioManager : Singleton<AudioManager>
     private const string MasterStr = "Master";
     private const string BGMStr = "BGM";
     private const string SFXStr = "SFX";
-    
-    public float BGMVolume
-    {
-        get
-        {
-            audioMixer.GetFloat("BGM", out var volume);
-            return volume;
-        }
-    }
-
-    public float SFXVolume
-    {
-        get
-        {
-            audioMixer.GetFloat("SFX", out var volume);
-            return volume;
-        }
-    }
-    
     //audio
     [SerializeField] private AudioClipsData audioClipsData;
     
@@ -75,7 +57,7 @@ public class AudioManager : Singleton<AudioManager>
         bgmSource.Play();
     }
 
-    public void PlaySFX(AudioSource source, SFXType sfxType, SFX sfx) //pooling?
+    public void PlaySFX(AudioSource source  ,SFXType sfxType, SFX sfx) //pooling?
     {
         AudioClip clip = null;
 
@@ -92,7 +74,15 @@ public class AudioManager : Singleton<AudioManager>
             return;
         }
 
+        //var source = ObjectPoolingManager.Instance.GetAudioSource();
         source.outputAudioMixerGroup = sfxGroup;
         source.PlayOneShot(clip);
+        //StartCoroutine(ReleaseAudioSource(source, clip.length));
+    }
+
+    private IEnumerator ReleaseAudioSource(AudioSource src, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ObjectPoolingManager.Instance.ReleaseAudioSource(src);
     }
 }

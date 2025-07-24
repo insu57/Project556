@@ -20,7 +20,6 @@ public class ReloadAnimationBehaviour : StateMachineBehaviour
         var reloadTime = _playerManager.PlayReloadSFX();
         var animationLength = stateInfo.length;
         var currentAnimationSpeed = animationLength / reloadTime;
-        Debug.Log($"Animation length: {animationLength}, reload Time: {reloadTime}, Animation speed: {currentAnimationSpeed}");
         animator.speed = currentAnimationSpeed;
     }
     

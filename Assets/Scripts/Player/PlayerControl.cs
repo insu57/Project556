@@ -32,7 +32,7 @@ namespace Player
       private InputAction _changeWeaponAction;
       private InputAction _quickSlotAction;
       
-      private PlayerManager _playerManager;
+      //private PlayerManager _playerManager;
       private Camera _mainCamera;
       private Rigidbody2D _rigidbody;
       private Collider2D[] _colliders;
@@ -41,6 +41,9 @@ namespace Player
       private LayerMask _climbMask;
    
       private Vector2 _playerMoveVector;
+      public bool IsUnarmed { set; get; }
+      public bool IsOneHanded { set; get; }
+      public bool IsAutomatic { set; get; }
       private bool _inShooting = false;
       private bool _canShoot = true;
       private bool _isFlipped = false;
@@ -52,10 +55,16 @@ namespace Player
    
       public event Action<bool> OnPlayerMove;
       public event Action OnPlayerReload;
+      public event Action OnFieldInteract;
+      public event Action<float> OnScrollInteractMenu;
+      public event Action<EquipWeaponIdx> OnChangeWeaponAction;
+      public event Action<QuickSlotIdx> OnQuickSlotAction;
+      public event Action<bool, float> OnShootAction; //isFlipped, shootAngle
+      public event Action OnReloadEndAction;
       
       private void Awake()
       {
-         TryGetComponent(out _playerManager);
+         //TryGetComponent(out _playerManager);
          TryGetComponent(out _rigidbody);
       
          _playerInput = GetComponent<PlayerInput>(); //PlayerInput - Player Action Map
@@ -152,17 +161,17 @@ namespace Player
 
       private void RotateArm()
       {
-         if(_playerManager.IsUnarmed) return;//비무장 제한...
+         if(IsUnarmed) return;//비무장 제한...
          //장전 등 몇몇 행동에서는 안움직여야한다.
          if (!_canRotateArm) return;
 
-         bool isOneHanded = _playerManager.CheckIsOneHanded(); //한손무기-양손무기 인지 체크
+         //bool isOneHanded = _playerManager.CheckIsOneHanded(); //한손무기-양손무기 인지 체크
 
          Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
          mousePos.z = 0;
 
          Vector2 direction; //방향 계산
-         if (isOneHanded)
+         if (IsOneHanded)
          {
             direction = mousePos - rightArm.transform.position;
             Debug.DrawRay(rightArm.transform.position, direction, Color.red); //조준선
@@ -188,7 +197,7 @@ namespace Player
             }
          }
 
-         if (isOneHanded)
+         if (IsOneHanded)
          {
             angle = Mathf.Clamp(angle, -60f, 60f); //각도제한
       
@@ -255,10 +264,7 @@ namespace Player
 
       private void OnInteract(InputAction.CallbackContext context)
       {
-         if (_playerManager.CanItemInteract) //아이템 상호작용 가능 상태
-         {
-            _playerManager.GetFieldItem(); //아이템 줍기
-         }
+         OnFieldInteract?.Invoke();
       }
    
       private void OnOpenUI(InputAction.CallbackContext context) //플레이어 정보(인벤토리 창), Default Tab키
@@ -276,29 +282,21 @@ namespace Player
 
       private void OnScrollWheel(InputAction.CallbackContext context)
       {
-         Vector2 delta = context.ReadValue<Vector2>(); //마우스 휠 스크롤
-
-         if (_playerManager.CanItemInteract) //상호작용 가능할 때
-         {
-            _playerManager.ScrollItemPickup(delta.y);
-         }
+         var delta = context.ReadValue<Vector2>(); //마우스 휠 스크롤
+         
+         OnScrollInteractMenu?.Invoke(delta.y);
       }
 
       private void OnChangeWeapon(InputAction.CallbackContext context)
       {
          if(context.control is not KeyControl key) return;
-
+         
          switch (key.keyCode)
          {
-            case Key.Digit1:
-               _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Primary);
-               break;
-            case Key.Digit2:
-               _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Secondary);
-               break;
-            case Key.Digit3:
-               _playerManager.HandleOnChangeWeapon(EquipWeaponIdx.Unarmed);
-               break;
+            case Key.Digit1:OnChangeWeaponAction?.Invoke(EquipWeaponIdx.Primary); return;
+            case Key.Digit2:OnChangeWeaponAction?.Invoke(EquipWeaponIdx.Secondary); return;
+            case Key.Digit3: OnChangeWeaponAction?.Invoke(EquipWeaponIdx.Unarmed); return;
+            default: return;
          }
       }
 
@@ -306,7 +304,7 @@ namespace Player
       {
          if(context.control is not KeyControl key) return;
          var idx = key.keyCode - Key.Digit1 + 1; //개선?
-         _playerManager.HandleOnUseQuickSlot((QuickSlotIdx)idx);
+         OnQuickSlotAction?.Invoke((QuickSlotIdx)idx);
       }
    
       private void OnMove(InputAction.CallbackContext context) //플레이어 이동 입력
@@ -331,14 +329,14 @@ namespace Player
 
       private void OnShoot(InputAction.CallbackContext ctx)
       {
-         if(_playerManager.IsUnarmed) return;
+         if(IsUnarmed) return;
          
          if(!_canShoot) return;
-         if (!_playerManager.CheckIsAutomatic())
+         if (!IsAutomatic)
          {
             if (ctx.started)
             {
-               _playerManager.Shoot(_isFlipped, _shootAngle);
+               OnShootAction?.Invoke(_isFlipped, _shootAngle);
             }
          }
          else
@@ -356,11 +354,11 @@ namespace Player
 
       private void Shoot() //사격(연사) 메서드
       {
-         if(_playerManager.IsUnarmed) return;
-         if(!_playerManager.CheckIsAutomatic()) return;  //단발인 경우 return
+         if(IsUnarmed) return;
+         if(!IsAutomatic) return;  //단발인 경우 return
          if(!_canShoot) return; //사격 불가 시 return
          if(!_inShooting) return; //사격 중 인지 check
-         _playerManager.Shoot(_isFlipped, _shootAngle);
+         OnShootAction?.Invoke(_isFlipped, _shootAngle);
       }
    
       private void OnJump(InputAction.CallbackContext ctx) //점프입력 Space키
@@ -373,7 +371,7 @@ namespace Player
 
       private void OnReload(InputAction.CallbackContext ctx) //재장전 입력 R키
       {
-         if(_playerManager.IsUnarmed) return;
+         if(IsUnarmed) return;
          
          _canRotateArm = false; //팔회전 불가
          _canShoot = false; //사격 불가
@@ -385,7 +383,8 @@ namespace Player
       {
          _canRotateArm = true;
          _canShoot = true;
-         _playerManager.Reload(); //장전 애니메이션 종료시 장전 매커니즘 작동
+         OnReloadEndAction?.Invoke();//장전 애니메이션 종료시 장전 매커니즘 작동
+         //_playerManager.Reload(); 
       }
    
    }

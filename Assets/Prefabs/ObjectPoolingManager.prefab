@@ -1,5 +1,129 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &851516360832488447
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4546533224560472214}
+  m_Layer: 0
+  m_Name: PistolParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4546533224560472214
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851516360832488447}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5411648469202492795}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1382515920351625750
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7150934889076441365}
+  m_Layer: 0
+  m_Name: BuckshotParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7150934889076441365
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382515920351625750}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5411648469202492795}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1667371704621257847
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2542419808733226594}
+  m_Layer: 0
+  m_Name: RifleParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2542419808733226594
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667371704621257847}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5411648469202492795}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2121073443276996998
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 249580183325902664}
+  m_Layer: 0
+  m_Name: AudioSourceParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &249580183325902664
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121073443276996998}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4218532382355262718}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4364459545279043593
 GameObject:
   m_ObjectHideFlags: 0
@@ -90,7 +214,10 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2542419808733226594}
+  - {fileID: 4546533224560472214}
+  - {fileID: 7150934889076441365}
   m_Father: {fileID: 4218532382355262718}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9124093598897954542
@@ -126,6 +253,7 @@ Transform:
   - {fileID: 5411648469202492795}
   - {fileID: 4066446479111149948}
   - {fileID: 5267184640819122955}
+  - {fileID: 249580183325902664}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6848106196037346412
@@ -142,23 +270,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPoolSettings:
   - category: 0
+    poolSetting:
+      parent: {fileID: 4546533224560472214}
+      initialSize: 100
+      maxSize: 250
     prefab: {fileID: 1195658896717919985, guid: 81098ebe12e68c84cb6cbdd116418bed, type: 3}
-    initialSize: 100
-    maxSize: 250
   - category: 1
+    poolSetting:
+      parent: {fileID: 2542419808733226594}
+      initialSize: 100
+      maxSize: 250
     prefab: {fileID: 2255073792994399734, guid: 8b372b66750a9a44e9aad955479dcf74, type: 3}
-    initialSize: 100
-    maxSize: 250
   - category: 2
+    poolSetting:
+      parent: {fileID: 7150934889076441365}
+      initialSize: 100
+      maxSize: 250
     prefab: {fileID: 1371491712315038372, guid: 6b151a676fe7d1948b903f689bfa2330, type: 3}
-    initialSize: 100
-    maxSize: 250
   bulletParent: {fileID: 5411648469202492795}
   itemDragHandlerPrefab: {fileID: 7716092572404661750, guid: 5a7c08fb9666c164893f6a9857039edc, type: 3}
-  itemDragInitParent: {fileID: 4066446479111149948}
-  itemDragInitialSize: 30
-  itemDragMaxSize: 200
+  itemDragSetting:
+    parent: {fileID: 4066446479111149948}
+    initialSize: 30
+    maxSize: 200
   itemPickUpPrefab: {fileID: 3325899211316545390, guid: c0eea6650d2a3a349b9ef0dcdcf4bdb5, type: 3}
-  itemPickupParent: {fileID: 5267184640819122955}
-  itemPickupInitialSize: 30
-  itemPickupMaxSize: 200
+  itemPickUpSetting:
+    parent: {fileID: 5267184640819122955}
+    initialSize: 30
+    maxSize: 200
+  audioSourcePrefab: {fileID: 8866496739101740030, guid: 3d60d2906a58d4641a0cac60e1fee572, type: 3}
+  audioSourceSetting:
+    parent: {fileID: 249580183325902664}
+    initialSize: 30
+    maxSize: 200

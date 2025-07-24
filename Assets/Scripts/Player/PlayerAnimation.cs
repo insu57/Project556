@@ -15,7 +15,8 @@ public class PlayerAnimation : MonoBehaviour
     
     [SerializeField] private Animator upperAnimator;
     [SerializeField] private Animator lowerAnimator;
-
+    public Animator UpperAnimator => upperAnimator;
+    
     [Serializable]
     private struct OverrideController
     {
@@ -28,33 +29,18 @@ public class PlayerAnimation : MonoBehaviour
     [SerializeField] private OverrideController pistolAnimator;
     [SerializeField] private OverrideController rifleAnimator;
 
-    private PlayerControl _playerControl;//플레이어 조작관련
+    //private PlayerControl _playerControl;//플레이어 조작관련
     
     private WeaponType _currentWeaponType; //현재 들고있는 무기 종류 - Manager에서 관리하니 제거?
     //하반신 애니메이터 별도로..
     
-    private void Awake()
-    {
-        TryGetComponent(out _playerControl);
-        TryGetComponent(out PlayerManager playerManager);
-        var reloadAnimationBehaviour = upperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
-        reloadAnimationBehaviour.Init(_playerControl, playerManager);
-        
-    }
-
-    private void Start()
-    {
-        _playerControl.OnPlayerMove += HandlePlayerMove; //이동 이벤트
-        _playerControl.OnPlayerReload += HandlePlayerReload; //장전 이벤트
-    }
-    
-    private void HandlePlayerMove(bool isMove)
+    public void ChangeAnimationMove(bool isMove)
     {
         upperAnimator.SetBool(IsMove, isMove);
         lowerAnimator.SetBool(IsMove, isMove);
     }
 
-    private void HandlePlayerReload()
+    public void ChangeAnimationReload()
     {
         upperAnimator.SetBool(IsReload, true);
     }

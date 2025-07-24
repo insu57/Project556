@@ -101,9 +101,9 @@ public enum SFXType
     Footstep, Weapon, UI, //...
 }
 
-public enum SFX
+public enum SFX //개선...
 {
-    FootstepDirt, FootstepRock, //Footstep
+    None, FootstepDirt, FootstepRock, //Footstep
     PistolShoot, ARShoot, PistolReload, ARReload //Weapon
     //UI...
 }

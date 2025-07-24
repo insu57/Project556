@@ -7,11 +7,18 @@ namespace Player
 {
     public class PlayerManager : MonoBehaviour, IDamageable
     {
+        //PlayerData로 이동...
         [SerializeField] private float playerHealth = 100f; //추후 SO에서 받아오게 수정 예정
         [SerializeField] private float playerStamina = 100f;
         [SerializeField] private float playerHydration = 100f;
         [SerializeField] private float playerEnergy = 100f;
-    
+        [ShowInInspector] private float _currentHealth;
+        [ShowInInspector] private float _currentTotalArmor;
+        [ShowInInspector] private float _currentStamina;
+        [ShowInInspector] private float _currentHydration;
+        [ShowInInspector] private float _currentEnergy;
+        [ShowInInspector] private float _currentTotalWeight;
+        
         [SerializeField] private SpriteRenderer oneHandSprite;
         [SerializeField] private Transform oneHandMuzzleTransform;
         [SerializeField] private SpriteRenderer twoHandSprite;
@@ -19,18 +26,12 @@ namespace Player
         [SerializeField] private GameObject muzzleFlashVFX;
     
         private Camera _mainCamera;
-        //private ItemUIManager _itemUIManager;
+        
         private PlayerWeapon _playerWeapon;
         private PlayerAnimation _playerAnimation;
+        private PlayerControl _playerControl;
+        
         private InventoryManager _inventoryManager;
-        private InventoryUIPresenter _inventoryUIPresenter;
-    
-        [ShowInInspector] private float _currentHealth;
-        [ShowInInspector] private float _currentTotalArmor;
-        [ShowInInspector] private float _currentStamina;
-        [ShowInInspector] private float _currentHydration;
-        [ShowInInspector] private float _currentEnergy;
-        [ShowInInspector] private float _currentTotalWeight;
     
         private WeaponInstance _currentWeaponItem;
         private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
@@ -46,10 +47,7 @@ namespace Player
         public event Action OnHideItemPickup;
         public event Action OnReloadNoAmmo;
 
-   
-        public bool IsUnarmed { private set; get; }
-    
-        public bool CanItemInteract { get; private set; }
+        private bool _canItemInteract;
         private int _currentItemInteractIdx;
         private readonly List<(bool available, ItemInteractType type)> _currentItemInteractList = new();
         private ItemPickUp _currentItemPickUp;
@@ -61,22 +59,52 @@ namespace Player
         private void Awake()
         {
             TryGetComponent(out _playerAnimation);
+            TryGetComponent(out _playerControl);
             TryGetComponent(out _playerWeapon);
-            _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
-        
+            var stageManager = FindAnyObjectByType<StageManager>();
+            
+            var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
+            reloadAnimationBehaviour.Init(_playerControl, this);
+            var moveAnimationBehaviour =  _playerAnimation.UpperAnimator.GetBehaviour<MoveAnimationBehaviour>();
+            moveAnimationBehaviour.Init(this, stageManager);
+            
             _mainCamera = Camera.main;
             _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
-            _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
-            _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
-        
+            
             ChangeCurrentWeapon(null); //비무장 초기화
          
             _currentHealth = playerHealth; //체력 초기화
             OnPlayerHealthChanged?.Invoke(_currentHealth, playerHealth);
         }
 
+        private void OnEnable()
+        {
+            _playerControl.OnPlayerMove += HandleOnPlayerMoveAction;
+            _playerControl.OnPlayerReload += HandleOnPlayerReloadAction;
+            _playerControl.OnFieldInteract += GetFieldItem;
+            _playerControl.OnScrollInteractMenu += ScrollItemPickup;
+            _playerControl.OnChangeWeaponAction += HandleOnChangeWeapon;
+            _playerControl.OnQuickSlotAction += HandleOnUseQuickSlot;
+            _playerControl.OnShootAction += Shoot;
+            _playerControl.OnReloadEndAction += Reload;
+                
+            _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
+            
+            _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
+            _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
+        }
+        
         private void OnDisable()
         {
+            _playerControl.OnPlayerMove -= HandleOnPlayerMoveAction;
+            _playerControl.OnPlayerReload -= HandleOnPlayerReloadAction;
+            _playerControl.OnFieldInteract -= GetFieldItem;
+            _playerControl.OnScrollInteractMenu -=  ScrollItemPickup;
+            _playerControl.OnChangeWeaponAction -= HandleOnChangeWeapon;
+            _playerControl.OnQuickSlotAction -= HandleOnUseQuickSlot;
+            _playerControl.OnShootAction -= Shoot;
+            _playerControl.OnReloadEndAction -= Reload;
+            
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
             _inventoryManager.OnUpdateArmorAmount -= HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon -= HandleOnUnequipWeapon;
@@ -100,20 +128,31 @@ namespace Player
             }
         }
 
-        public bool CheckIsAutomatic()
+        private void HandleOnPlayerMoveAction(bool isMove)
+        {
+            _playerAnimation.ChangeAnimationMove(isMove);
+        }
+
+        private void HandleOnPlayerReloadAction()
+        {
+            _playerAnimation.ChangeAnimationReload();
+        }
+
+        private bool CheckIsAutomatic()
         {
             if (_currentWeaponItem is { ItemData: WeaponData weaponData })
                 return weaponData.CanFullAuto;
             return false;
         }
 
-        public bool CheckIsOneHanded()
+        private bool CheckIsOneHanded()
         {
             if (_currentWeaponItem is { ItemData: WeaponData weaponData })
                 return weaponData.IsOneHanded;
             return false;
         }
         
+        //개선?
         private void PlayShootSFX()
         {
             AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon ,_currentWeaponItem.WeaponData.ShootSFX);
@@ -134,7 +173,6 @@ namespace Player
         
             if (!isShoot) return;
             PlayShootSFX();
-            //_playerAudio.PlayOneShotSFX(SFXType.Weapon, _currentWeaponItem.WeaponData.ShootSFX);
             _currentWeaponItem.UseAmmo();
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
             _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
@@ -186,7 +224,7 @@ namespace Player
             }
         }
 
-        public void HandleOnChangeWeapon(EquipWeaponIdx weaponIdx)
+        private void HandleOnChangeWeapon(EquipWeaponIdx weaponIdx)
         {
             switch (weaponIdx)
             {
@@ -210,6 +248,7 @@ namespace Player
                     _currentWeaponItem = null;
                     ChangeCurrentWeapon(null);
                     break;
+                default: return;
             }
             _equipWeaponIdx = weaponIdx;
         }
@@ -218,7 +257,8 @@ namespace Player
         {
             if (weaponItem == null)
             {
-                IsUnarmed = true;
+                //IsUnarmed = true;
+                _playerControl.IsUnarmed = true;
                 _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
                 oneHandSprite.enabled = false;
                 twoHandSprite.enabled = false;
@@ -228,8 +268,12 @@ namespace Player
 
             var newWeaponData = weaponItem.WeaponData;
         
-            WeaponType weaponType = newWeaponData.WeaponType; //무기 타입
-            IsUnarmed = false;
+            var weaponType = newWeaponData.WeaponType; //무기 타입
+            //IsUnarmed = false;
+            _playerControl.IsUnarmed = false;
+            _playerControl.IsOneHanded = CheckIsOneHanded();
+            _playerControl.IsAutomatic = CheckIsAutomatic();
+            
             if (weaponType == WeaponType.Pistol) //한손무기
             {
                 oneHandSprite.sprite = newWeaponData.ItemSprite; //스프라이트 위치
@@ -239,8 +283,6 @@ namespace Player
                 _playerWeapon.SetMuzzleTransform(oneHandMuzzleTransform); //총구위치 설정
             
                 muzzleFlashVFX.transform.SetParent(oneHandMuzzleTransform);
-                muzzleFlashVFX.transform.localRotation = Quaternion.identity;
-                muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
             }
             else //양손무기
             {
@@ -251,10 +293,10 @@ namespace Player
                 _playerWeapon.SetMuzzleTransform(twoHandMuzzleTransform);
             
                 muzzleFlashVFX.transform.SetParent(twoHandMuzzleTransform);
-                muzzleFlashVFX.transform.localRotation = Quaternion.identity;
-                muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
             }
-        
+            muzzleFlashVFX.transform.localRotation = Quaternion.identity;
+            muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
+
             _playerWeapon.ChangeWeaponData(newWeaponData); //변경
             _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
@@ -267,9 +309,11 @@ namespace Player
             var (item, _, _) = inventory.ItemDict[id];
             Debug.Log($"Quick Slot {slotIdx} Use : {item.ItemData.ItemName}");
         }
-    
-        public void ScrollItemPickup(float scrollDeltaY)
+
+        private void ScrollItemPickup(float scrollDeltaY)
         {
+            if(!_canItemInteract) return;
+            
             _currentItemInteractIdx += (int)scrollDeltaY;
             if (_currentItemInteractIdx < 0) _currentItemInteractIdx = _currentItemInteractList.Count - 1;
             else if (_currentItemInteractIdx >= _currentItemInteractList.Count) _currentItemInteractIdx = 0;
@@ -284,7 +328,7 @@ namespace Player
             if (other.CompareTag("Item"))
             {
                 //pick up ui
-                CanItemInteract = true;
+                _canItemInteract = true;
                 Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
             
                 other.TryGetComponent<ItemPickUp>(out var itemPickUp);
@@ -352,14 +396,16 @@ namespace Player
         {
             if (other.CompareTag("Item"))
             {
-                CanItemInteract = false;
+                _canItemInteract = false;
                 //_itemUIManager.HideItemPickup();
                 OnHideItemPickup?.Invoke();
             }
         }
 
-        public void GetFieldItem()
+        private void GetFieldItem()
         {
+            if(!_canItemInteract) return;
+            
             var item = _currentItemPickUp.GetItemInstance();
         
             //장비 - 장착/획득 순서
@@ -395,7 +441,7 @@ namespace Player
                     break;
             }
         
-            CanItemInteract = false;
+            _canItemInteract = false;
             //_itemUIManager.HideItemPickup();
             OnHideItemPickup?.Invoke();
         

@@ -3,126 +3,95 @@ using System.Collections.Generic;
 using UI;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.Serialization;
 
 public class ObjectPoolingManager : Singleton<ObjectPoolingManager>
 {
     [Serializable]
-    private struct BulletPoolSetting
+    private class BulletPoolSetting
     {
         public AmmoCategory category;
+        public PoolSetting poolSetting;
         public GameObject prefab;
-        public int initialSize;
-        public int maxSize;
     }
+
+    [Serializable]
+    private class PoolSetting
+    {
+        public Transform parent;
+        public int initialSize = 30;
+        public int maxSize = 200;
+    }
+    
     [SerializeField] private BulletPoolSetting[] bulletPoolSettings; //추후변경...
-    [SerializeField] private Transform bulletParent;
     private readonly Dictionary<AmmoCategory, ObjectPool<Bullet>> _bulletPool = new();
     
     [SerializeField, Space] private ItemDragHandler itemDragHandlerPrefab;
-    [SerializeField] private Transform itemDragInitParent;
-    [SerializeField] private int itemDragInitialSize = 30;
-    [SerializeField] private int itemDragMaxSize = 200;
+    [SerializeField] private PoolSetting itemDragSetting;
     private ObjectPool<ItemDragHandler> _itemDragHandlerPool;
     
     [SerializeField, Space] private ItemPickUp itemPickUpPrefab;
-    [SerializeField] private Transform itemPickupParent;
-    [SerializeField] private int itemPickupInitialSize = 30;
-    [SerializeField] private int itemPickupMaxSize = 200;
+    [SerializeField] private PoolSetting itemPickUpSetting;
     private ObjectPool<ItemPickUp> _itemPickUpPool;
+    
+    [SerializeField, Space] private AudioSource audioSourcePrefab;
+    [SerializeField] private PoolSetting audioSourceSetting;
+    private ObjectPool<AudioSource> _audioSourcePool;
 
     protected override void Awake()
     {
         base.Awake();
         
         InitBulletPools();
-        InitItemDragHandlerPool();
-        InitItemPickupPool(); //중복 개선? - 개수가 많아지면 수정
+        _itemDragHandlerPool = InitPool(itemDragHandlerPrefab, itemDragSetting);
+        _itemPickUpPool = InitPool(itemPickUpPrefab, itemPickUpSetting);
+        _audioSourcePool = InitPool(audioSourcePrefab, audioSourceSetting);
     }
 
     private void InitBulletPools()
     {
         foreach (var setting in bulletPoolSettings)
         {
-            _bulletPool[setting.category] = new ObjectPool<Bullet>(
-                createFunc: () => Instantiate(setting.prefab, bulletParent).GetComponent<Bullet>(),
-                actionOnGet: bullet => { bullet.gameObject.SetActive(true); },
-                actionOnRelease: bullet => { bullet.gameObject.SetActive(false); },
-                actionOnDestroy: bullet => { Destroy(bullet.gameObject); },
-                collectionCheck: false,
-                defaultCapacity: setting.initialSize,
-                maxSize: setting.maxSize
-            );
-
-            var tempList = new List<Bullet>();
-            for (int i = 0; i < setting.initialSize; i++)
-            {
-                var obj = _bulletPool[setting.category].Get();
-                tempList.Add(obj);
-            }
-
-            foreach (var obj in tempList)
-            {
-                _bulletPool[setting.category].Release(obj);
-            }
+            _bulletPool[setting.category] = InitPool(setting.prefab.GetComponent<Bullet>(), setting.poolSetting);
         }
     }
     
     public Bullet GetBullet(AmmoCategory category) => _bulletPool[category].Get();
 
     public void ReleaseBullet(AmmoCategory ammoCategory, Bullet bullet) => _bulletPool[ammoCategory].Release(bullet);
-
-    private void InitItemDragHandlerPool()
-    {
-        _itemDragHandlerPool = new ObjectPool<ItemDragHandler>(
-            createFunc: () => Instantiate(itemDragHandlerPrefab, itemDragInitParent),
-            actionOnGet: itemDragHandler => { itemDragHandler.gameObject.SetActive(true); },
-            actionOnRelease: itemDragHandler => { itemDragHandler.gameObject.SetActive(false); },
-            actionOnDestroy: itemDragHandler => { Destroy(itemDragHandler.gameObject); },
-            collectionCheck: false,
-            defaultCapacity: itemDragInitialSize,
-            maxSize: itemDragMaxSize
-        );
-        
-        var tempList = new List<ItemDragHandler>();
-        for (int i = 0; i < itemDragInitialSize; i++)
-        {
-            var obj = _itemDragHandlerPool.Get();
-            tempList.Add(obj);
-        }
-        foreach (var obj in tempList)
-        {
-            _itemDragHandlerPool.Release(obj);
-        }
-    }
     
     public ItemDragHandler GetItemDragHandler() => _itemDragHandlerPool.Get();//? Get불가
     public void ReleaseItemDragHandler(ItemDragHandler itemDragHandler) => _itemDragHandlerPool.Release(itemDragHandler);
 
-    private void InitItemPickupPool()
+    public ItemPickUp GetItemPickUp() => _itemPickUpPool.Get();
+    public void ReleaseItemPickUp(ItemPickUp itemPickUp) => _itemPickUpPool.Release(itemPickUp);
+    
+    public AudioSource GetAudioSource() => _audioSourcePool.Get();
+    public void ReleaseAudioSource(AudioSource audioSource) => _audioSourcePool.Release(audioSource);
+
+    private ObjectPool<T> InitPool<T>(T prefab, PoolSetting poolSetting) where T : Component
     {
-        _itemPickUpPool = new ObjectPool<ItemPickUp>(
-            createFunc: () => Instantiate(itemPickUpPrefab, itemPickupParent),
-            actionOnGet: itemPickUp => { itemPickUp.gameObject.SetActive(true); },
-            actionOnRelease: itemPickUp => { itemPickUp.gameObject.SetActive(false); },
-            actionOnDestroy: itemPickUp => { Destroy(itemPickUp.gameObject); },
+        var pool = new ObjectPool<T>(
+            createFunc: () => Instantiate(prefab, poolSetting.parent),
+            actionOnGet: component => component.gameObject.SetActive(true),
+            actionOnRelease: component => component.gameObject.SetActive(false),
+            actionOnDestroy: component => Destroy(component.gameObject),
             collectionCheck: false,
-            defaultCapacity: itemPickupInitialSize,
-            maxSize: itemPickupMaxSize
+            defaultCapacity: poolSetting.initialSize,
+            maxSize: poolSetting.maxSize
         );
         
-        var tempList = new List<ItemPickUp>();
-        for (int i = 0; i < itemPickupInitialSize; i++)
+        var tempList = new List<T>();
+        for (var i = 0; i < poolSetting.initialSize; i++)
         {
-            var obj = _itemPickUpPool.Get();
+            var obj = pool.Get();
             tempList.Add(obj);
         }
 
         foreach (var obj in tempList)
         {
-            _itemPickUpPool.Release(obj);
+            pool.Release(obj);
         }
+
+        return pool;
     }
-    public ItemPickUp GetItemPickUp() => _itemPickUpPool.Get();
-    public void ReleaseItemPickUp(ItemPickUp itemPickUp) => _itemPickUpPool.Release(itemPickUp);
 }
