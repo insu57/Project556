@@ -51,6 +51,13 @@ namespace Player
       private bool _canClimb = false;
       private bool _canRotateArm = true;
 
+      private enum Selector
+      {
+         SemiAuto,
+         Burst,
+         FullAuto
+      }
+      
       private UIControl _uiControl;
    
       public event Action<bool> OnPlayerMove;
@@ -384,7 +391,6 @@ namespace Player
          _canRotateArm = true;
          _canShoot = true;
          OnReloadEndAction?.Invoke();//장전 애니메이션 종료시 장전 매커니즘 작동
-         //_playerManager.Reload(); 
       }
    
    }

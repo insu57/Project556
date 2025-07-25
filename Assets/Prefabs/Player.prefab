@@ -4220,6 +4220,7 @@ GameObject:
   - component: {fileID: 3902235042742185205}
   - component: {fileID: 8781566730831562631}
   - component: {fileID: 644758073575750261}
+  - component: {fileID: 9050450742271964904}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -4257,10 +4258,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee69e61a2f511e249988138c53fdd2a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHealth: 100
-  playerStamina: 100
-  playerHydration: 100
-  playerEnergy: 100
   oneHandSprite: {fileID: 3132709087802935702}
   oneHandMuzzleTransform: {fileID: 8056941492875823244}
   twoHandSprite: {fileID: 7509388812552137820}
@@ -4610,6 +4607,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cd0373d1ad478e4fa5fe765c5945815, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &9050450742271964904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6380820316290436997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb545add8956af4e953f0fb515e43e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerHealth: 100
+  playerStamina: 100
+  playerEnergy: 100
+  playerHydration: 100
 --- !u!1 &6390626504461426336
 GameObject:
   m_ObjectHideFlags: 0

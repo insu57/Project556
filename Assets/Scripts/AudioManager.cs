@@ -57,32 +57,32 @@ public class AudioManager : Singleton<AudioManager>
         bgmSource.Play();
     }
 
-    public void PlaySFX(AudioSource source  ,SFXType sfxType, SFX sfx) //pooling?
+    public AudioClip GetSFXClip(SFXType type, SFX sfx)
     {
         AudioClip clip = null;
 
-        switch (sfxType)
+        switch (type)
         {
             case SFXType.Footstep: _footstepSFXMap.TryGetValue(sfx, out clip); break;
             case SFXType.Weapon: _weaponSFXMap.TryGetValue(sfx, out clip); break;
             case SFXType.UI: _uiSfxClipMap.TryGetValue(sfx, out clip); break;
         }
-
+        
+        return clip;
+    }
+    
+    public void PlaySFX(AudioSource source  ,SFXType sfxType, SFX sfx) //pooling?
+    {
+        var clip = GetSFXClip(sfxType, sfx);
+        
         if (!clip)
         {
             Debug.LogError($"{sfxType} not found");
             return;
         }
-
-        //var source = ObjectPoolingManager.Instance.GetAudioSource();
+        
         source.outputAudioMixerGroup = sfxGroup;
         source.PlayOneShot(clip);
-        //StartCoroutine(ReleaseAudioSource(source, clip.length));
     }
-
-    private IEnumerator ReleaseAudioSource(AudioSource src, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        ObjectPoolingManager.Instance.ReleaseAudioSource(src);
-    }
+    
 }

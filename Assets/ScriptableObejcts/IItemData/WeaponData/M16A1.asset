@@ -24,8 +24,8 @@ MonoBehaviour:
   accuracy: 80
   bulletSpeed: 15
   itemSprite: {fileID: 552750388532680738, guid: 736d194ce29a29a4ea5a579844881654, type: 3}
-  shootSFX: 3
-  reloadSFX: 5
+  shootSFX: 4
+  reloadSFX: 6
   reloadTime: 1.1
   itemWidth: 4
   itemHeight: 2

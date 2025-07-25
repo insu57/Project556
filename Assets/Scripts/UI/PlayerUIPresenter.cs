@@ -9,18 +9,19 @@ namespace UI
     {
         private PlayerUIManager _playerUIManager;
         private PlayerManager _playerManager;
-
+        private PlayerData _playerData;
+        
         private void Awake()
         {
             TryGetComponent(out _playerManager);
             _playerUIManager = FindFirstObjectByType<PlayerUIManager>();
-        
-            
+            TryGetComponent(out _playerData);
         }
 
         private void OnEnable()
         {
-            _playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
+            //_playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
+            _playerData.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
             _playerManager.OnUpdateMagazineCountUI += HandleOnUpdateMagazineCountUI;
             _playerManager.OnShowItemPickup += HandleOnShowItemPickup;
             _playerManager.OnScrollItemPickup += HandleOnScrollItemPickup;
@@ -30,7 +31,8 @@ namespace UI
 
         private void OnDisable()
         {
-            _playerManager.OnPlayerHealthChanged -= HandleOnUpdateHealthBar;
+            //_playerManager.OnPlayerHealthChanged -= HandleOnUpdateHealthBar;
+            _playerData.OnPlayerHealthChanged -= HandleOnUpdateHealthBar;
             _playerManager.OnUpdateMagazineCountUI -= HandleOnUpdateMagazineCountUI;
             _playerManager.OnShowItemPickup -= HandleOnShowItemPickup;
             _playerManager.OnScrollItemPickup -= HandleOnScrollItemPickup;

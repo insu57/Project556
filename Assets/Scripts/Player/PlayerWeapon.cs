@@ -10,14 +10,13 @@ public class PlayerWeapon : MonoBehaviour
     private WeaponData _weaponData;
     private Transform _muzzleTransform;
     
-    private bool _canShoot = true;
-    
     private AmmoCategory _ammoCategory;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
     private float _normalizedAccuracy; //정규화 정확도
     private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도
     private float _maxDeviationAngle; //최대 각도 편차(탄퍼짐 편차)
-
+    private float _lastShotTime;
+    
     public event Action OnShowMuzzleFlash;
     
     public void ChangeWeaponData(WeaponData weaponData)
@@ -32,11 +31,10 @@ public class PlayerWeapon : MonoBehaviour
     //개선...? Player매니저 shoot에서 장탄검사?
     public bool Shoot(bool isFlipped, float shootAngle)
     {
-        if(!_canShoot) return false;
+        if(Time.time - _lastShotTime < _weaponData.FireRate) return false; //FireRate제한
+        _lastShotTime = Time.time;
         
         OnShowMuzzleFlash?.Invoke(); //show flash
-        
-        StartCoroutine(ShootCoroutine()); //fireRate
 
         float bulletAngle;
         Vector2 direction;
@@ -68,13 +66,5 @@ public class PlayerWeapon : MonoBehaviour
     {
         _muzzleTransform = muzzleTransform;
     }
-    
-    private IEnumerator ShootCoroutine()
-    {
-        _canShoot = false;
-        yield return new WaitForSeconds(_weaponData.FireRate);
-        _canShoot = true;
-    }
-    
     
 }

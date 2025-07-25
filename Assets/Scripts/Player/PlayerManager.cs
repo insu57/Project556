@@ -5,19 +5,9 @@ using UnityEngine;
 
 namespace Player
 {
-    public class PlayerManager : MonoBehaviour, IDamageable
+    public class PlayerManager : MonoBehaviour
     {
         //PlayerData로 이동...
-        [SerializeField] private float playerHealth = 100f; //추후 SO에서 받아오게 수정 예정
-        [SerializeField] private float playerStamina = 100f;
-        [SerializeField] private float playerHydration = 100f;
-        [SerializeField] private float playerEnergy = 100f;
-        [ShowInInspector] private float _currentHealth;
-        [ShowInInspector] private float _currentTotalArmor;
-        [ShowInInspector] private float _currentStamina;
-        [ShowInInspector] private float _currentHydration;
-        [ShowInInspector] private float _currentEnergy;
-        [ShowInInspector] private float _currentTotalWeight;
         
         [SerializeField] private SpriteRenderer oneHandSprite;
         [SerializeField] private Transform oneHandMuzzleTransform;
@@ -27,6 +17,7 @@ namespace Player
     
         private Camera _mainCamera;
         
+        private PlayerData _playerData;
         private PlayerWeapon _playerWeapon;
         private PlayerAnimation _playerAnimation;
         private PlayerControl _playerControl;
@@ -38,8 +29,8 @@ namespace Player
 
         [SerializeField] private AudioSource loopSource;
         [SerializeField] private AudioSource oneShotSource;
+        public AudioSource OneShotSource => oneShotSource;
         
-        public event Action<float, float> OnPlayerHealthChanged;
         public event Action<bool, int> OnUpdateMagazineCountUI;
     
         public event Action<Vector2, List<(bool available, ItemInteractType type)>> OnShowItemPickup;
@@ -58,6 +49,7 @@ namespace Player
         //UI Manager 개선?
         private void Awake()
         {
+            TryGetComponent(out _playerData);
             TryGetComponent(out _playerAnimation);
             TryGetComponent(out _playerControl);
             TryGetComponent(out _playerWeapon);
@@ -72,13 +64,11 @@ namespace Player
             _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
             
             ChangeCurrentWeapon(null); //비무장 초기화
-         
-            _currentHealth = playerHealth; //체력 초기화
-            OnPlayerHealthChanged?.Invoke(_currentHealth, playerHealth);
         }
 
         private void OnEnable()
         {
+            //플레이어 조작
             _playerControl.OnPlayerMove += HandleOnPlayerMoveAction;
             _playerControl.OnPlayerReload += HandleOnPlayerReloadAction;
             _playerControl.OnFieldInteract += GetFieldItem;
@@ -86,10 +76,12 @@ namespace Player
             _playerControl.OnChangeWeaponAction += HandleOnChangeWeapon;
             _playerControl.OnQuickSlotAction += HandleOnUseQuickSlot;
             _playerControl.OnShootAction += Shoot;
-            _playerControl.OnReloadEndAction += Reload;
+            _playerControl.OnReloadEndAction += HandleOnReloadEnd;
                 
+            //무기
             _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
             
+            //인벤토리
             _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
         }
@@ -103,7 +95,7 @@ namespace Player
             _playerControl.OnChangeWeaponAction -= HandleOnChangeWeapon;
             _playerControl.OnQuickSlotAction -= HandleOnUseQuickSlot;
             _playerControl.OnShootAction -= Shoot;
-            _playerControl.OnReloadEndAction -= Reload;
+            _playerControl.OnReloadEndAction -= HandleOnReloadEnd;
             
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
             _inventoryManager.OnUpdateArmorAmount -= HandleOnUpdateArmorAmount;
@@ -117,7 +109,7 @@ namespace Player
 
         private void HandleOnUpdateArmorAmount(float amount)
         {
-            _currentTotalArmor = amount;
+            _playerData.UpdateTotalArmor(amount);
         }
 
         private void HandleOnUnequipWeapon(EquipWeaponIdx weaponIdx)
@@ -163,8 +155,8 @@ namespace Player
             AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponItem.WeaponData.ReloadSFX);
             return _currentWeaponItem.WeaponData.ReloadTime;
         }
-    
-        public void Shoot(bool isFlipped, float shootAngle) //사격
+
+        private void Shoot(bool isFlipped, float shootAngle) //사격
         {
             //총알 데이터..?
             if(GetCurrentWeaponMagazineCount() <= 0) return;
@@ -186,8 +178,8 @@ namespace Player
             }
             return -1;
         }
-    
-        public void Reload() //개선?
+
+        private void HandleOnReloadEnd() //개선?
         {
             //Inven -> weapon
             if (_currentWeaponItem != null)
@@ -302,12 +294,12 @@ namespace Player
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
         }
 
-        public void HandleOnUseQuickSlot(QuickSlotIdx slotIdx)
+        private void HandleOnUseQuickSlot(QuickSlotIdx slotIdx)
         {
             if(!_inventoryManager.QuickSlotDict.TryGetValue(slotIdx, out var quickSlotInfo)) return;
             var (id, inventory) = quickSlotInfo;
             var (item, _, _) = inventory.ItemDict[id];
-            Debug.Log($"Quick Slot {slotIdx} Use : {item.ItemData.ItemName}");
+            //USE...
         }
 
         private void ScrollItemPickup(float scrollDeltaY)
@@ -319,7 +311,6 @@ namespace Player
             else if (_currentItemInteractIdx >= _currentItemInteractList.Count) _currentItemInteractIdx = 0;
             //범위 넘기면 처리
       
-            //_itemUIManager.ScrollItemPickup(_currentItemInteractIdx);//ItemPickup UI 스크롤(획득/장착 등...)
             OnScrollItemPickup?.Invoke(_currentItemInteractIdx);
         }
     
@@ -448,14 +439,6 @@ namespace Player
             ObjectPoolingManager.Instance.ReleaseItemPickUp(_currentItemPickUp);
         }
 
-        public void TakeDamage(float damage)
-        {
-            _currentHealth -= damage;
-            OnPlayerHealthChanged?.Invoke(_currentHealth, playerHealth);
-            if (_currentHealth <= 0)
-            {
-                Debug.Log("Player Dead: Health");
-            }
-        }
+        
     }
 }

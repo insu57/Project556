@@ -16,8 +16,7 @@ public class StageManager : MonoBehaviour
             var tileCell = tilemap.WorldToCell(playerPos);
             if(!tilemap.HasTile(tileCell)) 
             {
-                Debug.Log($"tilemap doesn't have tile {tileCell}");
-                return SFX.None;//타일이 없음
+                continue;//타일이 없음
             }      
             var baseTile = tilemap.GetTile(tileCell);
             if (baseTile is not FootstepRuleTile ruleTile) continue;
