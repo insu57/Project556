@@ -6,11 +6,19 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class PlayerUIManager : MonoBehaviour
+    public class PlayerUI : MonoBehaviour
     {
         [SerializeField] private Image healthBar;
+        [SerializeField] private Image staminaBar;
+        [SerializeField] private Image energyBar;
+        [SerializeField] private Image hydrationBar;
         [SerializeField] private TMP_Text ammoText;
-    
+
+        [SerializeField] private TMP_Text healthTxt;
+        [SerializeField] private TMP_Text staminaTxt;
+        [SerializeField] private TMP_Text energyTxt;
+        [SerializeField] private TMP_Text hydrationTxt;
+        
         [SerializeField, Space] private RectTransform pickupUI;
         private readonly List<TMP_Text> _pickupTextList = new();
         [SerializeField] private TMP_Text equipText;
@@ -24,7 +32,7 @@ namespace UI
         private int _pickupTextListCount;
         private int _pickupCurrentIdx;
         [SerializeField] private GameObject noAmmoWarning;
-
+        
         private void Awake()
         {
             //ItemInteract UI
@@ -32,11 +40,30 @@ namespace UI
             _pickupTextList.Add(pickupText);
         }
     
-        public void UpdateHealthBar(float health, float maxHealth)
+        public void UpdateHealthUI(float health, float maxHealth)
         {
             healthBar.fillAmount = health / maxHealth;
+            healthTxt.text = $"{health:F0} / {maxHealth:F0}";
         }
 
+        public void UpdateStaminaUI(float stamina, float maxStamina)
+        {
+            staminaBar.fillAmount = stamina / maxStamina;
+            staminaTxt.text = $"{stamina:F0} / {maxStamina:F0}";
+        }
+
+        public void UpdateEnergyUI(float energy, float maxEnergy)
+        {
+            energyBar.fillAmount = energy / maxEnergy;
+            energyTxt.text = $"{energy:F0} / {maxEnergy:F0}";
+        }
+
+        public void UpdateHydrationUI(float hydration, float maxHydration)
+        {
+            hydrationBar.fillAmount = hydration / maxHydration;
+            hydrationTxt.text = $"{hydration:F0} / {maxHydration:F0}";
+        }
+        
         public void UpdateAmmoText(bool isFullyLoaded, int ammo) 
         {
             ammoText.text = ammo.ToString();

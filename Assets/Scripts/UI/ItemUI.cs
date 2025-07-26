@@ -8,10 +8,8 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class ItemUIManager : MonoBehaviour, IPointerClickHandler
+    public class ItemUI : MonoBehaviour, IPointerClickHandler
     {
-        [SerializeField] private GameObject playerUI;
-    
         [Header("Slot")]
         [SerializeField, Space] private float cellSize = 50f;
         private float _panelSlotPadding; //slotSize * 3
@@ -136,6 +134,9 @@ namespace UI
             
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.AddListener(CloseItemInfo);
+            
+            CloseItemContextMenu();//ContextMenu닫기
+            CloseItemInfo();
         }
 
         private void OnDisable()
@@ -150,12 +151,7 @@ namespace UI
             itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);
         }
 
-        public void OpenPlayerUI(bool isOpen) //PlayerUI
-        {
-            playerUI.SetActive(isOpen);
-            CloseItemContextMenu();//ContextMenu닫기
-            CloseItemInfo();
-        }
+       
 
         private void OnItemContextMenu(ItemContextType contextType)
         {

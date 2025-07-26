@@ -7,21 +7,21 @@ namespace UI
 {
     public class PlayerUIPresenter : MonoBehaviour
     {
-        private PlayerUIManager _playerUIManager;
+        private PlayerUI _playerUI;
         private PlayerManager _playerManager;
         private PlayerData _playerData;
         
         private void Awake()
         {
             TryGetComponent(out _playerManager);
-            _playerUIManager = FindFirstObjectByType<PlayerUIManager>();
+            _playerUI = FindFirstObjectByType<PlayerUI>();
             TryGetComponent(out _playerData);
         }
 
         private void OnEnable()
         {
-            //_playerManager.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
-            _playerData.OnPlayerHealthChanged += HandleOnUpdateHealthBar;
+            _playerData.OnPlayerStatChanged += HandleOnUpdatePlayerStat;
+            
             _playerManager.OnUpdateMagazineCountUI += HandleOnUpdateMagazineCountUI;
             _playerManager.OnShowItemPickup += HandleOnShowItemPickup;
             _playerManager.OnScrollItemPickup += HandleOnScrollItemPickup;
@@ -31,43 +31,59 @@ namespace UI
 
         private void OnDisable()
         {
-            //_playerManager.OnPlayerHealthChanged -= HandleOnUpdateHealthBar;
-            _playerData.OnPlayerHealthChanged -= HandleOnUpdateHealthBar;
+            _playerData.OnPlayerStatChanged -= HandleOnUpdatePlayerStat;
+         
             _playerManager.OnUpdateMagazineCountUI -= HandleOnUpdateMagazineCountUI;
             _playerManager.OnShowItemPickup -= HandleOnShowItemPickup;
             _playerManager.OnScrollItemPickup -= HandleOnScrollItemPickup;
             _playerManager.OnHideItemPickup -= HandleOnHideItemPickup;
             _playerManager.OnReloadNoAmmo -= HandleOnReloadNoAmmo;
         }
-
-        private void HandleOnUpdateHealthBar(float health, float maxHealth)
+        
+        private void HandleOnUpdatePlayerStat(PlayerStat stat, (float current, float max) amount)
         {
-            _playerUIManager.UpdateHealthBar(health, maxHealth);
+            switch (stat)
+            {
+                case  PlayerStat.Health:
+                    _playerUI.UpdateHealthUI(amount.current, amount.max);
+                    break;
+                case PlayerStat.Stamina:
+                    _playerUI.UpdateStaminaUI(amount.current, amount.max);
+                    break;
+                case PlayerStat.Energy:
+                    _playerUI.UpdateEnergyUI(amount.current, amount.max);
+                    break;
+                case PlayerStat.Hydration:
+                    _playerUI.UpdateHydrationUI(amount.current, amount.max);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(stat), stat, null);
+            }
         }
 
         private void HandleOnUpdateMagazineCountUI(bool isFullyLoaded, int ammo)
         {
-            _playerUIManager.UpdateAmmoText(isFullyLoaded, ammo);
+            _playerUI.UpdateAmmoText(isFullyLoaded, ammo);
         }
 
         private void HandleOnShowItemPickup(Vector2 pos, List<(bool available, ItemInteractType type)> availableList)
         {
-            _playerUIManager.ShowItemPickup(pos, availableList);
+            _playerUI.ShowItemPickup(pos, availableList);
         }
 
         private void HandleOnScrollItemPickup(int idx)
         {
-            _playerUIManager.ScrollItemPickup(idx);
+            _playerUI.ScrollItemPickup(idx);
         }
     
         private void HandleOnHideItemPickup()
         {
-            _playerUIManager.HideItemPickup();
+            _playerUI.HideItemPickup();
         }
 
         private void HandleOnReloadNoAmmo()
         {
-            _playerUIManager.ShowNoAmmoWarning();
+            _playerUI.ShowNoAmmoWarning();
         }
     }
 }

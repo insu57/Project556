@@ -9,8 +9,9 @@ public class UIControl : MonoBehaviour
 {
     private PlayerControl _playerControl;
     private PlayerInput _playerInput;
-    private ItemUIManager _itemUIManager;
-    private SettingUIManager _settingUIManager;
+    private UIManager _uiManager;
+    //private ItemUI _itemUI;
+    private SettingUI _settingUI;
     
     private InputAction _closeAction;
     private InputAction _closeUIAction;
@@ -22,8 +23,9 @@ public class UIControl : MonoBehaviour
     
     private void Awake()
     {
-        TryGetComponent(out _itemUIManager);
-        TryGetComponent(out _settingUIManager);
+        TryGetComponent(out _uiManager);
+        //TryGetComponent(out _itemUI);
+        TryGetComponent(out _settingUI);
     }
     
     public void Init(PlayerControl playerControl) //개선?
@@ -61,25 +63,25 @@ public class UIControl : MonoBehaviour
     //개선?
     public void OnOpenPlayerUI()
     {
-        _itemUIManager.OpenPlayerUI(true);
+        _uiManager.OpenPlayerUI(true);
     }
 
     public void OnOpenSettingsUI()
     {
-        _settingUIManager.OpenSettingUI(true);
+        _settingUI.OpenSettingUI(true);
     }
     
     private void OnClose(InputAction.CallbackContext context) //esc
     {
         //_itemUIManager.OpenPlayerUI(false);
-        _settingUIManager.OpenSettingUI(false);
+        _settingUI.OpenSettingUI(false);
         _playerControl.BlockControl(false);
         
     }
 
     private void OnCloseUI(InputAction.CallbackContext context) //Tab key
     {
-        _itemUIManager.OpenPlayerUI(false);
+        _uiManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
     }
 

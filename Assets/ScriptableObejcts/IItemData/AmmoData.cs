@@ -11,10 +11,10 @@ public class AmmoData : BaseItemDataSO
     [SerializeField] private string itemName;
     [SerializeField] private Sprite itemSprite;
 
-    [SerializeField] private int itemWidth;
-    [SerializeField] private int itemHeight;
+    [SerializeField] private int itemWidth = 1;
+    [SerializeField] private int itemHeight = 1;
     [SerializeField] private float itemWeight;
-    [SerializeField] private int maxStackAmount;
+    [SerializeField] private int maxStackAmount = 60;
     
     [SerializeField] private float ammoDamage;
     [SerializeField] private float ammoPiercing;

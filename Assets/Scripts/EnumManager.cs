@@ -91,6 +91,14 @@ public enum QuickSlotIdx
     QuickSlot7 = 7
 }
 
+public enum PlayerStat
+{
+    Health,
+    Stamina,
+    Energy,
+    Hydration,
+}
+
 public enum AudioType
 {
     Master, BGM, SFX, //Voice?...

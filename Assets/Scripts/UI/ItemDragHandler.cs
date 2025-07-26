@@ -24,7 +24,7 @@ namespace UI
         private bool _isRotated;
 
         private InventoryUIPresenter _inventoryUIPresenter;
-        private ItemUIManager _itemUIManager;
+        private ItemUI _itemUI;
 
         public Guid InstanceID { private set; get; }
 

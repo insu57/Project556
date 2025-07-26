@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a45b0ce3f01a934b9ddbebf8ea6757e, type: 3}
-  m_Name: M855
+  m_Name: 45ACP FMJ
   m_EditorClassIdentifier: 
-  ammoCaliber: 0
-  ammoCategory: 1
-  itemID: ammo_556x45_01
-  itemName: 'M855 5.56x45mm '
-  itemSprite: {fileID: -8238214526966065350, guid: b722f89953a25d54aa1f0b9cce48199b, type: 3}
+  ammoCaliber: 3
+  ammoCategory: 0
+  itemID: ammo_45acp_01
+  itemName: FMJ .45ACP
+  itemSprite: {fileID: 782092522669976558, guid: 9514c52afd7de53459a6da9641e384ee, type: 3}
   itemWidth: 1
   itemHeight: 1
   itemWeight: 0
-  maxStackAmount: 60
+  maxStackAmount: 80
   ammoDamage: 0
   ammoPiercing: 0
   velocityModify: 0

@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 public class InventoryUIPresenter : MonoBehaviour
 {
     private InventoryManager _inventoryManager;
-    private ItemUIManager _itemUIManager;
+    private ItemUI _itemUI;
     private UIControl _uiControl;
 
     private readonly Dictionary<RectTransform, CellData> _gearSlotsMap = new();
@@ -17,7 +17,7 @@ public class InventoryUIPresenter : MonoBehaviour
     private readonly Dictionary<RectTransform, Inventory> _invenMap = new();
     private readonly Dictionary<Guid, ItemDragHandler> _itemDragHandlers = new();
 
-    public float CellSize => _itemUIManager.CellSize;
+    public float CellSize => _itemUI.CellSize;
     //ItemDrag
     private ItemInstance _currentDragItem; //현재 드래그 중인 아이템
     private bool _rotatedOnClick; //클릭 시 회전 상태
@@ -43,40 +43,40 @@ public class InventoryUIPresenter : MonoBehaviour
     private void Awake()
     {
         TryGetComponent(out _inventoryManager);
-        _itemUIManager = FindFirstObjectByType<ItemUIManager>();
-        _itemUIManager.TryGetComponent(out _uiControl); //개선필요
+        _itemUI = FindFirstObjectByType<ItemUI>();
+        _itemUI.TryGetComponent(out _uiControl); //개선필요
     }
 
     private void Start()
     {
         //Left Panel Init
-        _gearSlotsMap[_itemUIManager.HeadwearSlotRT] = _inventoryManager.HeadwearSlot;
-        _gearSlotsMap[_itemUIManager.EyewearSlotRT] = _inventoryManager.EyewearSlot;
-        _gearSlotsMap[_itemUIManager.BodyArmorSlotRT] = _inventoryManager.BodyArmorSlot;
-        _gearSlotsMap[_itemUIManager.PWeaponSlotRT] = _inventoryManager.PrimaryWeaponSlot;
-        _gearSlotsMap[_itemUIManager.SWeaponSlotRT] = _inventoryManager.SecondaryWeaponSlot;
+        _gearSlotsMap[_itemUI.HeadwearSlotRT] = _inventoryManager.HeadwearSlot;
+        _gearSlotsMap[_itemUI.EyewearSlotRT] = _inventoryManager.EyewearSlot;
+        _gearSlotsMap[_itemUI.BodyArmorSlotRT] = _inventoryManager.BodyArmorSlot;
+        _gearSlotsMap[_itemUI.PWeaponSlotRT] = _inventoryManager.PrimaryWeaponSlot;
+        _gearSlotsMap[_itemUI.SWeaponSlotRT] = _inventoryManager.SecondaryWeaponSlot;
         
-        _gearRTMap[_inventoryManager.HeadwearSlot] = _itemUIManager.HeadwearSlotRT;
-        _gearRTMap[_inventoryManager.EyewearSlot] = _itemUIManager.EyewearSlotRT;
-        _gearRTMap[_inventoryManager.BodyArmorSlot] = _itemUIManager.BodyArmorSlotRT;
-        _gearRTMap[_inventoryManager.PrimaryWeaponSlot] = _itemUIManager.PWeaponSlotRT;
-        _gearRTMap[_inventoryManager.SecondaryWeaponSlot] = _itemUIManager.SWeaponSlotRT;
+        _gearRTMap[_inventoryManager.HeadwearSlot] = _itemUI.HeadwearSlotRT;
+        _gearRTMap[_inventoryManager.EyewearSlot] = _itemUI.EyewearSlotRT;
+        _gearRTMap[_inventoryManager.BodyArmorSlot] = _itemUI.BodyArmorSlotRT;
+        _gearRTMap[_inventoryManager.PrimaryWeaponSlot] = _itemUI.PWeaponSlotRT;
+        _gearRTMap[_inventoryManager.SecondaryWeaponSlot] = _itemUI.SWeaponSlotRT;
 
         //Mid Panel Init
-        _gearSlotsMap[_itemUIManager.RigSlotRT] = _inventoryManager.ChestRigSlot;
-        _gearSlotsMap[_itemUIManager.BackpackSlotRT] = _inventoryManager.BackpackSlot;
-        _gearRTMap[_inventoryManager.ChestRigSlot] = _itemUIManager.RigSlotRT;
-        _gearRTMap[_inventoryManager.BackpackSlot] = _itemUIManager.BackpackSlotRT;
+        _gearSlotsMap[_itemUI.RigSlotRT] = _inventoryManager.ChestRigSlot;
+        _gearSlotsMap[_itemUI.BackpackSlotRT] = _inventoryManager.BackpackSlot;
+        _gearRTMap[_inventoryManager.ChestRigSlot] = _itemUI.RigSlotRT;
+        _gearRTMap[_inventoryManager.BackpackSlot] = _itemUI.BackpackSlotRT;
         for (int i = 0; i < 4; i++)
         {
-            _gearSlotsMap[_itemUIManager.PocketsSlotRT[i]] = _inventoryManager.PocketSlots[i];
-            _gearRTMap[_inventoryManager.PocketSlots[i]] = _itemUIManager.PocketsSlotRT[i];
+            _gearSlotsMap[_itemUI.PocketsSlotRT[i]] = _inventoryManager.PocketSlots[i];
+            _gearRTMap[_inventoryManager.PocketSlots[i]] = _itemUI.PocketsSlotRT[i];
         }
 
         //Inventory 추가 **Inventory 초기 상태는 null!
-        _invenMap[_itemUIManager.RigInvenParent] = null;
-        _invenMap[_itemUIManager.BackpackInvenParent] = null;
-        _invenMap[_itemUIManager.LootSlotParent] = null;
+        _invenMap[_itemUI.RigInvenParent] = null;
+        _invenMap[_itemUI.BackpackInvenParent] = null;
+        _invenMap[_itemUI.LootSlotParent] = null;
         
         //test
         HandleOnInitInventory(crate01Test, null); //Loot
@@ -84,8 +84,8 @@ public class InventoryUIPresenter : MonoBehaviour
         SetItemToInventory(itemDataTest);
         SetStackableItem(bullet556TestData, 50);
         SetStackableItem(bullet556TestData, 10);
-        SetGearItem(backpackTestData, _itemUIManager.BackpackSlotRT);
-        SetGearItem(rigTestData, _itemUIManager.RigSlotRT);
+        SetGearItem(backpackTestData, _itemUI.BackpackSlotRT);
+        SetGearItem(rigTestData, _itemUI.RigSlotRT);
         SetItemToInventory(rigTanTestData);
     }
 
@@ -103,8 +103,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnRemoveQuickSlotItem += HandleOnRemoveQuickSlotItem;
         
         //ItemUIManager
-        _itemUIManager.OnItemContextMenuClick += HandleOnItemContextMenuClick;
-        _itemUIManager.OnCloseItemContextMenu += HandleOnCloseItemContextMenu;
+        _itemUI.OnItemContextMenuClick += HandleOnItemContextMenuClick;
+        _itemUI.OnCloseItemContextMenu += HandleOnCloseItemContextMenu;
     }
     
     private void OnDisable()
@@ -121,8 +121,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnRemoveQuickSlotItem -= HandleOnRemoveQuickSlotItem;
         
         //ItemUIManager
-        _itemUIManager.OnItemContextMenuClick -= HandleOnItemContextMenuClick;
-        _itemUIManager.OnCloseItemContextMenu -= HandleOnCloseItemContextMenu;
+        _itemUI.OnItemContextMenuClick -= HandleOnItemContextMenuClick;
+        _itemUI.OnCloseItemContextMenu -= HandleOnCloseItemContextMenu;
     }
 
     public void InitItemDragHandler(ItemDragHandler itemDrag) //아이템 줍기 등에서 생성...맵에서 상자열 때 생성...
@@ -197,10 +197,10 @@ public class InventoryUIPresenter : MonoBehaviour
     private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos)
     {
         var instanceID = itemDrag.InstanceID;
-        var slotInfo = _itemUIManager.GetItemSlotRT(mousePos);
+        var slotInfo = _itemUI.GetItemSlotRT(mousePos);
         if (!slotInfo.matchSlot) //No Match Slot...
         {
-            _itemUIManager.ClearShowAvailable();
+            _itemUI.ClearShowAvailable();
             _targetIsAvailable = false;
             return;
         }
@@ -222,7 +222,7 @@ public class InventoryUIPresenter : MonoBehaviour
         if (slotInfo.isGearSlot) //GearSlot인지 확인
         {
             _targetIsAvailable = CheckGearSlot(slotInfo.matchSlot, dragItem);
-            _itemUIManager.ShowSlotAvailable(_targetIsAvailable, slotInfo.matchSlot.position, slotInfo.matchSlot.sizeDelta);
+            _itemUI.ShowSlotAvailable(_targetIsAvailable, slotInfo.matchSlot.position, slotInfo.matchSlot.sizeDelta);
         }
         else
         {
@@ -233,7 +233,7 @@ public class InventoryUIPresenter : MonoBehaviour
     //정리?
     private void HandleOnEndDragItem(ItemDragHandler itemDrag) //아이템 드래그 End
     {
-        _itemUIManager.ClearShowAvailable();
+        _itemUI.ClearShowAvailable();
 
         //가방, 리그 등 이동할 때 고려(아이템 하위 인벤토리 관련). -> 저장은?
 
@@ -311,7 +311,7 @@ public class InventoryUIPresenter : MonoBehaviour
             var (targetPos, itemRT) = 
                 _targetInventory.MoveItem(_currentDragItem, _targetFirstIdx, _targetSlotRT, hasRotated);
             var itemSize = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y)
-                           * _itemUIManager.CellSize;
+                           * _itemUI.CellSize;
             itemDrag.SetItemDragPos(targetPos, itemSize, itemRT, _matchRT);
             return; //제거없이 이동만...
         }
@@ -347,7 +347,7 @@ public class InventoryUIPresenter : MonoBehaviour
             var (targetPos, itemRT) =
                 _targetInventory.AddItem(_currentDragItem, _targetFirstIdx, _targetSlotRT); //target인벤으로 이동
             var itemSize = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y)
-                           * _itemUIManager.CellSize;
+                           * _itemUI.CellSize;
 
             itemDrag.SetItemDragPos(targetPos, itemSize, itemRT, _matchRT);
         }
@@ -357,7 +357,7 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         if (_currentDragItem == null) return;
        
-        _itemUIManager.ClearShowAvailable();
+        _itemUI.ClearShowAvailable();
         _targetIsAvailable = false; //CellCheck 다시
         _currentDragItem.RotateItem();
 
@@ -380,7 +380,7 @@ public class InventoryUIPresenter : MonoBehaviour
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
        
-        if(inventoryRT != _itemUIManager.LootSlotParent) return; //Loot인벤이 아니면 무시
+        if(inventoryRT != _itemUI.LootSlotParent) return; //Loot인벤이 아니면 무시
       
         var lootInven = _inventoryManager.LootInventory;
         var item = lootInven.ItemDict[instanceID].item;
@@ -392,12 +392,12 @@ public class InventoryUIPresenter : MonoBehaviour
         if (backpackInven)
         {
             targetInven = backpackInven;
-            targetRT = _itemUIManager.BackpackInvenParent;
+            targetRT = _itemUI.BackpackInvenParent;
         }
         else if (rigInven)
         {
             targetInven = rigInven;
-            targetRT = _itemUIManager.RigInvenParent;
+            targetRT = _itemUI.RigInvenParent;
         }
         
         if (targetInven != null) //backpack or rig Inven
@@ -423,7 +423,7 @@ public class InventoryUIPresenter : MonoBehaviour
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
         
-        if(inventoryRT == _itemUIManager.LootSlotParent) return;
+        if(inventoryRT == _itemUI.LootSlotParent) return;
         ItemInstance item;
         if (inventoryRT)
         {
@@ -453,7 +453,7 @@ public class InventoryUIPresenter : MonoBehaviour
         //아이템 사용 시 개선?
         ItemInstance item;
         Inventory targetInven;
-        if (inventoryRT == _itemUIManager.RigInvenParent)
+        if (inventoryRT == _itemUI.RigInvenParent)
         {
             item = _inventoryManager.RigInventory.ItemDict[instanceID].item;
             targetInven = _inventoryManager.RigInventory;
@@ -472,7 +472,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 if (item.InstanceID != _inventoryManager.QuickSlotDict[idx].ID) continue; 
                 //이미 기존 퀵슬롯에 있을 때...
                 _inventoryManager.QuickSlotDict[idx] = (Guid.Empty, null);
-                _itemUIManager.ClearQuickSlot((int)idx);
+                _itemUI.ClearQuickSlot((int)idx);
                 itemDrag.ClearQuickSlotKey();
                 
                 if (idx == quickSlotIdx) return; //같은 퀵슬롯으로 Invoke(등록 해제), 새로 등록하는 하단 코드를 실행하지않음
@@ -480,7 +480,7 @@ public class InventoryUIPresenter : MonoBehaviour
             
             itemDrag.SetQuickSlotKey((int)quickSlotIdx);
             _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, targetInven);
-            _itemUIManager.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable,
+            _itemUI.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable,
                 item.ItemData.ItemSprite, item.CurrentStackAmount);
         }
     }
@@ -519,14 +519,14 @@ public class InventoryUIPresenter : MonoBehaviour
             isAvailable = item.ItemData is MedicalData or FoodData;//사용가능한 아이템 만...(의약품, 음식)..
         }
         
-        _itemUIManager.OpenItemContextMenu(itemDrag.transform.position, isAvailable, isGear);//List 설정
+        _itemUI.OpenItemContextMenu(itemDrag.transform.position, isAvailable, isGear);//List 설정
         
     }
 
     private void HandleOnCloseItemContextMenu()
     {
         _currentCotextMenuItem = null;
-        _itemUIManager.CloseItemContextMenu();
+        _itemUI.CloseItemContextMenu();
     }
     
     private void HandleOnItemContextMenuClick(ItemContextType contextType)
@@ -536,7 +536,7 @@ public class InventoryUIPresenter : MonoBehaviour
         switch (contextType)
         {
             case ItemContextType.Info:
-                _itemUIManager.OpenItemInfo(_currentCotextMenuItem);
+                _itemUI.OpenItemInfo(_currentCotextMenuItem);
                 break;
             case ItemContextType.Use:
                 //use
@@ -559,7 +559,7 @@ public class InventoryUIPresenter : MonoBehaviour
         if(itemDrag.InventoryRT) item = _invenMap[itemDrag.InventoryRT].ItemDict[id].item;
         else item = _inventoryManager.ItemDict[id].item;
         
-        _itemUIManager.OpenItemInfo(item);
+        _itemUI.OpenItemInfo(item);
     }
     
     private bool CheckGearSlot(RectTransform matchRT, ItemInstance dragItem)
@@ -629,7 +629,7 @@ public class InventoryUIPresenter : MonoBehaviour
         //간소화?
         var (firstIdx, firstIdxPos, mathSlotRT, status, cellCount, targetCellItemID) =
             targetInven.CheckSlot(mousePos, dragItem);
-        var cell = cellCount * _itemUIManager.CellSize;
+        var cell = cellCount * _itemUI.CellSize;
 
         bool isAvailable = false;
 
@@ -644,7 +644,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 break;
         }
 
-        _itemUIManager.ShowSlotAvailable(isAvailable, firstIdxPos, cell);
+        _itemUI.ShowSlotAvailable(isAvailable, firstIdxPos, cell);
         if (isAvailable)
         {
             _targetInventory = targetInven;
@@ -672,7 +672,7 @@ public class InventoryUIPresenter : MonoBehaviour
             instanceID = item.InstanceID;
         }
 
-        var inventory = _itemUIManager.SetInventorySlot(inventoryPrefab, gearType, instanceID, true);
+        var inventory = _itemUI.SetInventorySlot(inventoryPrefab, gearType, instanceID, true);
 
         OnSetInventory(item, gearType, inventory);//인벤토리 Set
     }
@@ -682,7 +682,7 @@ public class InventoryUIPresenter : MonoBehaviour
         var inventory = item.ItemInventory;
         var gearType = item.GearType;
         var instanceID = item.InstanceID;
-        _itemUIManager.SetInventorySlot(inventory.gameObject, gearType, instanceID, false);
+        _itemUI.SetInventorySlot(inventory.gameObject, gearType, instanceID, false);
         
         OnSetInventory(item, gearType, inventory);
     }
@@ -694,17 +694,17 @@ public class InventoryUIPresenter : MonoBehaviour
             case GearType.ArmoredRig:
             case GearType.UnarmoredRig:
                 _inventoryManager.SetInventoryData(inventory, gearType);
-                _invenMap[_itemUIManager.RigInvenParent] = inventory;
+                _invenMap[_itemUI.RigInvenParent] = inventory;
                 item?.SetItemInventory(inventory);
                 break;
             case GearType.Backpack:
                 _inventoryManager.SetInventoryData(inventory, gearType);
-                _invenMap[_itemUIManager.BackpackInvenParent] = inventory;
+                _invenMap[_itemUI.BackpackInvenParent] = inventory;
                 item?.SetItemInventory(inventory);
                 break;
             case GearType.None: //LootInventory
                 _inventoryManager.SetInventoryData(inventory, gearType);
-                _invenMap[_itemUIManager.LootSlotParent] = inventory;
+                _invenMap[_itemUI.LootSlotParent] = inventory;
                
                 break;
         }
@@ -723,7 +723,7 @@ public class InventoryUIPresenter : MonoBehaviour
             { ItemDragAction.SetQuickSlot, _uiControl.SetQuickSlotAction }
         };
         
-        itemDragHandler.Init(item, this, itemDragActionMap, _itemUIManager.transform);;
+        itemDragHandler.Init(item, this, itemDragActionMap, _itemUI.transform);;
         
         if (item.IsStackable) //개선?
         {
@@ -753,16 +753,16 @@ public class InventoryUIPresenter : MonoBehaviour
     {
         var itemDragHandlerInstance = InitItemDragHandler(item);
         
-        Vector2 size = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * _itemUIManager.CellSize;
+        Vector2 size = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * _itemUI.CellSize;
         
         switch (inventoryType)
         {
             case GearType.ArmoredRig: 
             case GearType.UnarmoredRig:
-                itemDragHandlerInstance.SetItemDragPos(pos, size, itemRT, _itemUIManager.RigInvenParent);
+                itemDragHandlerInstance.SetItemDragPos(pos, size, itemRT, _itemUI.RigInvenParent);
                 break;
             case GearType.Backpack:
-                itemDragHandlerInstance.SetItemDragPos(pos, size, itemRT, _itemUIManager.BackpackInvenParent);
+                itemDragHandlerInstance.SetItemDragPos(pos, size, itemRT, _itemUI.BackpackInvenParent);
                 break;
             case GearType.None:
                 //Unavailable 표시 -> UI Manager
@@ -794,7 +794,7 @@ public class InventoryUIPresenter : MonoBehaviour
         {
             itemDrag.ClearQuickSlotKey();
         }
-        _itemUIManager.ClearQuickSlot((int)idx);
+        _itemUI.ClearQuickSlot((int)idx);
     }
     
     
@@ -810,10 +810,10 @@ public class InventoryUIPresenter : MonoBehaviour
         
         var itemDrag = InitItemDragHandler(invenItem); 
         
-        var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUIManager.CellSize;
+        var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUI.CellSize;
         
         var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);
-        itemDrag.SetItemDragPos(pos, size,itemRT,_itemUIManager.LootSlotParent);
+        itemDrag.SetItemDragPos(pos, size,itemRT,_itemUI.LootSlotParent);
     }
 
     private void SetStackableItem(BaseItemDataSO itemData, int stackAmount)
@@ -828,10 +828,10 @@ public class InventoryUIPresenter : MonoBehaviour
         var invenItem = ItemInstance.CreateItemInstance(itemData);
         var itemDrag = InitItemDragHandler(invenItem);
         
-        var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUIManager.CellSize;
+        var size = new Vector2(invenItem.ItemCellCount.x, invenItem.ItemCellCount.y) *  _itemUI.CellSize;
         
         var (pos,itemRT) = inventory.AddItem(invenItem, firstIdx, slotRT);
-        itemDrag.SetItemDragPos(pos, size, itemRT,_itemUIManager.LootSlotParent);
+        itemDrag.SetItemDragPos(pos, size, itemRT,_itemUI.LootSlotParent);
       
         invenItem.SetStackAmount(stackAmount);
         itemDrag.SetStackAmountText(stackAmount);
