@@ -44,13 +44,14 @@ public class InventoryManager : MonoBehaviour
     public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddFieldItemToInventory;
     public event Action<Guid, int> OnUpdateItemStack;
     public event Action<Guid, bool, int> OnUpdateWeaponItemMagCount;
-    public event Action<Guid> OnRemoveItem;
+    public event Action<Guid> OnRemoveItemFromPlayer;
     public event Action<Guid, QuickSlotIdx> OnRemoveQuickSlotItem;
     
     //PlayerManager
     public event Action<float> OnUpdateArmorAmount;
     public event Action<EquipWeaponIdx> OnUnequipWeapon;
-    
+    public event Action<StatAdjustAmount, float> OnItemEffectStatAdjust;
+    public event Action<StatEffectPerSecond> OnItemEffectStatPerSecond;
     
     private void Awake()
     {
@@ -130,7 +131,6 @@ public class InventoryManager : MonoBehaviour
     public void SetGearItem(CellData gearSlot, ItemInstance item)
     {
         ItemDict[item.InstanceID] = (item, gearSlot);
-        Debug.Log($"Setting item : {item.ItemData.ItemName}, {item.InstanceID}, Count : {ItemDict.Count}");
         gearSlot.SetEmpty(false, item.InstanceID);
         
         SetGearItemData(gearSlot, item);
@@ -153,7 +153,7 @@ public class InventoryManager : MonoBehaviour
         OnUpdateArmorAmount?.Invoke(GetTotalArmorAmount());
     }
 
-    public void RemoveGearItem(CellData gearSlot, Guid itemID)
+    public void RemoveGearItem(Guid itemID)
     {
         var gearType = ItemDict[itemID].item.GearType;
         
@@ -191,7 +191,7 @@ public class InventoryManager : MonoBehaviour
                 break;
             }
         }
-
+        var gearSlot =  ItemDict[itemID].cell;
         ItemDict.Remove(itemID);
         gearSlot.SetEmpty(true, Guid.Empty);
         SetGearItemData(gearSlot, null);
@@ -216,7 +216,52 @@ public class InventoryManager : MonoBehaviour
         OnEquipFieldItem?.Invoke(gearSlot, item);
     }
 
-    public float GetTotalArmorAmount()
+    public void UseQuickSlotItem(QuickSlotIdx idx)
+    {
+        var (id, inventory) = QuickSlotDict[idx];
+        
+        UseItem(id, inventory);
+    }
+
+    public void UseItem(Guid id, Inventory inventory)
+    {
+        ItemInstance item;
+        if (!inventory) item = ItemDict[id].item;
+        else  item = inventory.ItemDict[id].item;
+
+        if (item.CurrentStackAmount > 1)
+        {
+            item.AdjustStackAmount(-1);
+            OnUpdateItemStack?.Invoke(id, item.CurrentStackAmount);
+        }
+        else
+        {
+            if(!inventory) RemoveGearItem(id);
+            else inventory.RemoveItem(id, false);
+            
+            OnRemoveItemFromPlayer?.Invoke(id);
+        }
+        
+        //effect
+        if (item.ItemData is IConsumableItem consumableItem)
+        {
+            foreach (var adjustAmount in consumableItem.AdjustAmount)
+            {
+                OnItemEffectStatAdjust?.Invoke(adjustAmount, consumableItem.UseDuration);
+            }
+
+            foreach (var effectPerSecond in consumableItem.EffectPerSecond)
+            {
+                OnItemEffectStatPerSecond?.Invoke(effectPerSecond); //초당효과 중복 제한...
+            }
+            
+        }
+        //버그 플레이어창 - 설정창, 플레이어창 초기화안됨...
+        
+        //추가 효과.(초당 효과 몇초동안(600초동안 스태미나 회복량 증가), 상태이상회복(출혈 등), 상태이상추가(취기 등)) 
+    }
+
+    private float GetTotalArmorAmount()
     {
         float totalArmor = 0;
         if(HeadwearItem is { ItemData: GearData headwearData }) totalArmor += headwearData.ArmorAmount;
@@ -241,8 +286,7 @@ public class InventoryManager : MonoBehaviour
     
     //QuickSlot...
 
-    public (bool canReload, int reloadAmmo) 
-        LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo, Guid weaponID) //탄종구분 - 탄 구분(zero sivert처럼)?
+    public (bool canReload, int reloadAmmo) LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo) //탄종구분 - 탄 구분(zero sivert처럼)?
     {
         int reloadAmmo = 0;
         if (RigInventory)
@@ -270,7 +314,7 @@ public class InventoryManager : MonoBehaviour
                     Debug.Log($"Rig, less stack : {ammoData.ItemName}, {neededAmmo}, {stackAmount}");
                     neededAmmo -= stackAmount; //요구치 스택만큼 감소
                     reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
-                    OnRemoveItem?.Invoke(item.InstanceID); //아이템 제거
+                    OnRemoveItemFromPlayer?.Invoke(item.InstanceID); //아이템 제거
                     RigInventory.ItemDict.Remove(item.InstanceID); //ItemDict제거, CellData 초기화...
                     cell.SetEmpty(true, Guid.Empty);
                 }
@@ -295,7 +339,7 @@ public class InventoryManager : MonoBehaviour
             //item 삭제...
             neededAmmo -= stackAmount; //요구치 스택만큼 감소
             reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
-            OnRemoveItem?.Invoke(item.InstanceID); //아이템 제거
+            OnRemoveItemFromPlayer?.Invoke(item.InstanceID); //아이템 제거
             ItemDict.Remove(item.InstanceID);
             pocket.SetEmpty(true, Guid.Empty);
         }

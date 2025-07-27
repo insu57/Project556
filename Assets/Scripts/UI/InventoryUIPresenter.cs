@@ -99,7 +99,7 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnAddFieldItemToInventory += HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
         _inventoryManager.OnUpdateWeaponItemMagCount += HandleOnUpdateWeaponItemMagCount;
-        _inventoryManager.OnRemoveItem += HandleOnRemoveItemHandler;
+        _inventoryManager.OnRemoveItemFromPlayer += HandleOnRemoveItemHandler;
         _inventoryManager.OnRemoveQuickSlotItem += HandleOnRemoveQuickSlotItem;
         
         //ItemUIManager
@@ -117,7 +117,7 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnAddFieldItemToInventory -= HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack -= HandleOnUpdateItemStack;
         _inventoryManager.OnUpdateWeaponItemMagCount -= HandleOnUpdateWeaponItemMagCount;
-        _inventoryManager.OnRemoveItem -= HandleOnRemoveItemHandler;
+        _inventoryManager.OnRemoveItemFromPlayer -= HandleOnRemoveItemHandler;
         _inventoryManager.OnRemoveQuickSlotItem -= HandleOnRemoveQuickSlotItem;
         
         //ItemUIManager
@@ -281,7 +281,7 @@ public class InventoryUIPresenter : MonoBehaviour
                 if (!originInvenRT) //GearSlot
                 {
                     var originCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
-                    _inventoryManager.RemoveGearItem(originCell, _currentDragItem.InstanceID); //drag아이템 기존 슬롯에서 제거
+                    _inventoryManager.RemoveGearItem(_currentDragItem.InstanceID); //drag아이템 기존 슬롯에서 제거
                 }
                 else //Inventory
                 {
@@ -318,9 +318,9 @@ public class InventoryUIPresenter : MonoBehaviour
         
         if (!originInvenRT) //GearSlot
         {
-            var originGearCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
+            //var originGearCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
 
-            _inventoryManager.RemoveGearItem(originGearCell, _currentDragItem.InstanceID); //기존 GearSlot에서 제거
+            _inventoryManager.RemoveGearItem(_currentDragItem.InstanceID); //기존 GearSlot에서 제거
 
             //rig, backpack 장착해제 -> 인벤토리 해제...
         }
@@ -432,11 +432,7 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         else item = _inventoryManager.ItemDict[instanceID].item;
         
-        //메서드로?
-        if(inventoryRT) _invenMap[inventoryRT].RemoveItem(instanceID, false);
-        else _inventoryManager.RemoveGearItem(_inventoryManager.ItemDict[instanceID].cell, instanceID);
-        
-        HandleOnRemoveItemHandler(instanceID);
+        RemoveItem(instanceID);
         
         ItemPickUp itemPickUp =  ObjectPoolingManager.Instance.GetItemPickUp(); //Position?
         itemPickUp.transform.position = gameObject.transform.position + new Vector3(0, .5f, 0);
@@ -465,7 +461,7 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         else return;
         
-        if (item.ItemData is MedicalData or FoodData)
+        if (item.ItemData is IConsumableItem)
         {
             for (var idx = QuickSlotIdx.QuickSlot4; idx <= QuickSlotIdx.QuickSlot7; idx++)
             {
@@ -480,7 +476,7 @@ public class InventoryUIPresenter : MonoBehaviour
             
             itemDrag.SetQuickSlotKey((int)quickSlotIdx);
             _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, targetInven);
-            _itemUI.UpdateQuickSlot((int)quickSlotIdx, item.IsStackable,
+            _itemUI.SetQuickSlot((int)quickSlotIdx, item.IsStackable,
                 item.ItemData.ItemSprite, item.CurrentStackAmount);
         }
     }
@@ -540,6 +536,9 @@ public class InventoryUIPresenter : MonoBehaviour
                 break;
             case ItemContextType.Use:
                 //use
+                var inventoryRT = itemDrag.InventoryRT;
+                var inventory = inventoryRT ? _invenMap[inventoryRT] : null;
+                _inventoryManager.UseItem(instanceID, inventory);
                 break;
             case ItemContextType.Equip:
                 var cell = _inventoryManager.CheckCanEquipItem(_currentCotextMenuItem.GearType);
@@ -551,6 +550,16 @@ public class InventoryUIPresenter : MonoBehaviour
         }
     }
 
+    private void RemoveItem(Guid instanceID)
+    {
+        //var instanceID = item.InstanceID;
+        var itemDrag = _itemDragHandlers[instanceID];
+        var inventoryRT = itemDrag.InventoryRT;
+        if(!inventoryRT) _inventoryManager.RemoveGearItem(instanceID);
+        else _invenMap[inventoryRT].RemoveItem(instanceID, false);
+        HandleOnRemoveItemHandler(instanceID);
+    }
+    
     private void HandleOnShowItemInfo(ItemDragHandler itemDrag)
     {
         var id = itemDrag.InstanceID;

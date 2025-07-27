@@ -285,12 +285,17 @@ namespace UI
             return inventory;
         }
 
-        public void UpdateQuickSlot(int idx, bool isStackable, Sprite itemSprite, int count)
+        public void SetQuickSlot(int idx, bool isStackable, Sprite itemSprite, int count)
         {
             _quickSlotDict[idx].img.sprite = itemSprite;
             _quickSlotDict[idx].img.enabled = true;
             if (!isStackable) return;
             _quickSlotDict[idx].txt.enabled = true;
+            _quickSlotDict[idx].txt.text = count.ToString();
+        }
+
+        public void UpdateQuickSlotCount(int idx, int count)
+        {
             _quickSlotDict[idx].txt.text = count.ToString();
         }
 
@@ -373,14 +378,9 @@ namespace UI
                             infoTxt += $"탄종: {EnumManager.AmmoCaliberToString(ammoData.AmmoCaliber)}\n";
                             //세부 스탯...
                             break;
-                        case MedicalData medicalData:
-                            infoTxt += $"체력 회복량: {medicalData.HealAmount}\n";
+                        case IConsumableItem consumableItem:
+                            //infoTxt += $"체력 회복량: {medicalData.HealAmount}\n";
                             //상태 이상 회복 등
-                            break;
-                        case FoodData foodData:
-                            if(foodData.EnergyAmount != 0) infoTxt += $"에너지 회복량: {foodData.EnergyAmount}\n";
-                            if (foodData.HydrationAmount != 0) infoTxt += $"수분 회복량: {foodData.HydrationAmount}\n";
-                            //추가?
                             break;
                     }
                     break;

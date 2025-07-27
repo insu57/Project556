@@ -4467,8 +4467,10 @@ MonoBehaviour:
   playerStamina: 100
   playerEnergy: 100
   playerHydration: 100
-  energyPerSecond: 0.1
-  hydrationPerSecond: 0.3
+  healthPerSecond: 0
+  staminaPerSecond: 0
+  energyPerSecond: -0.1
+  hydrationPerSecond: -0.3
 --- !u!50 &7135259940196754618
 Rigidbody2D:
   serializedVersion: 5

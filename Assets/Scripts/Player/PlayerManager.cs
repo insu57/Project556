@@ -84,6 +84,8 @@ namespace Player
             //인벤토리
             _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
+            _inventoryManager.OnItemEffectStatAdjust += HandleOnItemEffectStatAdjust;
+            _inventoryManager.OnItemEffectStatPerSecond += HandleOnItemEffectStatPerSecond;
         }
         
         private void OnDisable()
@@ -98,8 +100,11 @@ namespace Player
             _playerControl.OnReloadEndAction -= HandleOnReloadEnd;
             
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
+            
             _inventoryManager.OnUpdateArmorAmount -= HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon -= HandleOnUnequipWeapon;
+            _inventoryManager.OnItemEffectStatAdjust -= HandleOnItemEffectStatAdjust;
+            _inventoryManager.OnItemEffectStatPerSecond -= HandleOnItemEffectStatPerSecond;
         }
 
         private void HandleOnShowMuzzleFlash()
@@ -200,7 +205,7 @@ namespace Player
                 }
             
                 var (canReload, reloadAmmo)  = 
-                    _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill, _currentWeaponItem.InstanceID);
+                    _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
 
                 if (canReload)
                 {
@@ -297,9 +302,9 @@ namespace Player
         private void HandleOnUseQuickSlot(QuickSlotIdx slotIdx)
         {
             if(!_inventoryManager.QuickSlotDict.TryGetValue(slotIdx, out var quickSlotInfo)) return;
-            var (id, inventory) = quickSlotInfo;
-            var (item, _, _) = inventory.ItemDict[id];
-            //USE...
+            var (id, _) = quickSlotInfo;
+            if(id == Guid.Empty) return;
+            _inventoryManager.UseQuickSlotItem(slotIdx);
         }
 
         private void ScrollItemPickup(float scrollDeltaY)
@@ -313,7 +318,17 @@ namespace Player
       
             OnScrollItemPickup?.Invoke(_currentItemInteractIdx);
         }
-    
+
+        private void HandleOnItemEffectStatAdjust(StatAdjustAmount statAdjustAmount, float useDuration)
+        {
+            _playerData.AdjustPlayerStat(statAdjustAmount, useDuration);
+        }
+
+        private void HandleOnItemEffectStatPerSecond(StatEffectPerSecond statEffectPerSecond)
+        {
+            _playerData.AdjustStatPerSecond(statEffectPerSecond);
+        }
+        
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Item"))

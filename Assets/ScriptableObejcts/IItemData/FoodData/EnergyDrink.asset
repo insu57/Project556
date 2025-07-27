@@ -10,20 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cfdb44e271d525a4aab4665681099d1f, type: 3}
-  m_Name: Bread
+  m_Name: EnergyDrink
   m_EditorClassIdentifier: 
-  itemID: food_01
-  itemName: "\uBE75"
-  adjustAmount:
-  - stat: 2
-    amount: 50
-  - stat: 3
-    amount: -10
-  effectPerSecond: []
-  useDuration: 1.5
-  itemSprite: {fileID: 21300052, guid: f2b4b5d47add6824ebe9907634865656, type: 3}
-  itemWidth: 2
-  itemHeight: 1
+  itemID: food_02
+  itemName: "\uC5D0\uB108\uC9C0 \uB4DC\uB9C1\uD06C"
+  adjustAmount: []
+  effectPerSecond:
+  - stat: 1
+    amountPerSecond: 10
+    effectDuration: 60
+  useDuration: 1
+  itemSprite: {fileID: 21300040, guid: f2b4b5d47add6824ebe9907634865656, type: 3}
+  itemWidth: 1
+  itemHeight: 2
   itemWeight: 0
-  isStackable: 0
+  isStackable: 1
   maxStackAmount: 2

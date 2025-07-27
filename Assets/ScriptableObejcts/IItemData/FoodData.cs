@@ -1,13 +1,14 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "FoodData", menuName = "Scriptable Objects/FoodData")]
-public class FoodData : BaseItemDataSO
+public class FoodData : BaseItemDataSO, IConsumableItem
 {
     [SerializeField] private string itemID;
     [SerializeField] private string itemName;
     
-    [SerializeField] private float hydrationAmount;
-    [SerializeField] private float energyAmount;
+    [SerializeField] private StatAdjustAmount[] adjustAmount;
+    [SerializeField] private StatEffectPerSecond[] effectPerSecond;
+    [SerializeField] private float useDuration = 1;
     
     [SerializeField] private Sprite itemSprite;
    
@@ -28,6 +29,7 @@ public class FoodData : BaseItemDataSO
     public override bool IsConsumable => true;
     public override int MaxStackAmount => maxStackAmount;
     
-    public float HydrationAmount => hydrationAmount;
-    public float EnergyAmount => energyAmount;
+    public StatAdjustAmount[] AdjustAmount =>  adjustAmount;
+    public StatEffectPerSecond[] EffectPerSecond => effectPerSecond;
+    public float UseDuration => useDuration;
 }

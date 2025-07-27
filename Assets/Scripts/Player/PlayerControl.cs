@@ -282,7 +282,6 @@ namespace Player
 
       private void OnOpenSetting(InputAction.CallbackContext context)
       {
-         Debug.Log("OnOpenSetting- ESC"); //설정창
          BlockControl(true);
          _uiControl.OnOpenSettingsUI();
       }

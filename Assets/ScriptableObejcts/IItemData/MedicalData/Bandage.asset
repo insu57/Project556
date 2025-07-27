@@ -15,9 +15,14 @@ MonoBehaviour:
   itemID: medical_health_01
   itemName: "\uBD95\uB300"
   healAmount: 30
+  adjustAmount:
+  - stat: 0
+    amount: 30
+  effectPerSecond: []
+  useDuration: 2
   itemSprite: {fileID: 4675070254402442190, guid: f92d162190d5d644cad84ed3378ca43c, type: 3}
-  pickUpColliderSize: {x: 0, y: 0}
   itemWidth: 1
   itemHeight: 1
+  itemWeight: 0
   isStackable: 0
   maxStackAmount: 1
