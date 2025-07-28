@@ -6,10 +6,12 @@ namespace UI
     public class SettingUI : MonoBehaviour
     {
         [SerializeField] private GameObject settingUI;
+        public bool SettingUIOpen => settingUI.activeSelf;
         [SerializeField] private Slider masterVolumeSlider;
         [SerializeField] private Slider bgmVolumeSlider;
         [SerializeField] private Slider sfxVolumeSlider;
 
+        
         public void OpenSettingUI(bool isOpen)
         {
             settingUI.SetActive(isOpen);

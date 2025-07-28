@@ -218,12 +218,12 @@ public class InventoryManager : MonoBehaviour
 
     public void UseQuickSlotItem(QuickSlotIdx idx)
     {
-        var (id, inventory) = QuickSlotDict[idx];
+        var (id, inventory) = QuickSlotDict[idx]; //해당 퀵슬롯 정보
         
         UseItem(id, inventory);
     }
 
-    public void UseItem(Guid id, Inventory inventory)
+    public void UseItem(Guid id, Inventory inventory)//아이템 사용
     {
         ItemInstance item;
         if (!inventory) item = ItemDict[id].item;

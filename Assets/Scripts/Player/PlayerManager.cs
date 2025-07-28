@@ -303,7 +303,7 @@ namespace Player
         {
             if(!_inventoryManager.QuickSlotDict.TryGetValue(slotIdx, out var quickSlotInfo)) return;
             var (id, _) = quickSlotInfo;
-            if(id == Guid.Empty) return;
+            if(id == Guid.Empty) return; //빈 퀵슬롯이면 return
             _inventoryManager.UseQuickSlotItem(slotIdx);
         }
 

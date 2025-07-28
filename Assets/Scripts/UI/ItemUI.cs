@@ -150,9 +150,7 @@ namespace UI
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);
         }
-
-       
-
+        
         private void OnItemContextMenu(ItemContextType contextType)
         {
             OnItemContextMenuClick?.Invoke(contextType);

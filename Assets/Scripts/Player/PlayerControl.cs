@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Cainos.LucidEditor;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -9,11 +9,12 @@ namespace Player
 {
    public class PlayerControl : MonoBehaviour
    {
-      [SerializeField] private float moveSpeed = 5f;
+      [SerializeField] private float moveSpeed = 3f;
+      [ShowInInspector] private float _currentMoveSpeed;
       [SerializeField] private float runSpeedMultiplier = 1.2f;
-      [ShowInInspector] private float _runSpeed;
+      //private float _runSpeed;
       
-      [SerializeField] private float jumpSpeed = 5f;
+      [SerializeField] private float jumpSpeed = 4f;
    
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;
@@ -22,6 +23,7 @@ namespace Player
       
       private PlayerInput _playerInput;
       private InputAction _moveAction; //개선방안?
+      private InputAction _sprintAction;
       private InputAction _jumpAction;
       private InputAction _shootAction;
       private InputAction _reloadAction;
@@ -31,8 +33,7 @@ namespace Player
       private InputAction _scrollWheelAction;
       private InputAction _changeWeaponAction;
       private InputAction _quickSlotAction;
-      
-      //private PlayerManager _playerManager;
+
       private Camera _mainCamera;
       private Rigidbody2D _rigidbody;
       private Collider2D[] _colliders;
@@ -50,6 +51,7 @@ namespace Player
       private bool _isGrounded = false;
       private bool _canClimb = false;
       private bool _canRotateArm = true;
+      private bool _isSprint = false;
 
       private enum Selector
       {
@@ -71,13 +73,13 @@ namespace Player
       
       private void Awake()
       {
-         //TryGetComponent(out _playerManager);
          TryGetComponent(out _rigidbody);
       
          _playerInput = GetComponent<PlayerInput>(); //PlayerInput - Player Action Map
          _playerInput.actions.Disable();
          var playerMap = _playerInput.actions.FindActionMap("Player");
          _moveAction = playerMap.FindAction("Move");
+         _sprintAction = playerMap.FindAction("Sprint");
          _jumpAction = playerMap.FindAction("Jump");
          _shootAction = playerMap.FindAction("Shoot");
          _reloadAction = playerMap.FindAction("Reload");
@@ -90,6 +92,8 @@ namespace Player
          
          _uiControl = FindAnyObjectByType<UIControl>(); //UIControl
          _uiControl.Init(this); //초기화
+         
+         _currentMoveSpeed = moveSpeed;
       }
 
       private void Start()
@@ -101,15 +105,16 @@ namespace Player
          _climbMask = LayerMask.GetMask("Climbing");
          
          _playerInput.SwitchCurrentActionMap("Player");
-         //Project-Wide Actions 비활성..., UI Input Module 사용?
          
-         _runSpeed = moveSpeed * runSpeedMultiplier; //RunSpeed 이동속도에 보정(1.25기본)
+         //_runSpeed = moveSpeed * runSpeedMultiplier; //RunSpeed 이동속도에 보정(1.25기본)
       }
 
       private void OnEnable()
       {
          _moveAction.performed += OnMove; //InputAction 이벤트처리
          _moveAction.canceled += OnMove;
+         _sprintAction.performed += OnSprint;
+         _sprintAction.canceled += OnSprint;
          _jumpAction.performed += OnJump;
          _shootAction.started += OnShoot;
          _shootAction.canceled += OnShoot;
@@ -126,6 +131,8 @@ namespace Player
       {
          _moveAction.performed -= OnMove;
          _moveAction.canceled -= OnMove;
+         _sprintAction.performed -= OnSprint;
+         _sprintAction.canceled -= OnSprint;
          _jumpAction.performed -= OnJump;
          _shootAction.started -= OnShoot;
          _shootAction.canceled -= OnShoot;
@@ -171,8 +178,6 @@ namespace Player
          if(IsUnarmed) return;//비무장 제한...
          //장전 등 몇몇 행동에서는 안움직여야한다.
          if (!_canRotateArm) return;
-
-         //bool isOneHanded = _playerManager.CheckIsOneHanded(); //한손무기-양손무기 인지 체크
 
          Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
          mousePos.z = 0;
@@ -244,10 +249,10 @@ namespace Player
    
       private void PlayerMovement() //플레이어 이동
       {
-         _rigidbody.linearVelocityX = _playerMoveVector.x * moveSpeed;
+         _rigidbody.linearVelocityX = _playerMoveVector.x * _currentMoveSpeed;
          if (_canClimb)
          {
-            _rigidbody.linearVelocityY = _playerMoveVector.y * moveSpeed; 
+            _rigidbody.linearVelocityY = _playerMoveVector.y * _currentMoveSpeed; 
             _rigidbody.gravityScale = 0;
          }
          else
@@ -333,6 +338,18 @@ namespace Player
          }
       }
 
+      private void OnSprint(InputAction.CallbackContext context)
+      {
+         if (context.performed)
+         {
+            _currentMoveSpeed = moveSpeed * runSpeedMultiplier;
+         }
+         else if (context.canceled)
+         {
+            _currentMoveSpeed = moveSpeed;
+         }
+      }
+      
       private void OnShoot(InputAction.CallbackContext ctx)
       {
          if(IsUnarmed) return;

@@ -745,7 +745,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Close",
+                    "name": "Setting",
                     "type": "Button",
                     "id": "0abd810a-bfbe-49c6-af3e-fe2ec9546af3",
                     "expectedControlType": "",
@@ -1225,7 +1225,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Close",
+                    "action": "Setting",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -7,10 +7,11 @@ namespace UI
     public class UIManager : MonoBehaviour
     {
         [SerializeField] private RectTransform playerMenu;
+        public bool PlayerMenuOpen => playerMenu.gameObject.activeSelf;
         [SerializeField] private RectTransform inventoryTab;
         [SerializeField] private RectTransform infoTab;
         [SerializeField] private RectTransform questTab;
-        private Dictionary<PlayerMenuState, RectTransform> _playerTabs = new();
+        private readonly Dictionary<PlayerMenuState, RectTransform> _playerTabs = new();
         
         [SerializeField] private Button inventoryButton;
         [SerializeField] private Button playerInfoBtn;
@@ -25,8 +26,6 @@ namespace UI
         
         private void OnEnable()
         {
-            OpenTab(PlayerMenuState.Inventory);//초기 Tab
-            
             inventoryButton.onClick.AddListener(() => OpenTab(PlayerMenuState.Inventory));
             playerInfoBtn.onClick.AddListener(() => OpenTab(PlayerMenuState.PlayerInfo));
             questBtn.onClick.AddListener(() => OpenTab(PlayerMenuState.Quest));
@@ -49,6 +48,7 @@ namespace UI
         public void OpenPlayerUI(bool isOpen) //PlayerUI
         {
             playerMenu.gameObject.SetActive(isOpen);
+            OpenTab(PlayerMenuState.Inventory);
         }
 
         private void OpenTab(PlayerMenuState state)

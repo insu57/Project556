@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemID: food_02
   itemName: "\uC5D0\uB108\uC9C0 \uB4DC\uB9C1\uD06C"
-  adjustAmount: []
+  adjustAmount:
+  - stat: 3
+    amount: 30
   effectPerSecond:
   - stat: 1
     amountPerSecond: 10

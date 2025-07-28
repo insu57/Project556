@@ -782,6 +782,13 @@ public class InventoryUIPresenter : MonoBehaviour
     private void HandleOnUpdateItemStack(Guid id, int stackAmount)
     {
         _itemDragHandlers[id].SetStackAmountText(stackAmount);
+        foreach (var (idx, (quickSlotID,_)) in _inventoryManager.QuickSlotDict)
+        {
+            if (!id.Equals(quickSlotID)) continue;
+            
+            _itemUI.UpdateQuickSlotCount((int)idx, stackAmount);
+            return;
+        }
     }
 
     private void HandleOnUpdateWeaponItemMagCount(Guid id, bool isFullyLoaded ,int magazineCount)
