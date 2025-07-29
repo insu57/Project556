@@ -9,12 +9,10 @@ namespace Player
 {
    public class PlayerControl : MonoBehaviour
    {
-      [SerializeField] private float moveSpeed = 3f;
       [ShowInInspector] private float _currentMoveSpeed;
-      [SerializeField] private float runSpeedMultiplier = 1.2f;
-      //private float _runSpeed;
-      
-      [SerializeField] private float jumpSpeed = 4f;
+      public float MoveSpeed { set; get; }
+      public float SprintSpeedMultiplier { set; get; }
+      public float JumpSpeed { set; get; } 
    
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;
@@ -51,7 +49,7 @@ namespace Player
       private bool _isGrounded = false;
       private bool _canClimb = false;
       private bool _canRotateArm = true;
-      private bool _isSprint = false;
+      //private bool _isSprint = false;
 
       private enum Selector
       {
@@ -61,8 +59,9 @@ namespace Player
       }
       
       private UIControl _uiControl;
-   
+      
       public event Action<bool> OnPlayerMove;
+      public event Action<bool> OnPlayerSprint;
       public event Action OnPlayerReload;
       public event Action OnFieldInteract;
       public event Action<float> OnScrollInteractMenu;
@@ -92,8 +91,6 @@ namespace Player
          
          _uiControl = FindAnyObjectByType<UIControl>(); //UIControl
          _uiControl.Init(this); //초기화
-         
-         _currentMoveSpeed = moveSpeed;
       }
 
       private void Start()
@@ -106,7 +103,8 @@ namespace Player
          
          _playerInput.SwitchCurrentActionMap("Player");
          
-         //_runSpeed = moveSpeed * runSpeedMultiplier; //RunSpeed 이동속도에 보정(1.25기본)
+         _currentMoveSpeed = MoveSpeed;
+        
       }
 
       private void OnEnable()
@@ -162,7 +160,7 @@ namespace Player
          PlayerMovement();
          ColliderCheck();
       }
-   
+      
       private void ColliderCheck() //FixedUpdate가 아니라 다른곳에서?
       {
          float groundCheckDistance = 0.15f;
@@ -179,6 +177,8 @@ namespace Player
          //장전 등 몇몇 행동에서는 안움직여야한다.
          if (!_canRotateArm) return;
 
+         //Debug.Log("RotateArm");
+         
          Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
          mousePos.z = 0;
 
@@ -338,15 +338,17 @@ namespace Player
          }
       }
 
-      private void OnSprint(InputAction.CallbackContext context)
+      private void OnSprint(InputAction.CallbackContext context) //달리기 로직 변경?
       {
          if (context.performed)
          {
-            _currentMoveSpeed = moveSpeed * runSpeedMultiplier;
+            _currentMoveSpeed = MoveSpeed * SprintSpeedMultiplier;
+            OnPlayerSprint?.Invoke(true);
          }
          else if (context.canceled)
          {
-            _currentMoveSpeed = moveSpeed;
+            _currentMoveSpeed = MoveSpeed;
+            OnPlayerSprint?.Invoke(false);
          }
       }
       
@@ -388,14 +390,13 @@ namespace Player
       {
          if (ctx.performed && _isGrounded) //땅에 있을 때
          {
-            _rigidbody.AddForce(new Vector2(0f, jumpSpeed), ForceMode2D.Impulse);
+            _rigidbody.AddForce(new Vector2(0f, JumpSpeed), ForceMode2D.Impulse);
          }
       }
 
       private void OnReload(InputAction.CallbackContext ctx) //재장전 입력 R키
       {
          if(IsUnarmed) return;
-         
          _canRotateArm = false; //팔회전 불가
          _canShoot = false; //사격 불가
          _inShooting = false; //사격 중인 경우 중단

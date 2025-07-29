@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ReloadAnimationBehaviour : StateMachineBehaviour
 {
-    private static readonly int IsReload = Animator.StringToHash("isReload");
+    //private static readonly int IsReload = Animator.StringToHash("isReload");
     private PlayerControl _playerControl;
     private PlayerManager _playerManager;
     private const float DefaultAnimationSpeed = 1f;
@@ -27,6 +27,6 @@ public class ReloadAnimationBehaviour : StateMachineBehaviour
     {
         _playerControl.OnReloadEnd();
         animator.speed = DefaultAnimationSpeed;
-        animator.SetBool(IsReload, false);
+        animator.SetBool(PlayerAnimatorHash.IsReload, false);
     }
 }

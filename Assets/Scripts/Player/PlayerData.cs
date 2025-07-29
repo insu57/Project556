@@ -7,6 +7,13 @@ using UnityEngine;
 public class PlayerData : MonoBehaviour, IDamageable
 {
     //SO에서 기본 수치 관리...
+    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float sprintSpeedMultiplier = 1.5f;
+    [SerializeField] private float jumpSpeed = 4f;
+    public float MoveSpeed => moveSpeed;
+    public float SprintSpeedMultiplier => sprintSpeedMultiplier;
+    public float JumpSpeed => jumpSpeed;
+    
     [SerializeField] private float playerHealth = 100f;
     [SerializeField] private float playerStamina = 100f;
     [SerializeField] private float playerEnergy = 100f;

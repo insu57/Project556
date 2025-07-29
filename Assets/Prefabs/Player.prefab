@@ -4278,7 +4278,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 3
-  runSpeedMultiplier: 1.2
+  runSpeedMultiplier: 1.5
   jumpSpeed: 4
   rightArm: {fileID: 1669731848458698949}
   leftArm: {fileID: 5413740005232500178}

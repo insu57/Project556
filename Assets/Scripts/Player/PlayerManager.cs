@@ -30,6 +30,7 @@ namespace Player
         [SerializeField] private AudioSource loopSource;
         [SerializeField] private AudioSource oneShotSource;
         public AudioSource OneShotSource => oneShotSource;
+        public float LastFootstepTime { get; set; }
         
         public event Action<bool, int> OnUpdateMagazineCountUI;
     
@@ -55,14 +56,25 @@ namespace Player
             TryGetComponent(out _playerWeapon);
             var stageManager = FindAnyObjectByType<StageManager>();
             
+            _playerControl.MoveSpeed = _playerData.MoveSpeed;
+            _playerControl.SprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
+            _playerControl.JumpSpeed = _playerData.JumpSpeed; //개선?
+            
             var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
             reloadAnimationBehaviour.Init(_playerControl, this);
-            var moveAnimationBehaviour =  _playerAnimation.UpperAnimator.GetBehaviour<MoveAnimationBehaviour>();
-            moveAnimationBehaviour.Init(this, stageManager);
+            var sprintAnimationBehaviours =  _playerAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
+
+            foreach (var behaviour in sprintAnimationBehaviours)
+            {
+                behaviour.Init(this, _playerData, stageManager);
+            }
             
             _mainCamera = Camera.main;
             _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
-            
+        }
+
+        private void Start()
+        {
             ChangeCurrentWeapon(null); //비무장 초기화
         }
 
@@ -70,6 +82,7 @@ namespace Player
         {
             //플레이어 조작
             _playerControl.OnPlayerMove += HandleOnPlayerMoveAction;
+            _playerControl.OnPlayerSprint += HandleOnPlayerSprintAction;
             _playerControl.OnPlayerReload += HandleOnPlayerReloadAction;
             _playerControl.OnFieldInteract += GetFieldItem;
             _playerControl.OnScrollInteractMenu += ScrollItemPickup;
@@ -91,6 +104,7 @@ namespace Player
         private void OnDisable()
         {
             _playerControl.OnPlayerMove -= HandleOnPlayerMoveAction;
+            _playerControl.OnPlayerSprint -= HandleOnPlayerSprintAction;
             _playerControl.OnPlayerReload -= HandleOnPlayerReloadAction;
             _playerControl.OnFieldInteract -= GetFieldItem;
             _playerControl.OnScrollInteractMenu -=  ScrollItemPickup;
@@ -130,6 +144,11 @@ namespace Player
             _playerAnimation.ChangeAnimationMove(isMove);
         }
 
+        private void HandleOnPlayerSprintAction(bool isSprint)
+        {
+            _playerAnimation.ChangeAnimationSprint(isSprint);
+        }
+        
         private void HandleOnPlayerReloadAction()
         {
             _playerAnimation.ChangeAnimationReload();
