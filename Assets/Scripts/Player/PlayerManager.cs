@@ -60,10 +60,11 @@ namespace Player
             _playerControl.SprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
             _playerControl.JumpSpeed = _playerData.JumpSpeed; //개선?
             
+            //SMB 
             var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
             reloadAnimationBehaviour.Init(_playerControl, this);
-            var sprintAnimationBehaviours =  _playerAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
-
+            var sprintAnimationBehaviours =  
+                _playerAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
             foreach (var behaviour in sprintAnimationBehaviours)
             {
                 behaviour.Init(this, _playerData, stageManager);
@@ -94,6 +95,9 @@ namespace Player
             //무기
             _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
             
+            //데이터
+            _playerData.OnStaminaEmpty += HandleOnStaminaEmpty;
+            
             //인벤토리
             _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
@@ -114,6 +118,8 @@ namespace Player
             _playerControl.OnReloadEndAction -= HandleOnReloadEnd;
             
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
+
+            _playerData.OnStaminaEmpty -= HandleOnStaminaEmpty;
             
             _inventoryManager.OnUpdateArmorAmount -= HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon -= HandleOnUnequipWeapon;
@@ -146,7 +152,15 @@ namespace Player
 
         private void HandleOnPlayerSprintAction(bool isSprint)
         {
+            if (!_playerData.CanSprint) isSprint = false;
             _playerAnimation.ChangeAnimationSprint(isSprint);
+            _playerData.SprintStaminaSpend(isSprint);
+        }
+
+        private void HandleOnStaminaEmpty()
+        {
+            _playerAnimation.ChangeAnimationSprint(false);
+            _playerData.SprintStaminaSpend(false);
         }
         
         private void HandleOnPlayerReloadAction()
@@ -340,12 +354,12 @@ namespace Player
 
         private void HandleOnItemEffectStatAdjust(StatAdjustAmount statAdjustAmount, float useDuration)
         {
-            _playerData.AdjustPlayerStat(statAdjustAmount, useDuration);
+            _playerData.ItemEffectAdjustStat(statAdjustAmount, useDuration);
         }
 
         private void HandleOnItemEffectStatPerSecond(StatEffectPerSecond statEffectPerSecond)
         {
-            _playerData.AdjustStatPerSecond(statEffectPerSecond);
+            _playerData.ItemEffectAdjustStatPerSecond(statEffectPerSecond);
         }
         
         private void OnTriggerEnter2D(Collider2D other)

@@ -21,17 +21,22 @@ public class PlayerData : MonoBehaviour, IDamageable
     [ShowInInspector]
     private readonly Dictionary<PlayerStat, (float current, float max)>  _playerStats = new();
     
-    [SerializeField] private float healthPerSecond = 0f;
-    [SerializeField] private float staminaPerSecond = 0f;
-    [SerializeField] private float energyPerSecond = -0.1f;
-    [SerializeField] private float hydrationPerSecond = -0.3f;
+    [SerializeField] private float defaultHealthPerSecond = 0f;
+    [SerializeField] private float defaultStaminaPerSecond = 5f;
+    [SerializeField] private float defaultEnergyPerSecond = -0.1f;
+    [SerializeField] private float defaultHydrationPerSecond = -0.3f;
     [ShowInInspector]
     private readonly Dictionary<PlayerStat, float> _statsPerSecond = new();
+
+    [SerializeField] private float defaultSprintStaminaPerSecond = -5f;
     
     private float _totalArmor;
     private float _totalWeights;
+
+    public bool CanSprint { private set; get; }
     
     public event Action<PlayerStat, (float current, float max)> OnPlayerStatChanged;
+    public event Action OnStaminaEmpty;
     
     private void Awake()
     {
@@ -40,10 +45,12 @@ public class PlayerData : MonoBehaviour, IDamageable
         _playerStats[PlayerStat.Energy] = (playerEnergy, playerEnergy);
         _playerStats[PlayerStat.Hydration] = (playerHydration, playerHydration);
         
-        _statsPerSecond[PlayerStat.Health] = healthPerSecond;
-        _statsPerSecond[PlayerStat.Stamina] = staminaPerSecond;
-        _statsPerSecond[PlayerStat.Energy] = energyPerSecond;
-        _statsPerSecond[PlayerStat.Hydration] = hydrationPerSecond;
+        _statsPerSecond[PlayerStat.Health] = defaultHealthPerSecond;
+        _statsPerSecond[PlayerStat.Stamina] = defaultStaminaPerSecond;
+        _statsPerSecond[PlayerStat.Energy] = defaultEnergyPerSecond;
+        _statsPerSecond[PlayerStat.Hydration] = defaultHydrationPerSecond;
+
+        CanSprint = true;
     }
 
     private void Start()
@@ -62,19 +69,19 @@ public class PlayerData : MonoBehaviour, IDamageable
         UpdatePlayerStat(PlayerStat.Hydration, _statsPerSecond[PlayerStat.Hydration] *  Time.deltaTime);
     }
 
-    public void AdjustPlayerStat(StatAdjustAmount statAdjustAmount, float useDuration)
+    public void ItemEffectAdjustStat(StatAdjustAmount statAdjustAmount, float useDuration)
     {
         var amountPerSecond = statAdjustAmount.amount / useDuration;
-        StartCoroutine(ItemEffectAdjustPerSecond(statAdjustAmount.stat, amountPerSecond, useDuration));
+        StartCoroutine(AdjustStatPerSecondCoroutine(statAdjustAmount.stat, amountPerSecond, useDuration));
     }
 
-    public void AdjustStatPerSecond(StatEffectPerSecond statEffectPerSecond)
+    public void ItemEffectAdjustStatPerSecond(StatEffectPerSecond statEffectPerSecond)
     {
-        StartCoroutine(ItemEffectAdjustPerSecond(statEffectPerSecond.stat, 
+        StartCoroutine(AdjustStatPerSecondCoroutine(statEffectPerSecond.stat, 
             statEffectPerSecond.amountPerSecond, statEffectPerSecond.effectDuration));
     }
 
-    private IEnumerator ItemEffectAdjustPerSecond(PlayerStat stat, float amountPerSecond, float duration)
+    private IEnumerator AdjustStatPerSecondCoroutine(PlayerStat stat, float amountPerSecond, float duration)
     {
         float elapsedTime = 0f;
         _statsPerSecond[stat] += amountPerSecond;
@@ -85,6 +92,19 @@ public class PlayerData : MonoBehaviour, IDamageable
         }
         _statsPerSecond[stat] -= amountPerSecond;
     }
+
+    public void SprintStaminaSpend(bool isSprint)
+    {
+        if (isSprint)
+        {
+            _statsPerSecond[PlayerStat.Stamina] = defaultSprintStaminaPerSecond;
+        }
+        else
+        {
+            _statsPerSecond[PlayerStat.Stamina] = defaultStaminaPerSecond;
+        }
+        if(!CanSprint) _statsPerSecond[PlayerStat.Stamina] = defaultStaminaPerSecond;
+    }
     
     private void UpdatePlayerStat(PlayerStat stat , float amount)
     {
@@ -94,6 +114,22 @@ public class PlayerData : MonoBehaviour, IDamageable
         if (playerStat.current > playerStat.max) playerStat.current = playerStat.max; //max보다 크다면 
         _playerStats[stat] = playerStat;
         OnPlayerStatChanged?.Invoke(stat, playerStat);
+        switch (stat)
+        {
+            case PlayerStat.Health when _playerStats[stat].current <= 0:
+                Debug.Log("Player Dead: Health");
+                break;
+            case PlayerStat.Stamina:
+            {
+                CanSprint = !(_playerStats[stat].current <= 0);
+                if(!CanSprint) OnStaminaEmpty?.Invoke();
+                break;
+            }
+            case PlayerStat.Energy:
+                break;
+            case PlayerStat.Hydration:
+                break;
+        }
     }
     
     public void UpdateTotalArmor(float armor)
@@ -103,10 +139,5 @@ public class PlayerData : MonoBehaviour, IDamageable
     public void TakeDamage(float damage) //개선?
     {
         UpdatePlayerStat(PlayerStat.Health, -damage);
-        var currentHealth = _playerStats[PlayerStat.Health].current;
-        if (currentHealth <= 0)
-        {
-            Debug.Log("Player Dead: Health");
-        }
     }
 }

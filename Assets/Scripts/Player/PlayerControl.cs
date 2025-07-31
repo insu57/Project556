@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -40,6 +41,7 @@ namespace Player
       private LayerMask _climbMask;
    
       private Vector2 _playerMoveVector;
+      [SerializeField, Space] private float airDeceleration = 5f; //공중 감속수치
       public bool IsUnarmed { set; get; }
       public bool IsOneHanded { set; get; }
       public bool IsAutomatic { set; get; }
@@ -157,18 +159,21 @@ namespace Player
       private void FixedUpdate()
       {
          //물리 기반 처리
+         //ColliderCheck();
          PlayerMovement();
-         ColliderCheck();
       }
       
-      private void ColliderCheck() //FixedUpdate가 아니라 다른곳에서?
+      private bool ColliderCheck() //FixedUpdate가 아니라 다른곳에서?
       {
-         float groundCheckDistance = 0.15f;
-         _isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, _groundMask);
+         const float groundCheckDistance = 0.25f;
+         bool isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, _groundMask);
+         
          Debug.DrawRay(transform.position, Vector2.down * groundCheckDistance, Color.blue);
          Debug.DrawRay(transform.position, Vector2.left * groundCheckDistance, Color.blue);
          Debug.DrawRay(transform.position, Vector2.right * groundCheckDistance, Color.blue);
          _canClimb = _colliders.Any(col => col.IsTouchingLayers(_climbMask));
+
+         return isGrounded;
       }
 
       private void RotateArm()
@@ -249,7 +254,17 @@ namespace Player
    
       private void PlayerMovement() //플레이어 이동
       {
-         _rigidbody.linearVelocityX = _playerMoveVector.x * _currentMoveSpeed;
+         var isGrounded = ColliderCheck();
+         
+         if(!isGrounded && _isGrounded) OnPlayerMove?.Invoke(false); //점프 시 전환(점프 애니메이션으로 바꾸어도 됨)
+         if(isGrounded && !_isGrounded && _playerMoveVector.x != 0) OnPlayerMove?.Invoke(true); //착지 시 전환
+         
+         _isGrounded = isGrounded;
+         if (_isGrounded)
+         {
+            _rigidbody.linearVelocityX = _playerMoveVector.x * _currentMoveSpeed;
+         }
+         
          if (_canClimb)
          {
             _rigidbody.linearVelocityY = _playerMoveVector.y * _currentMoveSpeed; 
@@ -340,6 +355,7 @@ namespace Player
 
       private void OnSprint(InputAction.CallbackContext context) //달리기 로직 변경?
       {
+         if (!_isGrounded) return;
          if (context.performed)
          {
             _currentMoveSpeed = MoveSpeed * SprintSpeedMultiplier;
@@ -355,7 +371,6 @@ namespace Player
       private void OnShoot(InputAction.CallbackContext ctx)
       {
          if(IsUnarmed) return;
-         
          if(!_canShoot) return;
          if (!IsAutomatic)
          {
@@ -390,7 +405,7 @@ namespace Player
       {
          if (ctx.performed && _isGrounded) //땅에 있을 때
          {
-            _rigidbody.AddForce(new Vector2(0f, JumpSpeed), ForceMode2D.Impulse);
+            _rigidbody.AddForce(new Vector2(0, JumpSpeed), ForceMode2D.Impulse); //단순하게 위로 -> moveVector...
          }
       }
 
