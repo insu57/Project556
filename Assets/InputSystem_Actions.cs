@@ -225,6 +225,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleFireMode"",
+                    ""type"": ""Button"",
+                    ""id"": ""6fa92022-3dee-4e32-a310-d7a86fb4ada4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -731,6 +740,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""QuickSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""faac7dc0-d107-4c5d-9522-a9cc50b6c04b"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleFireMode"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1508,6 +1528,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_ScrollWheel = m_Player.FindAction("ScrollWheel", throwIfNotFound: true);
         m_Player_ChangeWeapon = m_Player.FindAction("ChangeWeapon", throwIfNotFound: true);
         m_Player_QuickSlot = m_Player.FindAction("QuickSlot", throwIfNotFound: true);
+        m_Player_ToggleFireMode = m_Player.FindAction("ToggleFireMode", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1622,6 +1643,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ScrollWheel;
     private readonly InputAction m_Player_ChangeWeapon;
     private readonly InputAction m_Player_QuickSlot;
+    private readonly InputAction m_Player_ToggleFireMode;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1694,6 +1716,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @QuickSlot => m_Wrapper.m_Player_QuickSlot;
         /// <summary>
+        /// Provides access to the underlying input action "Player/ToggleFireMode".
+        /// </summary>
+        public InputAction @ToggleFireMode => m_Wrapper.m_Player_ToggleFireMode;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1764,6 +1790,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @QuickSlot.started += instance.OnQuickSlot;
             @QuickSlot.performed += instance.OnQuickSlot;
             @QuickSlot.canceled += instance.OnQuickSlot;
+            @ToggleFireMode.started += instance.OnToggleFireMode;
+            @ToggleFireMode.performed += instance.OnToggleFireMode;
+            @ToggleFireMode.canceled += instance.OnToggleFireMode;
         }
 
         /// <summary>
@@ -1820,6 +1849,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @QuickSlot.started -= instance.OnQuickSlot;
             @QuickSlot.performed -= instance.OnQuickSlot;
             @QuickSlot.canceled -= instance.OnQuickSlot;
+            @ToggleFireMode.started -= instance.OnToggleFireMode;
+            @ToggleFireMode.performed -= instance.OnToggleFireMode;
+            @ToggleFireMode.canceled -= instance.OnToggleFireMode;
         }
 
         /// <summary>
@@ -2291,6 +2323,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnQuickSlot(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleFireMode" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleFireMode(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

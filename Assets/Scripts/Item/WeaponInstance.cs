@@ -2,20 +2,21 @@ using UnityEngine;
 
 public class WeaponInstance : ItemInstance
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-
     public WeaponData WeaponData { get; }
     public int CurrentMagazineCount { get; private set; }
     private int MaxMagazineCount { get; }
     public bool HasChamber {get; private set;}
-    public WeaponSelector WeaponSelector  {get; private set;}
+    public FireMode CurrentFireMode { get; private set; }
+    private int _fireModeIdx;
+
     public WeaponInstance( WeaponData weaponData) : base(weaponData)
     {
         WeaponData = weaponData;
         
         MaxMagazineCount = weaponData.DefaultMagazineSize;
 
-        WeaponSelector = WeaponSelector.Single;
+        CurrentFireMode = weaponData.FireModes[0]; 
+        _fireModeIdx = 0;//기본 FireMode
     }
 
     public void SetMagazineCount(int magazineCount)
@@ -43,8 +44,10 @@ public class WeaponInstance : ItemInstance
         return CurrentMagazineCount > MaxMagazineCount; //총알이 없으면 약실에 없음
     }
 
-    public void ChangeSelector(WeaponSelector selector)
+    public void ToggleFireMode()
     {
-        WeaponSelector = selector; //수정?
+        _fireModeIdx++;
+        if(_fireModeIdx >= WeaponData.FireModes.Length) _fireModeIdx = 0;
+        CurrentFireMode = WeaponData.FireModes[_fireModeIdx];
     }
 }

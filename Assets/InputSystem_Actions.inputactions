@@ -139,6 +139,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ToggleFireMode",
+                    "type": "Button",
+                    "id": "6fa92022-3dee-4e32-a310-d7a86fb4ada4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -645,6 +654,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "QuickSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "faac7dc0-d107-4c5d-9522-a9cc50b6c04b",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleFireMode",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

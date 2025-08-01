@@ -57,13 +57,6 @@ public enum AmmoCategory
     Buckshot,
 }
 
-public enum WeaponSelector
-{
-    Single,
-    Auto,
-    Burst
-}
-
 public enum GearType
 {
     None,
@@ -112,7 +105,7 @@ public enum SFXType
 public enum SFX //개선...
 {
     None, FootstepDirt, FootstepRock, //Footstep
-    PistolShoot, ARShoot, PistolReload, ARReload //Weapon
+    PistolShoot, ARShoot, PistolReload, ARReload, Selector //Weapon
     //UI...
 }
 
@@ -120,6 +113,14 @@ public enum BGM
 {
     //BGM
     ForestEnvironment,
+}
+
+public enum FireMode
+{
+    SemiAuto,
+    _2Burst,
+    _3Burst,
+    FullAuto
 }
 
 public class EnumManager : MonoBehaviour

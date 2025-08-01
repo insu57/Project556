@@ -91,6 +91,7 @@ namespace Player
             _playerControl.OnQuickSlotAction += HandleOnUseQuickSlot;
             _playerControl.OnShootAction += Shoot;
             _playerControl.OnReloadEndAction += HandleOnReloadEnd;
+            _playerControl.OnToggleFireModeAction += HandleOnToggleFireMode;
                 
             //무기
             _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
@@ -116,6 +117,7 @@ namespace Player
             _playerControl.OnQuickSlotAction -= HandleOnUseQuickSlot;
             _playerControl.OnShootAction -= Shoot;
             _playerControl.OnReloadEndAction -= HandleOnReloadEnd;
+            _playerControl.OnToggleFireModeAction -= HandleOnToggleFireMode;
             
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
 
@@ -254,6 +256,14 @@ namespace Player
             }
         }
 
+        private void HandleOnToggleFireMode() //이미지로 표시(장탄수 옆에 추가)
+        {
+            if (_currentWeaponItem == null) return;
+            AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, SFX.Selector);
+            _currentWeaponItem.ToggleFireMode();
+            _playerControl.IsAutomatic = _currentWeaponItem.CurrentFireMode == FireMode.FullAuto; //일단은 단발/연발만.
+        }
+        
         private void HandleOnChangeWeapon(EquipWeaponIdx weaponIdx)
         {
             switch (weaponIdx)
@@ -425,8 +435,7 @@ namespace Player
                 _currentItemInteractIdx = 0;
                 if(isGear) _currentItemInteractList.Add((canEquip, ItemInteractType.Equip)); //Pickup UI 리스트
                 _currentItemInteractList.Add((canPickup, ItemInteractType.PickUp));
-            
-                //_itemUIManager.ShowItemPickup(pos, _currentItemInteractList); //이벤트로 수정 예정
+                
                 OnShowItemPickup?.Invoke(pos, _currentItemInteractList);
             }
         }
@@ -436,7 +445,6 @@ namespace Player
             if (other.CompareTag("Item"))
             {
                 _canItemInteract = false;
-                //_itemUIManager.HideItemPickup();
                 OnHideItemPickup?.Invoke();
             }
         }
@@ -481,7 +489,7 @@ namespace Player
             }
         
             _canItemInteract = false;
-            //_itemUIManager.HideItemPickup();
+            
             OnHideItemPickup?.Invoke();
         
             ObjectPoolingManager.Instance.ReleaseItemPickUp(_currentItemPickUp);

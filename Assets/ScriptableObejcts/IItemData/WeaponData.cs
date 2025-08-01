@@ -1,6 +1,5 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Scriptable Objects/WeaponData")]
 public class WeaponData : BaseItemDataSO
@@ -12,9 +11,10 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private AmmoCaliber ammoCaliber;
     [SerializeField] private int defaultMagazineSize;
     
-    [SerializeField] private bool canFullAuto = false;
-    [SerializeField] private bool isOneHanded = false;
-    [SerializeField] private bool isOpenBolt = false;
+    [SerializeField] private bool canFullAuto;
+    [SerializeField] private bool isOneHanded;
+    [SerializeField] private bool isOpenBolt;
+    //펌프, 탄창유무
     
     [SerializeField] private float fireRate;
     [SerializeField] private float accuracy;
@@ -26,6 +26,10 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private SFX reloadSFX;
     [Tooltip("Seconds")]
     [SerializeField] private float reloadTime;
+    
+    [SerializeField] private FireMode[] fireModes = {
+        FireMode.SemiAuto
+    };
     
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
@@ -41,7 +45,7 @@ public class WeaponData : BaseItemDataSO
     public SFX ShootSFX => shootSFX;
     public SFX ReloadSFX => reloadSFX;
     public float ReloadTime => reloadTime;
-    
+    public FireMode[] FireModes => fireModes;
     public bool CanFullAuto => canFullAuto;
     public bool IsOneHanded => isOneHanded;
     public bool IsOpenBolt => isOpenBolt;

@@ -26,6 +26,7 @@ namespace Player
       private InputAction _jumpAction;
       private InputAction _shootAction;
       private InputAction _reloadAction;
+      private InputAction _toggleFireModeAction;
       private InputAction _interactAction;
       private InputAction _openUIAction;
       private InputAction _openSettingAction;
@@ -51,14 +52,6 @@ namespace Player
       private bool _isGrounded = false;
       private bool _canClimb = false;
       private bool _canRotateArm = true;
-      //private bool _isSprint = false;
-
-      private enum Selector
-      {
-         SemiAuto,
-         Burst,
-         FullAuto
-      }
       
       private UIControl _uiControl;
       
@@ -71,6 +64,7 @@ namespace Player
       public event Action<QuickSlotIdx> OnQuickSlotAction;
       public event Action<bool, float> OnShootAction; //isFlipped, shootAngle
       public event Action OnReloadEndAction;
+      public event Action OnToggleFireModeAction;
       
       private void Awake()
       {
@@ -84,6 +78,7 @@ namespace Player
          _jumpAction = playerMap.FindAction("Jump");
          _shootAction = playerMap.FindAction("Shoot");
          _reloadAction = playerMap.FindAction("Reload");
+         _toggleFireModeAction = playerMap.FindAction("ToggleFireMode");
          _interactAction = playerMap.FindAction("Interact");
          _openUIAction = playerMap.FindAction("OpenUI");
          _openSettingAction = playerMap.FindAction("OpenSetting");
@@ -119,6 +114,7 @@ namespace Player
          _shootAction.started += OnShoot;
          _shootAction.canceled += OnShoot;
          _reloadAction.performed += OnReload;
+         _toggleFireModeAction.performed += OnToggleFireMode;
          _interactAction.performed += OnInteract;
          _openUIAction.performed += OnOpenUI;
          _openSettingAction.performed += OnOpenSetting;
@@ -137,6 +133,7 @@ namespace Player
          _shootAction.started -= OnShoot;
          _shootAction.canceled -= OnShoot;
          _reloadAction.performed -= OnReload;
+         _toggleFireModeAction.performed -= OnToggleFireMode;
          _interactAction.performed -= OnInteract;
          _openUIAction.performed -= OnOpenUI;
          _openSettingAction.performed -= OnOpenSetting;
@@ -159,7 +156,6 @@ namespace Player
       private void FixedUpdate()
       {
          //물리 기반 처리
-         //ColliderCheck();
          PlayerMovement();
       }
       
@@ -423,6 +419,12 @@ namespace Player
          _canRotateArm = true;
          _canShoot = true;
          OnReloadEndAction?.Invoke();//장전 애니메이션 종료시 장전 매커니즘 작동
+      }
+
+      private void OnToggleFireMode(InputAction.CallbackContext ctx)
+      {
+         if(IsUnarmed) return;
+         OnToggleFireModeAction?.Invoke();
       }
    
    }
