@@ -46,8 +46,8 @@ namespace Player
       public bool IsUnarmed { set; get; }
       public bool IsOneHanded { set; get; }
       public FireMode CurrentFireMode { set; get; }
-      private bool _inShooting = false;
-      private bool _canShoot = true;
+      public bool InShooting { set; get; }
+      private bool _canShoot  = true;
       private bool _isFlipped = false;
       private bool _isGrounded = false;
       private bool _canClimb = false;
@@ -65,6 +65,7 @@ namespace Player
       public event Action<EquipWeaponIdx> OnChangeWeaponAction;
       public event Action<QuickSlotIdx> OnQuickSlotAction;
       public event Action<bool, float> OnShootAction; //isFlipped, shootAngle
+      public event Action<int, bool, float> OnBurstShootAction; //burstCount, isFlipped, shootAngle
       public event Action OnReloadEndAction;
       public event Action OnToggleFireModeAction;
       
@@ -369,6 +370,7 @@ namespace Player
          if(IsUnarmed) return;
          if(!_canShoot) return;
          
+         
          switch (CurrentFireMode)
          {
             case FireMode.SemiAuto: //단발
@@ -380,14 +382,18 @@ namespace Player
                break;
             }
             case FireMode._2Burst:
-            {
-               break;
-            }
             case FireMode._3Burst:
             {
+               if(InShooting) return;
+               int burstCount = 0;
+               if(CurrentFireMode == FireMode._2Burst) burstCount = 2;
+               else if(CurrentFireMode == FireMode._3Burst) burstCount = 3;
+               
+               if(burstCount == 0) return;
+               
                if (ctx.started)
                {
-                  OnShootAction?.Invoke(_isFlipped, _shootAngle);
+                  OnBurstShootAction?.Invoke(burstCount, _isFlipped, _shootAngle);
                }
                break;
             }
@@ -395,11 +401,11 @@ namespace Player
             {
                if (ctx.started) //좌클릭 홀드일 때 연사, 때면 사격종료
                {
-                  _inShooting = true;
+                  InShooting = true;
                }
                else if (ctx.canceled)
                {
-                  _inShooting = false;
+                  InShooting = false;
                }
 
                break;
@@ -412,7 +418,7 @@ namespace Player
          if(IsUnarmed) return;
          if(CurrentFireMode != FireMode.FullAuto) return;  //단발인 경우 return
          if(!_canShoot) return; //사격 불가 시 return
-         if(!_inShooting) return; //사격 중 인지 check
+         if(!InShooting) return; //사격 중 인지 check
          OnShootAction?.Invoke(_isFlipped, _shootAngle);
       }
    
@@ -429,7 +435,7 @@ namespace Player
          if(IsUnarmed) return;
          _canRotateArm = false; //팔회전 불가
          _canShoot = false; //사격 불가
-         _inShooting = false; //사격 중인 경우 중단
+         InShooting = false; //사격 중인 경우 중단
          OnPlayerReload?.Invoke();//장전 이벤트 전달
       }
 
@@ -443,6 +449,7 @@ namespace Player
       private void OnToggleFireMode(InputAction.CallbackContext ctx)
       {
          if(IsUnarmed) return;
+         if(InShooting) return;
          OnToggleFireModeAction?.Invoke();
       }
    

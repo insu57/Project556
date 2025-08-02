@@ -33,6 +33,8 @@ public class PlayerWeapon : MonoBehaviour
     {
         //점사
     }
+
+   
     
     public bool Shoot(bool isFlipped, float shootAngle)
     {

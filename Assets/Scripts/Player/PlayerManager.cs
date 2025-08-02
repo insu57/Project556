@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -92,6 +93,7 @@ namespace Player
             _playerControl.OnChangeWeaponAction += HandleOnChangeWeapon;
             _playerControl.OnQuickSlotAction += HandleOnUseQuickSlot;
             _playerControl.OnShootAction += Shoot;
+            _playerControl.OnBurstShootAction += BurstShoot;
             _playerControl.OnReloadEndAction += HandleOnReloadEnd;
             _playerControl.OnToggleFireModeAction += HandleOnToggleFireMode;
                 
@@ -118,6 +120,7 @@ namespace Player
             _playerControl.OnChangeWeaponAction -= HandleOnChangeWeapon;
             _playerControl.OnQuickSlotAction -= HandleOnUseQuickSlot;
             _playerControl.OnShootAction -= Shoot;
+            _playerControl.OnBurstShootAction -= BurstShoot;
             _playerControl.OnReloadEndAction -= HandleOnReloadEnd;
             _playerControl.OnToggleFireModeAction -= HandleOnToggleFireMode;
             
@@ -212,6 +215,24 @@ namespace Player
             _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
         }
 
+        private void BurstShoot(int burstCount, bool isFlipped, float shootAngle)
+        {
+            if (GetCurrentWeaponMagazineCount() < burstCount) burstCount = GetCurrentWeaponMagazineCount();
+
+            StartCoroutine(BurstRoutine(burstCount, isFlipped, shootAngle));
+        }
+
+        private IEnumerator BurstRoutine(int burstCount, bool isFlipped, float shootAngle)
+        {
+            _playerControl.InShooting = true;
+            for (int i = 0; i < burstCount; i++)
+            {
+                Shoot(isFlipped, shootAngle);
+                yield return new WaitForSeconds(_currentWeaponItem.WeaponData.FireRate);
+            }
+            _playerControl.InShooting = false;
+        }
+
         private int GetCurrentWeaponMagazineCount()
         {
             if (_currentWeaponItem != null)
@@ -300,12 +321,10 @@ namespace Player
         {
             if (weaponItem == null)
             {
-                //IsUnarmed = true;
                 _playerControl.IsUnarmed = true;
                 _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
                 oneHandSprite.enabled = false;
                 twoHandSprite.enabled = false;
-                //OnUpdateMagazineCountUI?.Invoke(false, 0);
                 OnShowAmmoIndicator?.Invoke(false);
                 return;
             }
@@ -316,8 +335,7 @@ namespace Player
             _playerControl.IsUnarmed = false;
             _playerControl.IsOneHanded = CheckIsOneHanded();
             _playerControl.CurrentFireMode = _currentWeaponItem.CurrentFireMode;
-            //_playerControl.IsAutomatic = CheckIsAutomatic();
-            
+  
             if (weaponType == WeaponType.Pistol) //한손무기
             {
                 oneHandSprite.sprite = newWeaponData.ItemSprite; //스프라이트 위치
