@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fd2243bc440acbe4d82f740ce3722053, type: 3}
-  m_Name: M16A1
+  m_Name: K2
   m_EditorClassIdentifier: 
-  itemID: ar_01
-  weaponName: M16A1
+  itemID: ar_02
+  weaponName: "K2 \uC18C\uCD1D"
   weaponType: 3
   ammoCaliber: 0
-  defaultMagazineSize: 20
+  defaultMagazineSize: 30
   canFullAuto: 1
   isOneHanded: 0
   isOpenBolt: 0
-  fireRate: 0.1
-  accuracy: 80
+  fireRate: 0.08
+  accuracy: 85
   bulletSpeed: 15
-  itemSprite: {fileID: 552750388532680738, guid: 736d194ce29a29a4ea5a579844881654, type: 3}
+  itemSprite: {fileID: 5985368622149440744, guid: 652ddd8ee8712364287fed45474e0d55, type: 3}
   shootSFX: 4
   reloadSFX: 6
   reloadTime: 1.1
-  fireModes: 0000000003000000
+  fireModes: 000000000200000003000000
   itemWidth: 4
   itemHeight: 2
   itemWeight: 0
-  weaponSetup: {fileID: 908842763981515001, guid: 87d30c91a9124b64cabda583f3679601, type: 3}
+  weaponSetup: {fileID: 4193718607018505976, guid: 2d975a97aed6a0742aa618621d51efd5, type: 3}

@@ -27,6 +27,8 @@ namespace UI
             _playerManager.OnScrollItemPickup += HandleOnScrollItemPickup;
             _playerManager.OnHideItemPickup += HandleOnHideItemPickup;
             _playerManager.OnReloadNoAmmo += HandleOnReloadNoAmmo;
+            _playerManager.OnToggleFireMode += HandleOnToggleFireMode;
+            _playerManager.OnShowAmmoIndicator += HandleOnShowAmmoIndicator;
         }
 
         private void OnDisable()
@@ -38,6 +40,8 @@ namespace UI
             _playerManager.OnScrollItemPickup -= HandleOnScrollItemPickup;
             _playerManager.OnHideItemPickup -= HandleOnHideItemPickup;
             _playerManager.OnReloadNoAmmo -= HandleOnReloadNoAmmo;
+            _playerManager.OnToggleFireMode -= HandleOnToggleFireMode;
+            _playerManager.OnShowAmmoIndicator -= HandleOnShowAmmoIndicator;
         }
         
         private void HandleOnUpdatePlayerStat(PlayerStat stat, (float current, float max) amount)
@@ -84,6 +88,16 @@ namespace UI
         private void HandleOnReloadNoAmmo()
         {
             _playerUI.ShowNoAmmoWarning();
+        }
+
+        private void HandleOnToggleFireMode(AmmoCategory ammoCategory, FireMode fireMode)
+        {
+            _playerUI.ToggleFireModeImage(ammoCategory, fireMode);
+        }
+
+        private void HandleOnShowAmmoIndicator(bool isShow)
+        {
+            _playerUI.ShowAmmoIndicator(isShow);
         }
     }
 }

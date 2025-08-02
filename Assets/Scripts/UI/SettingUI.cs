@@ -10,11 +10,17 @@ namespace UI
         [SerializeField] private Slider masterVolumeSlider;
         [SerializeField] private Slider bgmVolumeSlider;
         [SerializeField] private Slider sfxVolumeSlider;
-
+        
+        [SerializeField] private Button quitButton;
         
         public void OpenSettingUI(bool isOpen)
         {
             settingUI.SetActive(isOpen);
+        }
+
+        private void Awake()
+        {
+            quitButton.onClick.AddListener(Application.Quit);
         }
 
         private void OnEnable()

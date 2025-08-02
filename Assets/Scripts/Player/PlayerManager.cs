@@ -38,6 +38,8 @@ namespace Player
         public event Action<int> OnScrollItemPickup;
         public event Action OnHideItemPickup;
         public event Action OnReloadNoAmmo;
+        public event Action<AmmoCategory, FireMode> OnToggleFireMode;
+        public event Action<bool> OnShowAmmoIndicator;
 
         private bool _canItemInteract;
         private int _currentItemInteractIdx;
@@ -261,7 +263,8 @@ namespace Player
             if (_currentWeaponItem == null) return;
             AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, SFX.Selector);
             _currentWeaponItem.ToggleFireMode();
-            _playerControl.IsAutomatic = _currentWeaponItem.CurrentFireMode == FireMode.FullAuto; //일단은 단발/연발만.
+            _playerControl.CurrentFireMode = _currentWeaponItem.CurrentFireMode; //일단은 단발/연발만.
+            OnToggleFireMode?.Invoke(_currentWeaponItem.AmmoCategory, _currentWeaponItem.CurrentFireMode);
         }
         
         private void HandleOnChangeWeapon(EquipWeaponIdx weaponIdx)
@@ -302,17 +305,18 @@ namespace Player
                 _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
                 oneHandSprite.enabled = false;
                 twoHandSprite.enabled = false;
-                OnUpdateMagazineCountUI?.Invoke(false, 0);
+                //OnUpdateMagazineCountUI?.Invoke(false, 0);
+                OnShowAmmoIndicator?.Invoke(false);
                 return;
             }
 
             var newWeaponData = weaponItem.WeaponData;
-        
             var weaponType = newWeaponData.WeaponType; //무기 타입
-            //IsUnarmed = false;
+   
             _playerControl.IsUnarmed = false;
             _playerControl.IsOneHanded = CheckIsOneHanded();
-            _playerControl.IsAutomatic = CheckIsAutomatic();
+            _playerControl.CurrentFireMode = _currentWeaponItem.CurrentFireMode;
+            //_playerControl.IsAutomatic = CheckIsAutomatic();
             
             if (weaponType == WeaponType.Pistol) //한손무기
             {
@@ -339,7 +343,10 @@ namespace Player
 
             _playerWeapon.ChangeWeaponData(newWeaponData); //변경
             _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
+            OnShowAmmoIndicator?.Invoke(true);
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
+            OnToggleFireMode?.Invoke(_currentWeaponItem.AmmoCategory, _currentWeaponItem.CurrentFireMode);
+            
         }
 
         private void HandleOnUseQuickSlot(QuickSlotIdx slotIdx)

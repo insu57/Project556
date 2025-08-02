@@ -45,13 +45,15 @@ namespace Player
       [SerializeField, Space] private float airDeceleration = 5f; //공중 감속수치
       public bool IsUnarmed { set; get; }
       public bool IsOneHanded { set; get; }
-      public bool IsAutomatic { set; get; }
+      public FireMode CurrentFireMode { set; get; }
       private bool _inShooting = false;
       private bool _canShoot = true;
       private bool _isFlipped = false;
       private bool _isGrounded = false;
       private bool _canClimb = false;
       private bool _canRotateArm = true;
+      
+      private float _burstFiringTime;
       
       private UIControl _uiControl;
       
@@ -101,7 +103,6 @@ namespace Player
          _playerInput.SwitchCurrentActionMap("Player");
          
          _currentMoveSpeed = MoveSpeed;
-        
       }
 
       private void OnEnable()
@@ -239,7 +240,6 @@ namespace Player
                rightArm.transform.localPosition = _baseRArmPosition;
             }
          
-         
             rightArm.transform.localRotation = Quaternion.Euler(0, 0, targetAngle); 
             leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle - 85f);   
             //SPUM캐릭터에서 scale.-x로 Flip시킨 것을 디폴트로 만듦. -> 그래서 캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준
@@ -368,22 +368,41 @@ namespace Player
       {
          if(IsUnarmed) return;
          if(!_canShoot) return;
-         if (!IsAutomatic)
+         
+         switch (CurrentFireMode)
          {
-            if (ctx.started)
+            case FireMode.SemiAuto: //단발
             {
-               OnShootAction?.Invoke(_isFlipped, _shootAngle);
+               if (ctx.started)
+               {
+                  OnShootAction?.Invoke(_isFlipped, _shootAngle);
+               }
+               break;
             }
-         }
-         else
-         {
-            if (ctx.started) //좌클릭 홀드일 때 연사, 때면 사격종료
+            case FireMode._2Burst:
             {
-               _inShooting = true;
+               break;
             }
-            else if (ctx.canceled)
+            case FireMode._3Burst:
             {
-               _inShooting = false;
+               if (ctx.started)
+               {
+                  OnShootAction?.Invoke(_isFlipped, _shootAngle);
+               }
+               break;
+            }
+               case FireMode.FullAuto:
+            {
+               if (ctx.started) //좌클릭 홀드일 때 연사, 때면 사격종료
+               {
+                  _inShooting = true;
+               }
+               else if (ctx.canceled)
+               {
+                  _inShooting = false;
+               }
+
+               break;
             }
          }
       }
@@ -391,7 +410,7 @@ namespace Player
       private void Shoot() //사격(연사) 메서드
       {
          if(IsUnarmed) return;
-         if(!IsAutomatic) return;  //단발인 경우 return
+         if(CurrentFireMode != FireMode.FullAuto) return;  //단발인 경우 return
          if(!_canShoot) return; //사격 불가 시 return
          if(!_inShooting) return; //사격 중 인지 check
          OnShootAction?.Invoke(_isFlipped, _shootAngle);

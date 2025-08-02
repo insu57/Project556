@@ -12,9 +12,12 @@ namespace UI
         [SerializeField] private Image staminaBar;
         [SerializeField] private Image energyBar;
         [SerializeField] private Image hydrationBar;
+        [SerializeField] private Image fireModeImage;
         [SerializeField] private TMP_Text ammoText;
-
-        [SerializeField] private TMP_Text healthTxt;
+        [SerializeField] private List<FireModeImage> fireModeImageData;
+        private readonly Dictionary<AmmoCategory, Dictionary<FireMode, Sprite>> _fireModeSpriteDict = new();
+        
+        [SerializeField, Space] private TMP_Text healthTxt;
         [SerializeField] private TMP_Text staminaTxt;
         [SerializeField] private TMP_Text energyTxt;
         [SerializeField] private TMP_Text hydrationTxt;
@@ -38,6 +41,11 @@ namespace UI
             //ItemInteract UI
             _pickupTextList.Add(equipText);
             _pickupTextList.Add(pickupText);
+
+            foreach (var data in fireModeImageData)
+            {
+                _fireModeSpriteDict[data.AmmoCategory] = data.FireModeSpriteDict;
+            }
         }
     
         public void UpdateHealthUI(float health, float maxHealth)
@@ -138,6 +146,19 @@ namespace UI
             noAmmoWarning.SetActive(true);
             yield return new WaitForSeconds(1f);
             noAmmoWarning.SetActive(false);
+        }
+
+        public void ToggleFireModeImage(AmmoCategory ammoCategory,FireMode fireMode)
+        {
+            //Pistol 제외한 다른 탄종 이미지 추가 예정
+            var dict = _fireModeSpriteDict[AmmoCategory.Pistol];
+            fireModeImage.sprite = dict[fireMode];
+        }
+
+        public void ShowAmmoIndicator(bool isShow)
+        {
+            fireModeImage.enabled = isShow;
+            ammoText.enabled = isShow;
         }
     }
 }

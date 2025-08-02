@@ -28,7 +28,12 @@ public class PlayerWeapon : MonoBehaviour
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy); //탄퍼짐 각도 편차
     }
     
-    //개선...? Player매니저 shoot에서 장탄검사?
+    //점사?
+    public void BurstShoot(int burstCount, bool isFlipped, float shootAngle)
+    {
+        //점사
+    }
+    
     public bool Shoot(bool isFlipped, float shootAngle)
     {
         if(Time.time - _lastShotTime < _weaponData.FireRate) return false; //FireRate제한

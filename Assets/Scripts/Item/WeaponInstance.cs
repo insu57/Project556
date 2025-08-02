@@ -8,7 +8,7 @@ public class WeaponInstance : ItemInstance
     public bool HasChamber {get; private set;}
     public FireMode CurrentFireMode { get; private set; }
     private int _fireModeIdx;
-
+    public AmmoCategory AmmoCategory => EnumManager.GetAmmoCategory(WeaponData.AmmoCaliber);
     public WeaponInstance( WeaponData weaponData) : base(weaponData)
     {
         WeaponData = weaponData;

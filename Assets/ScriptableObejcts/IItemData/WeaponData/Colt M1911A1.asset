@@ -27,6 +27,7 @@ MonoBehaviour:
   shootSFX: 3
   reloadSFX: 5
   reloadTime: 0.7
+  fireModes: 00000000
   itemWidth: 2
   itemHeight: 1
   itemWeight: 0
