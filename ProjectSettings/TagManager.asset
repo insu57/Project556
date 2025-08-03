@@ -10,6 +10,7 @@ TagManager:
   - Item
   - Climbing
   - FxTemporaire
+  - Crate
   layers:
   - Default
   - TransparentFX
@@ -55,6 +56,9 @@ TagManager:
     locked: 0
   - name: Climbing
     uniqueID: 3583427827
+    locked: 0
+  - name: Crate
+    uniqueID: 483321899
     locked: 0
   - name: Character
     uniqueID: 3624751437

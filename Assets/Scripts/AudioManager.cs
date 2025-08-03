@@ -37,19 +37,20 @@ public class AudioManager : Singleton<AudioManager>
         
     }
 
-    public void AdjustVolume(AudioType type ,float volume)
+    public void AdjustVolume(AudioType type ,float volumeSlider)
     {
-        var volumedB = Mathf.Lerp(minVolumedB, maxVolumedB, volume);
+        var dB = (volumeSlider > 0.0001f) ? Mathf.Log10(volumeSlider) * 20f : minVolumedB;
+        //volume 1.0 -> 0dB, 0 -> -80db. 데시벨 계산식
         switch (type)
         {
-            case AudioType.Master: audioMixer.SetFloat(MasterStr, volumedB); break;
-            case AudioType.BGM: audioMixer.SetFloat(BGMStr, volumedB); break;
-            case AudioType.SFX:  audioMixer.SetFloat(SFXStr, volumedB); break;
+            case AudioType.Master: audioMixer.SetFloat(MasterStr, dB); break;
+            case AudioType.BGM: audioMixer.SetFloat(BGMStr, dB); break;
+            case AudioType.SFX:  audioMixer.SetFloat(SFXStr, dB); break;
             default: return;
         }
     }
     
-    public void PlayBGM(BGM bgm)
+    public void PlayBGM(BGM bgm) //BGM 재생
     {
         bgmSource.outputAudioMixerGroup = bgmGroup;
         bgmSource.clip = _bgmMap[bgm];

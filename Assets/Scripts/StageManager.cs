@@ -6,9 +6,14 @@ using Random = UnityEngine.Random;
 
 public class StageManager : MonoBehaviour
 {
-    [SerializeField] private Tilemap[] tilemaps;
+    [SerializeField] private Tilemap[] tilemaps; //Stage의 TileMaps
     
-    public SFX GetTileFootstepSFX(Vector3 playerPos)
+    private void Start()
+    {
+        AudioManager.Instance.PlayBGM(BGM.ForestEnvironment);
+    }
+    
+    public SFX GetTileFootstepSFX(Vector3 playerPos) //해당 TileMap의 FootStep SFX
     {
         
         foreach (var tilemap in tilemaps)

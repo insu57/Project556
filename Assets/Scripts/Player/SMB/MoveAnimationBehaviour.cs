@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class MoveAnimationBehaviour : StateMachineBehaviour
 {
-    //private static readonly int IsSprint = Animator.StringToHash("isSprint");
     private PlayerManager _playerManager;
     private PlayerData _playerData;
     private StageManager _stageManager;

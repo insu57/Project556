@@ -8,39 +8,34 @@ namespace Player
 {
     public class PlayerManager : MonoBehaviour
     {
-        //PlayerData로 이동...
-        
-        [SerializeField] private SpriteRenderer oneHandSprite;
-        [SerializeField] private Transform oneHandMuzzleTransform;
-        [SerializeField] private SpriteRenderer twoHandSprite;
-        [SerializeField] private Transform twoHandMuzzleTransform;
-        [SerializeField] private GameObject muzzleFlashVFX;
+        [SerializeField] private SpriteRenderer oneHandSprite; //한손무기 Sprite
+        [SerializeField] private Transform oneHandMuzzleTransform; //한손무기 Muzzle Transform
+        [SerializeField] private SpriteRenderer twoHandSprite; //두손무기 Sprite
+        [SerializeField] private Transform twoHandMuzzleTransform; //두손무기 Muzzle Transform
+        [SerializeField] private GameObject muzzleFlashVFX; //총구화염VFX
     
         private Camera _mainCamera;
-        
         private PlayerData _playerData;
         private PlayerWeapon _playerWeapon;
         private PlayerAnimation _playerAnimation;
         private PlayerControl _playerControl;
-        
         private InventoryManager _inventoryManager;
     
-        private WeaponInstance _currentWeaponItem;
+        private WeaponInstance _currentWeaponItem; //현재 장착한 무기 아이템
         private EquipWeaponIdx _equipWeaponIdx = EquipWeaponIdx.Unarmed; //초기 Unarmed
 
         [SerializeField] private AudioSource loopSource;
-        [SerializeField] private AudioSource oneShotSource;
+        [SerializeField] private AudioSource oneShotSource; //PlayOneShot Source
         public AudioSource OneShotSource => oneShotSource;
-        public float LastFootstepTime { get; set; }
+        public float LastFootstepTime { get; set; } //마지막 재생된 발소리 시간
         
-        public event Action<bool, int> OnUpdateMagazineCountUI;
-    
-        public event Action<Vector2, List<(bool available, ItemInteractType type)>> OnShowItemPickup;
-        public event Action<int> OnScrollItemPickup;
-        public event Action OnHideItemPickup;
-        public event Action OnReloadNoAmmo;
-        public event Action<AmmoCategory, FireMode> OnToggleFireMode;
-        public event Action<bool> OnShowAmmoIndicator;
+        public event Action<bool, int> OnUpdateMagazineCountUI; //장탄수 UI 업데이트
+        public event Action<Vector2, List<(bool available, ItemInteractType type)>> OnShowItemPickup; //현재 ItemPickUP
+        public event Action<int> OnScrollItemPickup; //아이템 픽업 UI 스크롤
+        public event Action OnHideItemPickup; //가리기
+        public event Action OnReloadNoAmmo; //남은 탄약이 없을 때 경고
+        public event Action<AmmoCategory, FireMode> OnToggleFireMode; //FireMode변경
+        public event Action<bool> OnShowAmmoIndicator; //무기 전환 시 장탄, 조정관 표시
 
         private bool _canItemInteract;
         private int _currentItemInteractIdx;
@@ -63,7 +58,7 @@ namespace Player
             _playerControl.SprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
             _playerControl.JumpSpeed = _playerData.JumpSpeed; //개선?
             
-            //SMB 
+            //SMB Init
             var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
             reloadAnimationBehaviour.Init(_playerControl, this);
             var sprintAnimationBehaviours =  
@@ -134,17 +129,17 @@ namespace Player
             _inventoryManager.OnItemEffectStatPerSecond -= HandleOnItemEffectStatPerSecond;
         }
 
-        private void HandleOnShowMuzzleFlash()
+        private void HandleOnShowMuzzleFlash() //사격 시 총구화염 VFX 오브젝트(애니메이션 자동 재생)
         {
             muzzleFlashVFX.SetActive(true);
         }
 
-        private void HandleOnUpdateArmorAmount(float amount)
+        private void HandleOnUpdateArmorAmount(float amount) //총 방어도 업데이트
         {
             _playerData.UpdateTotalArmor(amount);
         }
 
-        private void HandleOnUnequipWeapon(EquipWeaponIdx weaponIdx)
+        private void HandleOnUnequipWeapon(EquipWeaponIdx weaponIdx) //들고있는 무기 장착해제 시
         {
             if (_equipWeaponIdx == weaponIdx)
             {
@@ -152,34 +147,27 @@ namespace Player
             }
         }
 
-        private void HandleOnPlayerMoveAction(bool isMove)
+        private void HandleOnPlayerMoveAction(bool isMove) //이동 전환
         {
             _playerAnimation.ChangeAnimationMove(isMove);
         }
 
-        private void HandleOnPlayerSprintAction(bool isSprint)
+        private void HandleOnPlayerSprintAction(bool isSprint) //달리기 전환
         {
             if (!_playerData.CanSprint) isSprint = false;
             _playerAnimation.ChangeAnimationSprint(isSprint);
             _playerData.SprintStaminaSpend(isSprint);
         }
 
-        private void HandleOnStaminaEmpty()
+        private void HandleOnStaminaEmpty() //스태미나가 없을 때
         {
             _playerAnimation.ChangeAnimationSprint(false);
             _playerData.SprintStaminaSpend(false);
         }
         
-        private void HandleOnPlayerReloadAction()
+        private void HandleOnPlayerReloadAction() //장전 시 애니메이션 재생
         {
             _playerAnimation.ChangeAnimationReload();
-        }
-
-        private bool CheckIsAutomatic()
-        {
-            if (_currentWeaponItem is { ItemData: WeaponData weaponData })
-                return weaponData.CanFullAuto;
-            return false;
         }
 
         private bool CheckIsOneHanded()
