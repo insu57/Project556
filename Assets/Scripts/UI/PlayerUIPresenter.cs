@@ -23,9 +23,9 @@ namespace UI
             _playerData.OnPlayerStatChanged += HandleOnUpdatePlayerStat;
             
             _playerManager.OnUpdateMagazineCountUI += HandleOnUpdateMagazineCountUI;
-            _playerManager.OnShowItemPickup += HandleOnShowItemPickup;
+            _playerManager.OnShowFieldInteract += HandleOnShowFieldInteract;
             _playerManager.OnScrollItemPickup += HandleOnScrollItemPickup;
-            _playerManager.OnHideItemPickup += HandleOnHideItemPickup;
+            _playerManager.OnHideFieldInteract += HandleOnHideFieldInteract;
             _playerManager.OnReloadNoAmmo += HandleOnReloadNoAmmo;
             _playerManager.OnToggleFireMode += HandleOnToggleFireMode;
             _playerManager.OnShowAmmoIndicator += HandleOnShowAmmoIndicator;
@@ -36,9 +36,9 @@ namespace UI
             _playerData.OnPlayerStatChanged -= HandleOnUpdatePlayerStat;
          
             _playerManager.OnUpdateMagazineCountUI -= HandleOnUpdateMagazineCountUI;
-            _playerManager.OnShowItemPickup -= HandleOnShowItemPickup;
+            _playerManager.OnShowFieldInteract -= HandleOnShowFieldInteract;
             _playerManager.OnScrollItemPickup -= HandleOnScrollItemPickup;
-            _playerManager.OnHideItemPickup -= HandleOnHideItemPickup;
+            _playerManager.OnHideFieldInteract -= HandleOnHideFieldInteract;
             _playerManager.OnReloadNoAmmo -= HandleOnReloadNoAmmo;
             _playerManager.OnToggleFireMode -= HandleOnToggleFireMode;
             _playerManager.OnShowAmmoIndicator -= HandleOnShowAmmoIndicator;
@@ -70,9 +70,9 @@ namespace UI
             _playerUI.UpdateAmmoText(isFullyLoaded, ammo);
         }
 
-        private void HandleOnShowItemPickup(Vector2 pos, List<(bool available, ItemInteractType type)> availableList)
+        private void HandleOnShowFieldInteract(Vector2 pos, List<(bool available, InteractType type)> availableList)
         {
-            _playerUI.ShowItemPickup(pos, availableList);
+            _playerUI.ShowItemPickup(pos, availableList);//상호작용 리스트(해당 좌표에 표시)
         }
 
         private void HandleOnScrollItemPickup(int idx)
@@ -80,7 +80,7 @@ namespace UI
             _playerUI.ScrollItemPickup(idx);
         }
     
-        private void HandleOnHideItemPickup()
+        private void HandleOnHideFieldInteract()
         {
             _playerUI.HideItemPickup();
         }

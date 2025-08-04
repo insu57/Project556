@@ -283,6 +283,29 @@ namespace UI
             return inventory;
         }
 
+        public void SetLootInventory(Inventory lootInventory)
+        {
+            if (_lootSlotInstance)
+            {
+                _lootSlotInstance.SetActive(false);
+            }
+            _lootSlotInstance = lootInventory.gameObject;
+            _lootSlotInstance.transform.SetParent(lootSlotParent);
+            _lootSlotInstance.transform.localPosition = Vector3.zero;
+            float slotPrefabHeight = lootInventory.Height + _panelSlotPadding;
+                    
+            lootSlotParent.sizeDelta = new Vector2(lootInventory.Width, lootInventory.Height);
+            if (slotPrefabHeight > minLootSlotHeight)
+            {
+                lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
+            }
+            else
+            {
+                lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
+            }
+        }
+        
+        
         public void SetQuickSlot(int idx, bool isStackable, Sprite itemSprite, int count)
         {
             _quickSlotDict[idx].img.sprite = itemSprite;

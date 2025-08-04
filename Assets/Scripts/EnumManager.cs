@@ -7,11 +7,12 @@ public enum SlotStatus
     Unavailable,
 }
 
-public enum ItemInteractType
+public enum InteractType
 {
     PickUp = 0,
     Equip,
     Use,
+    Open
 }
 
 public enum ItemContextType

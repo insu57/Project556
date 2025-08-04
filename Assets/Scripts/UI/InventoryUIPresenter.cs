@@ -95,6 +95,7 @@ public class InventoryUIPresenter : MonoBehaviour
         //InventoryManager
         _inventoryManager.OnInitInventory += HandleOnInitInventory;
         _inventoryManager.OnShowInventory += HandleOnShowInventory;
+        _inventoryManager.OnSetLootInventory += HandleOnSetLootInventory;
         _inventoryManager.OnEquipFieldItem += HandleOnEquipFieldItem;
         _inventoryManager.OnAddFieldItemToInventory += HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack += HandleOnUpdateItemStack;
@@ -113,6 +114,7 @@ public class InventoryUIPresenter : MonoBehaviour
         //InventoryManager
         _inventoryManager.OnInitInventory -= HandleOnInitInventory;
         _inventoryManager.OnShowInventory -= HandleOnShowInventory;
+        _inventoryManager.OnSetLootInventory -= HandleOnSetLootInventory;
         _inventoryManager.OnEquipFieldItem -= HandleOnEquipFieldItem;
         _inventoryManager.OnAddFieldItemToInventory -= HandleOnAddFieldItemToInventory;
         _inventoryManager.OnUpdateItemStack -= HandleOnUpdateItemStack;
@@ -696,6 +698,12 @@ public class InventoryUIPresenter : MonoBehaviour
         OnSetInventory(item, gearType, inventory);
     }
 
+    private void HandleOnSetLootInventory(Inventory inventory)
+    {
+        _invenMap[_itemUI.LootSlotParent] = inventory;
+        _itemUI.SetLootInventory(inventory);
+    }
+
     private void OnSetInventory(ItemInstance item, GearType gearType, Inventory inventory)
     {
         switch (gearType)
@@ -714,7 +722,6 @@ public class InventoryUIPresenter : MonoBehaviour
             case GearType.None: //LootInventory
                 _inventoryManager.SetInventoryData(inventory, gearType);
                 _invenMap[_itemUI.LootSlotParent] = inventory;
-               
                 break;
         }
     }

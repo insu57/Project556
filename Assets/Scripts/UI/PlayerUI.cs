@@ -26,12 +26,14 @@ namespace UI
         private readonly List<TMP_Text> _pickupTextList = new();
         [SerializeField] private TMP_Text equipText;
         [SerializeField] private TMP_Text pickupText;
+        [SerializeField] private TMP_Text useText;
+        [SerializeField] private TMP_Text openText;
         [SerializeField] private float pickupTextSize = 50f;
         [SerializeField] private RectTransform itemInteractUI;
         [SerializeField] private Image pickupHighlight;
         [SerializeField] private Color pickupHighlightAvailableColor;
         [SerializeField] private Color pickupHighlightUnavailableColor;
-        private List<(bool isAvailable, ItemInteractType type)> _pickupAvailableList;
+        private List<(bool isAvailable, InteractType type)> _pickupAvailableList;
         private int _pickupTextListCount;
         private int _pickupCurrentIdx;
         [SerializeField] private GameObject noAmmoWarning;
@@ -41,6 +43,8 @@ namespace UI
             //ItemInteract UI
             _pickupTextList.Add(equipText);
             _pickupTextList.Add(pickupText);
+            _pickupTextList.Add(useText);
+            _pickupTextList.Add(openText);
 
             foreach (var data in fireModeImageData)
             {
@@ -85,7 +89,7 @@ namespace UI
             }
         }
     
-        public void ShowItemPickup (Vector2 position, List<(bool, ItemInteractType)> availableList)
+        public void ShowItemPickup (Vector2 position, List<(bool, InteractType)> availableList)
         {
             //설정...아이템 따라
             pickupUI.gameObject.SetActive(true);
@@ -104,11 +108,17 @@ namespace UI
             {
                 switch (type)
                 {
-                    case ItemInteractType.Equip:
+                    case InteractType.Equip:
                         equipText.gameObject.SetActive(true);
                         break;
-                    case ItemInteractType.PickUp:
+                    case InteractType.PickUp:
                         pickupText.gameObject.SetActive(true);
+                        break;
+                    case InteractType.Use:
+                        useText.gameObject.SetActive(true);
+                        break;
+                    case InteractType.Open:
+                        openText.gameObject.SetActive(true);
                         break;
                     default:
                         Debug.LogWarning("ItemInteractType Error: None.");

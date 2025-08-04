@@ -40,6 +40,7 @@ public class InventoryManager : MonoBehaviour
     //ItemUI Presenter
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<ItemInstance> OnShowInventory;
+    public event Action<Inventory> OnSetLootInventory;
     public event Action<CellData, ItemInstance> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddFieldItemToInventory;
     public event Action<Guid, int> OnUpdateItemStack;
@@ -50,8 +51,7 @@ public class InventoryManager : MonoBehaviour
     //PlayerManager
     public event Action<float> OnUpdateArmorAmount;
     public event Action<EquipWeaponIdx> OnUnequipWeapon;
-    public event Action<StatAdjustAmount, float> OnItemEffectStatAdjust;
-    public event Action<StatEffectPerSecond> OnItemEffectStatPerSecond;
+    public event Action<IConsumableItem> OnUseItem;
     
     private void Awake()
     {
@@ -83,6 +83,12 @@ public class InventoryManager : MonoBehaviour
                 LootInventory = inventory;
                 break;
         }
+    }
+
+    public void SetLootInventory(Inventory inventory)
+    {
+        LootInventory = inventory;
+        OnSetLootInventory?.Invoke(inventory);
     }
 
     public CellData CheckCanEquipItem(GearType gearType) //GearSlot 장착 가능 여부 확인
@@ -245,20 +251,9 @@ public class InventoryManager : MonoBehaviour
         //effect
         if (item.ItemData is IConsumableItem consumableItem)
         {
-            foreach (var adjustAmount in consumableItem.AdjustAmount)
-            {
-                OnItemEffectStatAdjust?.Invoke(adjustAmount, consumableItem.UseDuration);
-            }
-
-            foreach (var effectPerSecond in consumableItem.EffectPerSecond)
-            {
-                OnItemEffectStatPerSecond?.Invoke(effectPerSecond); //초당효과 중복 제한...
-            }
-            
+            OnUseItem?.Invoke(consumableItem);
         }
-        //버그 플레이어창 - 설정창, 플레이어창 초기화안됨...
-        
-        //추가 효과.(초당 효과 몇초동안(600초동안 스태미나 회복량 증가), 상태이상회복(출혈 등), 상태이상추가(취기 등)) 
+        //추가 효과.상태이상회복(출혈 등), 상태이상추가(취기 등)) 
     }
 
     private float GetTotalArmorAmount()

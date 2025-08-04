@@ -42,7 +42,7 @@ namespace Player
       private LayerMask _climbMask;
    
       private Vector2 _playerMoveVector;
-      [SerializeField, Space] private float airDeceleration = 5f; //공중 감속수치
+      
       public bool IsUnarmed { set; get; }
       public bool IsOneHanded { set; get; }
       public FireMode CurrentFireMode { set; get; }
@@ -179,8 +179,6 @@ namespace Player
          if(IsUnarmed) return;//비무장 제한...
          //장전 등 몇몇 행동에서는 안움직여야한다.
          if (!_canRotateArm) return;
-
-         //Debug.Log("RotateArm");
          
          Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
          mousePos.z = 0;
@@ -297,6 +295,12 @@ namespace Player
          _uiControl.OnOpenPlayerUI();
       }
 
+      public void OnOpenCrate()
+      {
+         BlockControl(true);
+         _uiControl.OnOpenPlayerUI();
+      }
+      
       private void OnOpenSetting(InputAction.CallbackContext context)
       {
          BlockControl(true);
@@ -350,9 +354,9 @@ namespace Player
          }
       }
 
-      private void OnSprint(InputAction.CallbackContext context) //달리기 로직 변경?
+      private void OnSprint(InputAction.CallbackContext context)
       {
-         if (!_isGrounded) return;
+         if (!_isGrounded) return;//땅 위에서만 
          if (context.performed)
          {
             _currentMoveSpeed = MoveSpeed * SprintSpeedMultiplier;
