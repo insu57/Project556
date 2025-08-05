@@ -16,7 +16,7 @@ namespace UI
         [SerializeField] private Button inventoryButton;
         [SerializeField] private Button playerInfoBtn;
         [SerializeField] private Button questBtn;
-
+        
         private enum PlayerMenuState
         {
             Inventory,

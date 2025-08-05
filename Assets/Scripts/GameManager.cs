@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
-    //GameManager
-    
+    [SerializeField] private float cellSize = 50f;
+    public float CellSize => cellSize;
+
 }

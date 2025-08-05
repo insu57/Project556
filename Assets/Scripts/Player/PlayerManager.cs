@@ -416,7 +416,7 @@ namespace Player
                 bool isGear = item.GearType != GearType.None; //Gear인지 체크
                 if (item.GearType is not GearType.None)
                 {
-                    var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
+                    var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType, item.ItemCellCount);
                     if (checkCell is not null)
                     {
                         canEquip = true;
@@ -452,9 +452,8 @@ namespace Player
                 }
                 else //리그, 가방에 공간이 없을 때
                 {
-                    var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType);
-                    if(checkCell is not null 
-                       && itemData.ItemHeight == 1 && itemData.ItemWidth == 1) 
+                    var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType, item.ItemCellCount);
+                    if(checkCell is not null) 
                     {
                         canPickup = true; //Cell크기 고려
                         _pickupTargetCell = checkCell;
@@ -500,8 +499,7 @@ namespace Player
         private void FieldInteract()
         {
             if(!_canInteract) return;
-
-            //
+            
             var (isAvailable, interactType) = _currentItemInteractList[_currentItemInteractIdx];
         
             if (!isAvailable) return;
@@ -537,10 +535,7 @@ namespace Player
                     }
                     break;
                 case InteractType.Open:
-                    Debug.Log(_currentLootCrate);
-                    var lootInventory = _currentLootCrate.GetLootInventory();
-                    lootInventory.gameObject.SetActive(true);
-                    _inventoryManager.SetLootInventory(lootInventory);
+                    _inventoryManager.SetLootInventory(_currentLootCrate);
                     _playerControl.OnOpenCrate();
                     break;
                 default:

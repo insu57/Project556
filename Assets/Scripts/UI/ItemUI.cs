@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Item;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,10 +11,9 @@ namespace UI
 {
     public class ItemUI : MonoBehaviour, IPointerClickHandler
     {
-        [Header("Slot")]
-        [SerializeField, Space] private float cellSize = 50f;
-        private float _panelSlotPadding; //slotSize * 3
-        public float CellSize => cellSize;
+        //[Header("Slot")]
+        private static float PanelSlotPadding => GameManager.Instance.CellSize * 3; //CellSize * 3
+        public static float CellSize => GameManager.Instance.CellSize;
 
         [SerializeField] private Color availableColor;
         [SerializeField] private Color unavailableColor;
@@ -65,8 +65,9 @@ namespace UI
         public List<RectTransform> PocketsSlotRT => pockets;
         public RectTransform RigInvenParent => rigInvenParent;
         public RectTransform BackpackInvenParent => packInvenParent;
-    
+
         [Header("Right Panel")]
+        [SerializeField] private TMP_Text lootCrateName;
         [SerializeField] private RectTransform rightPanel;
         [SerializeField] private RectTransform lootSlotParent;
         [SerializeField] private float minLootSlotHeight = 800f;
@@ -90,15 +91,11 @@ namespace UI
         [SerializeField] private Image itemInfoIcon;
         [SerializeField] private TMP_Text itemInfoDescriptionTxt;
         
-        
         private readonly List<RectTransform> _gearSlotRT = new();
         private readonly List<RectTransform> _inventoriesRT = new();
-       
         
         private void Awake()
         {
-            _panelSlotPadding = cellSize * 3;
-        
             //RectTransform Init
             _gearSlotRT.Add(headwearSlot);
             _gearSlotRT.Add(eyewearSlot);
@@ -136,7 +133,7 @@ namespace UI
             itemInfoCloseBtn.onClick.AddListener(CloseItemInfo);
             
             CloseItemContextMenu();//ContextMenu닫기
-            CloseItemInfo();
+            CloseItemInfo(); //아이템 설명창 끄기
         }
 
         private void OnDisable()
@@ -149,6 +146,8 @@ namespace UI
             
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);
+            
+            
         }
         
         private void OnItemContextMenu(ItemContextType contextType)
@@ -190,7 +189,6 @@ namespace UI
         public Inventory SetInventorySlot(GameObject inventoryGO, GearType itemType, Guid instanceID, bool isInit)
         {
             //초기화...
-
             if (!inventoryGO) return null;
         
             Inventory inventory = null;
@@ -221,7 +219,7 @@ namespace UI
                     if (slotPrefabHeight > minMiddlePanelItemHeight)
                     {
                         chestRigParent.sizeDelta = 
-                            new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+                            new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
                     }
                     else
                     {
@@ -251,7 +249,7 @@ namespace UI
                     if (slotPrefabHeight > minMiddlePanelItemHeight)
                     {
                         backpackParent.sizeDelta = 
-                            new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + _panelSlotPadding);
+                            new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
                     }
                     else
                     {
@@ -265,7 +263,7 @@ namespace UI
                     _lootSlotInstance = Instantiate(inventoryGO, lootSlotParent);
                     _lootSlotInstance.TryGetComponent(out inventory);
                     inventory.Init(CellSize, instanceID);
-                    slotPrefabHeight = inventory.Height + _panelSlotPadding;
+                    slotPrefabHeight = inventory.Height + PanelSlotPadding;
                     
                     lootSlotParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
                     if (slotPrefabHeight > minLootSlotHeight)
@@ -283,16 +281,26 @@ namespace UI
             return inventory;
         }
 
-        public void SetLootInventory(Inventory lootInventory)
+        public void SetLootInventory(LootCrate lootCrate)
         {
+            var lootInventory = lootCrate?.GetLootInventory();
+            if (!lootInventory)
+            {
+                lootCrateName.text = string.Empty;
+                return;
+            }
+            
             if (_lootSlotInstance)
             {
                 _lootSlotInstance.SetActive(false);
             }
+
+            lootCrateName.text = lootCrate.CrateName;
             _lootSlotInstance = lootInventory.gameObject;
             _lootSlotInstance.transform.SetParent(lootSlotParent);
             _lootSlotInstance.transform.localPosition = Vector3.zero;
-            float slotPrefabHeight = lootInventory.Height + _panelSlotPadding;
+            _lootSlotInstance.SetActive(true);
+            float slotPrefabHeight = lootInventory.Height + PanelSlotPadding;
                     
             lootSlotParent.sizeDelta = new Vector2(lootInventory.Width, lootInventory.Height);
             if (slotPrefabHeight > minLootSlotHeight)
@@ -303,6 +311,7 @@ namespace UI
             {
                 lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
             }
+            
         }
         
         
@@ -405,10 +414,8 @@ namespace UI
                             break;
                     }
                     break;
+                }
             }
-            }
-            
-            
             
             itemInfoDescriptionTxt.text = infoTxt;
         }

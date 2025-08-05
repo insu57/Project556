@@ -19,6 +19,7 @@ public class UIControl : MonoBehaviour
     public InputAction QuickAddItemAction {private set; get;}
     public InputAction QuickDropItemAction {private set; get;}
     public InputAction SetQuickSlotAction {private set; get;}
+    public event Action OnCloseItemUI;
     
     private void Awake()
     {
@@ -83,6 +84,7 @@ public class UIControl : MonoBehaviour
         if(!_uiManager.PlayerMenuOpen) return;
         _uiManager.OpenPlayerUI(false);
         _playerControl.BlockControl(false);
+        OnCloseItemUI?.Invoke();
     }
 
     

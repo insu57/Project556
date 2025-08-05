@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Item;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -40,7 +41,7 @@ public class InventoryManager : MonoBehaviour
     //ItemUI Presenter
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 오브젝트, 인벤토리 타입(구분) 
     public event Action<ItemInstance> OnShowInventory;
-    public event Action<Inventory> OnSetLootInventory;
+    public event Action<LootCrate> OnSetLootInventory;
     public event Action<CellData, ItemInstance> OnEquipFieldItem;
     public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddFieldItemToInventory;
     public event Action<Guid, int> OnUpdateItemStack;
@@ -85,18 +86,19 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void SetLootInventory(Inventory inventory)
+    public void SetLootInventory(LootCrate lootCrate)
     {
+        var inventory = lootCrate?.GetLootInventory();
         LootInventory = inventory;
-        OnSetLootInventory?.Invoke(inventory);
+        OnSetLootInventory?.Invoke(lootCrate);
     }
 
-    public CellData CheckCanEquipItem(GearType gearType) //GearSlot 장착 가능 여부 확인
+    public CellData CheckCanEquipItem(GearType gearType, Vector2Int itemCellCount) //GearSlot 장착 가능 여부 확인
     {
         switch (gearType)
         {
             case GearType.ArmoredRig:
-                if(!BodyArmorSlot.IsEmpty || !ChestRigSlot.IsEmpty) return null;
+                if(!BodyArmorSlot.IsEmpty || !ChestRigSlot.IsEmpty) return null;//BodyArmor와 동시장착 불가
                 return ChestRigSlot; 
             case GearType.UnarmoredRig:
                 return ChestRigSlot.IsEmpty ? ChestRigSlot : null;
@@ -105,7 +107,7 @@ public class InventoryManager : MonoBehaviour
                
                 var rigID = ChestRigSlot.InstanceID;
                 var rigItemType = ItemDict[rigID].item.GearType;
-                if (rigItemType is GearType.ArmoredRig) return null;
+                if (rigItemType is GearType.ArmoredRig) return null; //방탄리그와 동시장착 불가
                 return BodyArmorSlot.IsEmpty ? BodyArmorSlot : null;
             case GearType.Backpack:
                 return BackpackSlot.IsEmpty ? BackpackSlot : null;
@@ -124,7 +126,7 @@ public class InventoryManager : MonoBehaviour
                 }
                 break;
             case GearType.None:
-                //if()크기?
+                if (itemCellCount.x > 1 || itemCellCount.y > 1) return null;//크기 초과(1x1 크기제한)
                 for (int i = 0; i < 4; i++)
                 {
                     if (PocketSlots[i].IsEmpty) return PocketSlots[i];
@@ -174,6 +176,9 @@ public class InventoryManager : MonoBehaviour
                 {
                     inventory.OnItemRemovedCheckQuickSlot -= CheckRemoveItemIsQuickSlot;
                 }
+
+                if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig) RigInventory = null;
+                else BackpackInventory = null;
                 break;
             }
             case GearType.Weapon:

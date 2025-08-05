@@ -8,7 +8,7 @@ public class ItemPickUp : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
 
-    public void Init(ItemInstance item) //MapManager?(맵 초기화), 아이템 드랍 등 -> Init)
+    public void Init(ItemInstance item) //StageManager(맵 초기화), 아이템 드랍 등 -> Init)
     {
         _itemInstance = item;
         _spriteRenderer.sprite = item.ItemData.ItemSprite;
@@ -17,8 +17,8 @@ public class ItemPickUp : MonoBehaviour
     
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _collider = GetComponent<BoxCollider2D>();
+        TryGetComponent(out _spriteRenderer);
+        TryGetComponent(out _collider);
     }
     private void Start()
     {

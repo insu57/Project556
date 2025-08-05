@@ -86,7 +86,7 @@ namespace UI
         public void Init(ItemInstance item, InventoryUIPresenter presenter, 
             Dictionary<ItemDragAction, InputAction> inputActions, Transform uiParent)
         {
-            var cellSize = presenter.CellSize;
+            var cellSize = InventoryUIPresenter.CellSize;
 
             _itemRT = GetComponent<RectTransform>();
         

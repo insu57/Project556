@@ -26,7 +26,7 @@ public class AudioManager : Singleton<AudioManager>
     private Dictionary<SFX,AudioClip> _footstepSFXMap;
     private Dictionary<SFX, AudioClip> _weaponSFXMap;
     private Dictionary<SFX,AudioClip> _uiSfxClipMap;
-
+    
     protected override void Awake()
     {
         base.Awake();
