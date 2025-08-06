@@ -251,14 +251,15 @@ namespace Player
                     else ammoToRefill = magazineSize + 1 - currentAmmo;//약실 한 발 고려
                 }
             
-                var (canReload, reloadAmmo)  = 
+                var (canReload, reloadAmmo, ammoData)  = 
                     _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
 
                 if (canReload)
                 {
-                    _currentWeaponItem.ReloadAmmo(currentAmmo + reloadAmmo);
+                    _currentWeaponItem.ReloadAmmo(ammoData, currentAmmo + reloadAmmo);
                     OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), _currentWeaponItem.CurrentMagazineCount);
                     _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
+                    _playerWeapon.SetAmmoData(ammoData);
                 }
                 else
                 {
@@ -348,7 +349,7 @@ namespace Player
             muzzleFlashVFX.transform.localRotation = Quaternion.identity;
             muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
 
-            _playerWeapon.ChangeWeaponData(newWeaponData); //변경
+            _playerWeapon.ChangeWeaponData(newWeaponData, weaponItem.CurrentAmmoData); //변경
             _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
             OnShowAmmoIndicator?.Invoke(true);
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());

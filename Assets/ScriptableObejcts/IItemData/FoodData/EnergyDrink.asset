@@ -22,7 +22,7 @@ MonoBehaviour:
     amountPerSecond: 10
     effectDuration: 60
   useDuration: 1
-  itemSprite: {fileID: 21300040, guid: f2b4b5d47add6824ebe9907634865656, type: 3}
+  itemSprite: {fileID: -6521511599253771929, guid: edef2a444b11ac8459a46f04f998623b, type: 3}
   itemWidth: 1
   itemHeight: 2
   itemWeight: 0

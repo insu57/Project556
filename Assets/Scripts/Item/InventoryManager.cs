@@ -286,9 +286,11 @@ public class InventoryManager : MonoBehaviour
     
     //QuickSlot...
 
-    public (bool canReload, int reloadAmmo) LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo) //탄종구분 - 탄 구분(zero sivert처럼)?
+    public (bool canReload, int reloadAmmo, AmmoData ammoData)
+        LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo) //탄종구분 - 탄 구분(zero sivert처럼)?
     {
         int reloadAmmo = 0;
+        AmmoData ammoData = null;
         if (RigInventory)
         {
             foreach (var (_, (cells, _, _)) in RigInventory.SlotDict)
@@ -297,7 +299,8 @@ public class InventoryManager : MonoBehaviour
                 {
                     if(cell.IsEmpty) continue;
                     var (item, _, _) = RigInventory.ItemDict[cell.InstanceID];
-                    if(item.ItemData is not AmmoData ammoData) continue;
+                    if(item.ItemData is not AmmoData itemData) continue;
+                    ammoData = itemData;
                     if(ammoData.AmmoCaliber != ammoCaliber) continue;
                     Debug.Log($"Rig, Use Ammo : {ammoData.AmmoCaliber}");
                     var stackAmount = item.CurrentStackAmount;
@@ -307,7 +310,7 @@ public class InventoryManager : MonoBehaviour
                         reloadAmmo += neededAmmo;
                         item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
                         OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
-                        return (true, reloadAmmo); //요구치 전부
+                        return (true, reloadAmmo, ammoData); //요구치 전부
                     }
 
                     //item 삭제...
@@ -325,7 +328,8 @@ public class InventoryManager : MonoBehaviour
         {
             if(pocket.IsEmpty) continue;
             var (item, _) = ItemDict[pocket.InstanceID];
-            if(item.ItemData is not AmmoData ammoData) continue;
+            if(item.ItemData is not AmmoData itemData) continue;
+            ammoData = itemData;
             if(ammoData.AmmoCaliber != ammoCaliber) continue;
             Debug.Log($"Pocket, Use Ammo : {ammoData.AmmoCaliber}");
             var stackAmount = item.CurrentStackAmount;
@@ -334,7 +338,7 @@ public class InventoryManager : MonoBehaviour
                 reloadAmmo += neededAmmo;
                 item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
                 OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
-                return (true, reloadAmmo); //요구치 전부
+                return (true, reloadAmmo, ammoData); //요구치 전부
             }
             //item 삭제...
             neededAmmo -= stackAmount; //요구치 스택만큼 감소
@@ -347,10 +351,10 @@ public class InventoryManager : MonoBehaviour
         if (reloadAmmo <= 0)
         {
             Debug.Log($"No Ammo : {ammoCaliber}");
-            return (false, 0);
+            return (false, 0, null);
         }
         Debug.Log($"Reload Ammo : {ammoCaliber}, {reloadAmmo}");
-        return (true, reloadAmmo);
+        return (true, reloadAmmo, ammoData);
     }
 
     public void UpdateWeaponMagCount(Guid id)

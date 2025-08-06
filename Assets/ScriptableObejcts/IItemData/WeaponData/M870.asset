@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd2243bc440acbe4d82f740ce3722053, type: 3}
+  m_Name: M870
+  m_EditorClassIdentifier: 
+  itemID: sg_01
+  weaponName: Remington M870
+  weaponType: 1
+  ammoCaliber: 10
+  defaultMagazineSize: 8
+  defaultAmmoData:
+  - {fileID: 11400000, guid: bef0b617cce34a142965cd18e60770ac, type: 2}
+  isOneHanded: 0
+  isOpenBolt: 0
+  fireRate: 0.5
+  accuracy: 70
+  bulletSpeed: 10
+  fireModes: 00000000
+  weaponActionType: 1
+  hasDetachableMagazine: 0
+  itemSprite: {fileID: 8386081289750346863, guid: 235bc17a146b7ad4f88f68f4f3ee21f6, type: 3}
+  shootSFX: 5
+  reloadSFX: 8
+  loadAmmoSFX: 9
+  reloadTime: 0.95
+  itemWidth: 4
+  itemHeight: 2
+  itemWeight: 0
+  weaponSetup: {fileID: 1531553905668286428, guid: 2e1116683c6210648a412fe3f2b98b8d, type: 3}

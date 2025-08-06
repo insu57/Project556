@@ -10,26 +10,25 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private WeaponType weaponType;
     [SerializeField] private AmmoCaliber ammoCaliber;
     [SerializeField] private int defaultMagazineSize;
+    [SerializeField] private AmmoData[] defaultAmmoData;
     
-    [SerializeField] private bool canFullAuto;
-    [SerializeField] private bool isOneHanded;
+    [SerializeField,Space] private bool isOneHanded;
     [SerializeField] private bool isOpenBolt;
-    //펌프, 탄창유무
-    
     [SerializeField] private float fireRate;
     [SerializeField] private float accuracy;
-    
     [SerializeField] private float bulletSpeed; //Bullet에 따로?
+    [SerializeField] private FireMode[] fireModes = {
+        FireMode.SemiAuto
+    };
+    [SerializeField] private WeaponActionType weaponActionType;
+    [SerializeField] private bool hasDetachableMagazine;
     
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private SFX shootSFX;
     [SerializeField] private SFX reloadSFX;
+    [SerializeField] private SFX loadAmmoSFX;
     [Tooltip("Seconds")]
     [SerializeField] private float reloadTime;
-    
-    [SerializeField] private FireMode[] fireModes = {
-        FireMode.SemiAuto
-    };
     
     [SerializeField] private int itemWidth;
     [SerializeField] private int itemHeight;
@@ -42,11 +41,14 @@ public class WeaponData : BaseItemDataSO
     public WeaponType WeaponType => weaponType;
     public AmmoCaliber AmmoCaliber => ammoCaliber;
     public int DefaultMagazineSize => defaultMagazineSize;
+    public AmmoData[] DefaultAmmoData => defaultAmmoData;
     public SFX ShootSFX => shootSFX;
     public SFX ReloadSFX => reloadSFX;
+    public SFX LoadAmmoSFX => loadAmmoSFX;
     public float ReloadTime => reloadTime;
     public FireMode[] FireModes => fireModes;
-    public bool CanFullAuto => canFullAuto;
+    public WeaponActionType WeaponActionType => weaponActionType;
+    public bool HasDetachableMagazine => hasDetachableMagazine;
     public bool IsOneHanded => isOneHanded;
     public bool IsOpenBolt => isOpenBolt;
     

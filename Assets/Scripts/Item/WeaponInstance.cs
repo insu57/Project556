@@ -8,11 +8,13 @@ public class WeaponInstance : ItemInstance
     public bool HasChamber {get; private set;}
     public FireMode CurrentFireMode { get; private set; }
     private int _fireModeIdx;
+    public AmmoData CurrentAmmoData { get; private set; }//탄종 시스템 진행중
     public AmmoCategory AmmoCategory => EnumManager.GetAmmoCategory(WeaponData.AmmoCaliber);
     public WeaponInstance( WeaponData weaponData) : base(weaponData)
     {
         WeaponData = weaponData;
-        
+        var ammoIdx = Random.Range(0,weaponData.DefaultAmmoData.Length);
+        CurrentAmmoData = weaponData.DefaultAmmoData[ammoIdx];
         MaxMagazineCount = weaponData.DefaultMagazineSize;
 
         CurrentFireMode = weaponData.FireModes[0]; 
@@ -29,8 +31,9 @@ public class WeaponInstance : ItemInstance
         CurrentMagazineCount--;
     }
 
-    public void ReloadAmmo(int reloadAmmo) //주머니 탄 소모...
+    public void ReloadAmmo(AmmoData ammoData, int reloadAmmo) //주머니 탄 소모...
     {
+        CurrentAmmoData = ammoData;
         CurrentMagazineCount = reloadAmmo;
     }
 

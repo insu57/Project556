@@ -106,8 +106,23 @@ public enum SFXType
 public enum SFX //개선...
 {
     None, FootstepDirt, FootstepRock, //Footstep
-    PistolShoot, ARShoot, PistolReload, ARReload, Selector //Weapon
+    PistolShoot, ARShoot, SgShoot ,PistolReload, ARReload, SgReloadNoMag,SgPump ,Selector //Weapon
     //UI...
+}
+
+public enum FootStepSFX
+{
+    None,FootstepDirt, FootstepRock
+}
+
+public enum WeaponSFX
+{
+    None, PistolShoot, ARShoot, SgShoot ,PistolReload, ARReload, SgReloadNoMag,SgPump ,Selector
+}
+
+public enum UiSFX
+{
+    None,
 }
 
 public enum BGM
@@ -122,6 +137,14 @@ public enum FireMode
     _2Burst,
     _3Burst,
     FullAuto
+}
+
+public enum WeaponActionType
+{
+    Automatic,
+    PumpAction,
+    BoltAction,
+    //...
 }
 
 public class EnumManager : MonoBehaviour

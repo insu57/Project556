@@ -17,17 +17,21 @@ MonoBehaviour:
   weaponType: 3
   ammoCaliber: 0
   defaultMagazineSize: 20
-  canFullAuto: 1
+  defaultAmmoData:
+  - {fileID: 11400000, guid: 5b70e39c2e2bf2c458c4a7d1c911b520, type: 2}
   isOneHanded: 0
   isOpenBolt: 0
   fireRate: 0.1
   accuracy: 80
   bulletSpeed: 15
+  fireModes: 0000000003000000
+  weaponActionType: 0
+  hasDetachableMagazine: 0
   itemSprite: {fileID: 552750388532680738, guid: 736d194ce29a29a4ea5a579844881654, type: 3}
   shootSFX: 4
   reloadSFX: 6
+  loadAmmoSFX: 0
   reloadTime: 1.1
-  fireModes: 0000000003000000
   itemWidth: 4
   itemHeight: 2
   itemWeight: 0

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a45b0ce3f01a934b9ddbebf8ea6757e, type: 3}
+  m_Name: 12Gauge Buckshot
+  m_EditorClassIdentifier: 
+  ammoCaliber: 10
+  ammoCategory: 2
+  itemID: ammo_12g_01
+  itemName: Buckshot 12Gauge
+  itemSprite: {fileID: 5708895028770762888, guid: 7af738695de31224eab760d4a7972662, type: 3}
+  itemWidth: 1
+  itemHeight: 1
+  itemWeight: 0
+  maxStackAmount: 40
+  ammoDamage: 0
+  ammoPiercing: 0
+  velocityModify: 0
+  isBuckshot: 1
+  pelletCount: 8

@@ -9,8 +9,7 @@ public class PlayerWeapon : MonoBehaviour
 {
     private WeaponData _weaponData;
     private Transform _muzzleTransform;
-    
-    private AmmoCategory _ammoCategory;
+    private AmmoData _ammoData;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
     private float _normalizedAccuracy; //정규화 정확도
     private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도
@@ -19,22 +18,19 @@ public class PlayerWeapon : MonoBehaviour
     
     public event Action OnShowMuzzleFlash;
     
-    public void ChangeWeaponData(WeaponData weaponData)
+    public void ChangeWeaponData(WeaponData weaponData, AmmoData ammoData)
     {
         _weaponData = weaponData;
-
-        _ammoCategory = EnumManager.GetAmmoCategory(weaponData.AmmoCaliber);
+        _ammoData = ammoData;
+        
         _normalizedAccuracy = Mathf.Clamp01(weaponData.Accuracy / MaxAccuracy); //정확도 정규화
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy); //탄퍼짐 각도 편차
     }
-    
-    //점사?
-    public void BurstShoot(int burstCount, bool isFlipped, float shootAngle)
-    {
-        //점사
-    }
 
-   
+    public void SetAmmoData(AmmoData ammoData)
+    {
+        _ammoData = ammoData;
+    }
     
     public bool Shoot(bool isFlipped, float shootAngle)
     {
@@ -43,32 +39,38 @@ public class PlayerWeapon : MonoBehaviour
         
         OnShowMuzzleFlash?.Invoke(); //show flash
 
-        float bulletAngle;
-        Vector2 direction;
+        var palletCount = _ammoData.IsBuckshot ? _ammoData.PelletCount : 1;
         
-        float offsetAngle = Random.Range(-_maxDeviationAngle, _maxDeviationAngle); //랜덤 탄퍼짐 각도
+        for (var i = 0; i < palletCount; i++)
+        {
+            float bulletAngle;
+            Vector2 direction;
         
-        shootAngle += offsetAngle;
-        if (isFlipped)
-        {
-            //Flip이면 x반대방향으로
-            //발사 각도 연산
-            direction = 
-                new Vector2(-Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
-            bulletAngle = 180 - shootAngle;
+            float offsetAngle = Random.Range(-_maxDeviationAngle, _maxDeviationAngle); //랜덤 탄퍼짐 각도
+        
+            shootAngle += offsetAngle;
+            if (isFlipped)
+            {
+                //Flip이면 x반대방향으로
+                //발사 각도 연산
+                direction = 
+                    new Vector2(-Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
+                bulletAngle = 180 - shootAngle;
+            }
+            else
+            {
+                direction = 
+                    new Vector2(Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
+                bulletAngle = shootAngle;
+            }
+            Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoData.AmmoCategory);
+            bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
+            bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
         }
-        else
-        {
-            direction = 
-                new Vector2(Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
-            bulletAngle = shootAngle;
-        }
-        Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoCategory);
-        bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
-        bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
+        
         return true;
     }
-
+    
     public void SetMuzzleTransform(Transform muzzleTransform)
     {
         _muzzleTransform = muzzleTransform;

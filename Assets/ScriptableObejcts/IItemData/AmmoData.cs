@@ -6,7 +6,7 @@ public class AmmoData : BaseItemDataSO
 {
     [SerializeField] private AmmoCaliber ammoCaliber;
     [SerializeField] private AmmoCategory ammoCategory;
-
+    
     [SerializeField] private string itemID;
     [SerializeField] private string itemName;
     [SerializeField] private Sprite itemSprite;
@@ -19,7 +19,9 @@ public class AmmoData : BaseItemDataSO
     [SerializeField] private float ammoDamage;
     [SerializeField] private float ammoPiercing;
     [SerializeField] private float velocityModify; //탄속 보정치
-
+    [SerializeField] private bool isBuckshot;
+    [SerializeField] private int pelletCount = 1;
+    
     public AmmoCaliber AmmoCaliber => ammoCaliber;
     public AmmoCategory AmmoCategory => ammoCategory;
 
@@ -38,4 +40,7 @@ public class AmmoData : BaseItemDataSO
     public float AmmoDamage => ammoDamage;
     public float AmmoPiercing => ammoPiercing;
     public float VelocityModify => velocityModify;
+    public bool IsBuckshot => isBuckshot;
+    public int PelletCount => pelletCount;
+    
 }
