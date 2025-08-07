@@ -70,6 +70,11 @@ namespace Player
             {
                 behaviour.Init(this, _playerData, stageManager);
             }
+            var loadAmmoAnimationBehaviours = _playerAnimation.UpperAnimator.GetBehaviours<LoadAmmoAnimationBehaviour>();
+            foreach (var behaviour in loadAmmoAnimationBehaviours)
+            {
+                behaviour.Init(this);
+            }
             
             _mainCamera = Camera.main;
             _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
@@ -97,6 +102,7 @@ namespace Player
                 
             //무기
             _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
+            _playerWeapon.OnEndWeaponAction += HandleOnEndWeaponAction;
             
             //데이터
             _playerData.OnStaminaEmpty += HandleOnStaminaEmpty;
@@ -122,6 +128,7 @@ namespace Player
             _playerControl.OnToggleFireModeAction -= HandleOnToggleFireMode;
             
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
+            _playerWeapon.OnEndWeaponAction -= HandleOnEndWeaponAction;
 
             _playerData.OnStaminaEmpty -= HandleOnStaminaEmpty;
             
@@ -171,11 +178,19 @@ namespace Player
             _playerAnimation.ChangeAnimationReload();
         }
 
-        private bool CheckIsOneHanded()
+        private bool CheckWeaponIsOneHanded()
         {
-            if (_currentWeaponItem is { ItemData: WeaponData weaponData })
-                return weaponData.IsOneHanded;
-            return false;
+            return _currentWeaponItem != null && _currentWeaponItem.WeaponData.IsOneHanded;
+        }
+
+        public bool CheckWeaponIsFullyLoaded()
+        {
+            return _currentWeaponItem != null && _currentWeaponItem.IsFullyLoaded();
+        }
+
+        public bool CheckWeaponHasNotDetachMag() //내장탄창인지 체크
+        {
+            return _currentWeaponItem != null && !_currentWeaponItem.WeaponData.HasDetachableMagazine;
         }
         
         //개선?
@@ -190,6 +205,12 @@ namespace Player
             return _currentWeaponItem.WeaponData.ReloadTime;
         }
 
+        public float PlayLoadAmmoSFX()
+        {
+            AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponItem.WeaponData.LoadAmmoSFX);
+            return _currentWeaponItem.WeaponData.FireRate;
+        }
+        
         private void Shoot(bool isFlipped, float shootAngle) //사격
         {
             //총알 데이터..?
@@ -231,42 +252,56 @@ namespace Player
             return -1;
         }
 
+        private void HandleOnEndWeaponAction(WeaponActionType weaponActionType)
+        {
+            _playerAnimation.ChangeAnimationLoadAmmo(weaponActionType);
+        }
+
         private void HandleOnReloadEnd() //개선?
         {
             //Inven -> weapon
-            if (_currentWeaponItem != null)
-            {
-                var weaponData = _currentWeaponItem.WeaponData;
-                var magazineSize = weaponData.DefaultMagazineSize;
-                var currentAmmo = _currentWeaponItem.CurrentMagazineCount;
-                int ammoToRefill;
-
-                if (weaponData.IsOpenBolt)
-                {
-                    ammoToRefill = magazineSize - currentAmmo;
-                }
-                else
-                {
-                    if(currentAmmo == 0) ammoToRefill = magazineSize;
-                    else ammoToRefill = magazineSize + 1 - currentAmmo;//약실 한 발 고려
-                }
+            if (_currentWeaponItem == null) return;
             
-                var (canReload, reloadAmmo, ammoData)  = 
-                    _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
-
-                if (canReload)
-                {
-                    _currentWeaponItem.ReloadAmmo(ammoData, currentAmmo + reloadAmmo);
-                    OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), _currentWeaponItem.CurrentMagazineCount);
-                    _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
-                    _playerWeapon.SetAmmoData(ammoData);
-                }
-                else
-                {
-                    OnReloadNoAmmo?.Invoke(); //장전할 탄이 하나도 없으면 경고문구 띄우기 -> 개선??
-                }
-                //장전 제어?
+            var weaponData = _currentWeaponItem.WeaponData;
+            var magazineSize = weaponData.DefaultMagazineSize;
+            var currentAmmo = _currentWeaponItem.CurrentMagazineCount;
+            int ammoToRefill;
+            
+            if (weaponData.IsOpenBolt)
+            {
+                ammoToRefill = magazineSize - currentAmmo;
             }
+            else if (!weaponData.HasDetachableMagazine) //내부 탄창
+            {
+                ammoToRefill = _currentWeaponItem.IsFullyLoaded() ? 0 : 1; //꽉 찬 상태가 아니라면 1발씩
+            }
+            else
+            {
+                if(currentAmmo == 0) ammoToRefill = magazineSize;
+                else ammoToRefill = magazineSize + 1 - currentAmmo;//약실 한 발 고려
+            }
+            
+            var (canReload, reloadAmmo, ammoData)  = 
+                _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
+
+            if (canReload)
+            {
+                _currentWeaponItem.ReloadAmmo(ammoData, currentAmmo + reloadAmmo);
+                OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), _currentWeaponItem.CurrentMagazineCount);
+                _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
+                _playerWeapon.SetAmmoData(ammoData);
+                if (!_currentWeaponItem.IsFullyLoaded() && !_currentWeaponItem.WeaponData.HasDetachableMagazine)
+                {
+                    Debug.Log("Need More Ammo");
+                    _playerAnimation.ChangeAnimationReload();
+                    //장전 매커니즘 수정필요...(장전 시퀀스 개선?)
+                }
+            }
+            else
+            {
+                OnReloadNoAmmo?.Invoke(); //장전할 탄이 하나도 없으면 경고문구 띄우기 -> 개선??
+            }
+            //장전 제어?(약실비었으면 다른 애니메이션?)
         }
 
         private void HandleOnToggleFireMode() //이미지로 표시(장탄수 옆에 추가)
@@ -323,7 +358,7 @@ namespace Player
             var weaponType = newWeaponData.WeaponType; //무기 타입
    
             _playerControl.IsUnarmed = false;
-            _playerControl.IsOneHanded = CheckIsOneHanded();
+            _playerControl.IsOneHanded = CheckWeaponIsOneHanded();
             _playerControl.CurrentFireMode = _currentWeaponItem.CurrentFireMode;
   
             if (weaponType == WeaponType.Pistol) //한손무기

@@ -3,11 +3,11 @@ using UnityEngine;
 public class Singleton <T> : MonoBehaviour where T : Singleton<T> //Singleton Generic Class
 {
     private static T _instance;
-    public static T Instance
+    public static T Instance //해당 컴포넌트 접근
     {
         get
         {
-            if (!_instance)
+            if (!_instance) //없다면 새로...
             {
                 _instance = (T)FindAnyObjectByType(typeof(T));
                 if (!_instance)
@@ -22,15 +22,15 @@ public class Singleton <T> : MonoBehaviour where T : Singleton<T> //Singleton Ge
 
     protected virtual void Awake()
     {
-        RemoveDuplicates();
+        RemoveDuplicates();//중복제거
     }
 
-    private static void SetupInstance()
+    private static void SetupInstance() //인스턴스 설정
     {
         _instance = (T)FindAnyObjectByType(typeof(T));
         
-        if (_instance) return;
-        var obj = new GameObject
+        if (_instance) return; //이미 있으면 return
+        var obj = new GameObject //없다면 새로 생성
         {
             name = typeof(T).Name
         };
@@ -38,12 +38,12 @@ public class Singleton <T> : MonoBehaviour where T : Singleton<T> //Singleton Ge
         DontDestroyOnLoad(obj);
     }
 
-    private void RemoveDuplicates()
+    private void RemoveDuplicates()//중복제거
     {
-        if (!_instance)
+        if (!_instance) //없으면 지정
         {
             _instance = this as T;
-            DontDestroyOnLoad(_instance);
+            DontDestroyOnLoad(_instance);//로드 시 파괴 방지
         }
         else
         {

@@ -9,6 +9,9 @@ namespace Player
         public static readonly int IsMove = Animator.StringToHash("isMove");
         public static readonly int IsSprint = Animator.StringToHash("isSprint");
         public static readonly int IsReload = Animator.StringToHash("isReload");
+        public static readonly int Pump = Animator.StringToHash("Pump");
+        public static readonly int Bolt = Animator.StringToHash("Bolt");
+        public static readonly int Reload  = Animator.StringToHash("Reload");
     }
 
     public class PlayerAnimation : MonoBehaviour
@@ -51,9 +54,20 @@ namespace Player
 
         public void ChangeAnimationReload()
         {
-            upperAnimator.SetBool(PlayerAnimatorHash.IsReload, true);
+            Debug.Log("ReloadAnimation");
+            //upperAnimator.SetBool(PlayerAnimatorHash.IsReload, true);
+            upperAnimator.SetTrigger(PlayerAnimatorHash.Reload);
         }
 
+        public void ChangeAnimationLoadAmmo(WeaponActionType type)
+        {
+            int id;
+            if(type is WeaponActionType.PumpAction) id = PlayerAnimatorHash.Pump;
+            else if (type is WeaponActionType.BoltAction) id = PlayerAnimatorHash.Bolt;
+            else return;
+            upperAnimator.SetTrigger(id);
+        }
+        
         public void ChangeWeapon(WeaponType newWeaponType) //애니메이션 전환
         {
             _currentWeaponType = newWeaponType;

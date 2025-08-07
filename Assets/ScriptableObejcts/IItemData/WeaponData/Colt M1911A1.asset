@@ -26,7 +26,7 @@ MonoBehaviour:
   bulletSpeed: 10
   fireModes: 00000000
   weaponActionType: 0
-  hasDetachableMagazine: 0
+  hasDetachableMagazine: 1
   itemSprite: {fileID: 3612897601756222204, guid: 007f4cb0b2211ac4088450706eb81205, type: 3}
   shootSFX: 3
   reloadSFX: 5

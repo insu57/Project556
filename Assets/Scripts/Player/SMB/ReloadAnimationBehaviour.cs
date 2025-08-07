@@ -25,7 +25,16 @@ public class ReloadAnimationBehaviour : StateMachineBehaviour
     
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        _playerControl.OnReloadEnd();
+        if (_playerManager.CheckWeaponHasNotDetachMag())
+        {
+            if(_playerManager.CheckWeaponIsFullyLoaded())
+                _playerControl.OnReloadEnd();
+            else _playerControl.OnReloadOneRoundEnd();
+        }
+        else
+        {
+            _playerControl.OnReloadEnd();
+        }
         animator.speed = DefaultAnimationSpeed;
         animator.SetBool(PlayerAnimatorHash.IsReload, false);
     }

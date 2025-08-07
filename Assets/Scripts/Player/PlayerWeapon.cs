@@ -17,6 +17,7 @@ public class PlayerWeapon : MonoBehaviour
     private float _lastShotTime;
     
     public event Action OnShowMuzzleFlash;
+    public event Action<WeaponActionType> OnEndWeaponAction;
     
     public void ChangeWeaponData(WeaponData weaponData, AmmoData ammoData)
     {
@@ -39,7 +40,7 @@ public class PlayerWeapon : MonoBehaviour
         
         OnShowMuzzleFlash?.Invoke(); //show flash
 
-        var palletCount = _ammoData.IsBuckshot ? _ammoData.PelletCount : 1;
+        var palletCount = _ammoData.IsBuckshot ? _ammoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
         
         for (var i = 0; i < palletCount; i++)
         {
@@ -66,6 +67,11 @@ public class PlayerWeapon : MonoBehaviour
             Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoData.AmmoCategory);
             bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
             bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
+        }
+
+        if (_weaponData.WeaponActionType == WeaponActionType.PumpAction)
+        {
+            OnEndWeaponAction?.Invoke(WeaponActionType.PumpAction);
         }
         
         return true;

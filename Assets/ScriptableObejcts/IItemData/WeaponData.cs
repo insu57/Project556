@@ -21,7 +21,7 @@ public class WeaponData : BaseItemDataSO
         FireMode.SemiAuto
     };
     [SerializeField] private WeaponActionType weaponActionType;
-    [SerializeField] private bool hasDetachableMagazine;
+    [SerializeField] private bool hasDetachableMagazine = true;
     
     [SerializeField] private Sprite itemSprite;
     [SerializeField] private SFX shootSFX;

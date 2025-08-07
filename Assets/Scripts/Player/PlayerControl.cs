@@ -47,6 +47,7 @@ namespace Player
       public bool IsOneHanded { set; get; }
       public FireMode CurrentFireMode { set; get; }
       public bool InShooting { set; get; }
+      private bool _inReloading;
       private bool _canShoot  = true;
       private bool _isFlipped = false;
       private bool _isGrounded = false;
@@ -437,16 +438,33 @@ namespace Player
       private void OnReload(InputAction.CallbackContext ctx) //재장전 입력 R키
       {
          if(IsUnarmed) return;
+         if(_inReloading) return;
          _canRotateArm = false; //팔회전 불가
          _canShoot = false; //사격 불가
          InShooting = false; //사격 중인 경우 중단
+         _inReloading = true;
          OnPlayerReload?.Invoke();//장전 이벤트 전달
       }
 
+      public void ReloadOneRound() //한발씩 장전(내부탄창)시 조작 제한 메서드
+      {
+         _canRotateArm = false;
+         _canShoot = false;
+         InShooting = false;
+         _inReloading = true;
+         OnPlayerReload?.Invoke();
+      }
+
+      public void OnReloadOneRoundEnd()
+      {
+         OnReloadEndAction?.Invoke();
+      }
+      
       public void OnReloadEnd()//장전 종료시 호출
       {
          _canRotateArm = true;
          _canShoot = true;
+         _inReloading = false;
          OnReloadEndAction?.Invoke();//장전 애니메이션 종료시 장전 매커니즘 작동
       }
 

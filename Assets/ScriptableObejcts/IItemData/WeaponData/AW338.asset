@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd2243bc440acbe4d82f740ce3722053, type: 3}
+  m_Name: AW338
+  m_EditorClassIdentifier: 
+  itemID: sr_01
+  weaponName: AW-338
+  weaponType: 5
+  ammoCaliber: 8
+  defaultMagazineSize: 5
+  defaultAmmoData:
+  - {fileID: 11400000, guid: 3d2628c673806a14382694b1c6bbccbd, type: 2}
+  isOneHanded: 0
+  isOpenBolt: 0
+  fireRate: 0.75
+  accuracy: 90
+  bulletSpeed: 25
+  fireModes: 00000000
+  weaponActionType: 2
+  hasDetachableMagazine: 1
+  itemSprite: {fileID: 4532097585892698541, guid: 850102b0e4abc3c49af6d7f1a73b92b8, type: 3}
+  shootSFX: 5
+  reloadSFX: 7
+  loadAmmoSFX: 0
+  reloadTime: 1.2
+  itemWidth: 5
+  itemHeight: 2
+  itemWeight: 0
+  weaponSetup: {fileID: 0}

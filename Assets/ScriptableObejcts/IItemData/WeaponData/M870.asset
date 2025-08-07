@@ -15,13 +15,13 @@ MonoBehaviour:
   itemID: sg_01
   weaponName: Remington M870
   weaponType: 1
-  ammoCaliber: 10
+  ammoCaliber: 11
   defaultMagazineSize: 8
   defaultAmmoData:
   - {fileID: 11400000, guid: bef0b617cce34a142965cd18e60770ac, type: 2}
   isOneHanded: 0
   isOpenBolt: 0
-  fireRate: 0.5
+  fireRate: 0.7
   accuracy: 70
   bulletSpeed: 10
   fireModes: 00000000

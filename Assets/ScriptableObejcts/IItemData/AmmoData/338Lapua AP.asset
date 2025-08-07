@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a45b0ce3f01a934b9ddbebf8ea6757e, type: 3}
-  m_Name: 12Gauge Buckshot
+  m_Name: 338Lapua AP
   m_EditorClassIdentifier: 
-  ammoCaliber: 11
-  ammoCategory: 2
-  itemID: ammo_12g_01
-  itemName: Buckshot 12Gauge
-  itemSprite: {fileID: 5708895028770762888, guid: 7af738695de31224eab760d4a7972662, type: 3}
+  ammoCaliber: 0
+  ammoCategory: 0
+  itemID: ammo_338_01
+  itemName: AP .338 Lapua Magnum
+  itemSprite: {fileID: 1833901363245245110, guid: 4362b0ee692b4464a9ef3f749481145c, type: 3}
   itemWidth: 1
   itemHeight: 1
   itemWeight: 0
-  maxStackAmount: 40
+  maxStackAmount: 30
   ammoDamage: 0
   ammoPiercing: 0
   velocityModify: 0
-  isBuckshot: 1
-  pelletCount: 8
+  isBuckshot: 0
+  pelletCount: 1

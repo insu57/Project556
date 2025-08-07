@@ -5,6 +5,7 @@ public class WeaponInstance : ItemInstance
     public WeaponData WeaponData { get; }
     public int CurrentMagazineCount { get; private set; }
     private int MaxMagazineCount { get; }
+    //public bool IsFullyLoaded
     public bool HasChamber {get; private set;}
     public FireMode CurrentFireMode { get; private set; }
     private int _fireModeIdx;
@@ -41,7 +42,7 @@ public class WeaponInstance : ItemInstance
     {
         if (WeaponData.IsOpenBolt) //오픈볼트면 약실에 없음
         {
-            return false;
+            return CurrentMagazineCount >= MaxMagazineCount;
         }
     
         return CurrentMagazineCount > MaxMagazineCount; //총알이 없으면 약실에 없음
