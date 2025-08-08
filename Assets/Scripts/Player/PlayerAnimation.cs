@@ -54,7 +54,6 @@ namespace Player
 
         public void ChangeAnimationReload()
         {
-            Debug.Log("ReloadAnimation");
             //upperAnimator.SetBool(PlayerAnimatorHash.IsReload, true);
             upperAnimator.SetTrigger(PlayerAnimatorHash.Reload);
         }

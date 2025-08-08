@@ -4,7 +4,7 @@ public class WeaponInstance : ItemInstance
 {
     public WeaponData WeaponData { get; }
     public int CurrentMagazineCount { get; private set; }
-    private int MaxMagazineCount { get; }
+    public int MaxMagazineCount { get; private set; }
     //public bool IsFullyLoaded
     public bool HasChamber {get; private set;}
     public FireMode CurrentFireMode { get; private set; }

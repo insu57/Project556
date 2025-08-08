@@ -317,6 +317,8 @@ namespace Player
 
       private void OnChangeWeapon(InputAction.CallbackContext context)
       {
+         if(InShooting) return;
+         if(_inReloading) return; //사격, 장전 중 불가
          if(context.control is not KeyControl key) return;
          
          switch (key.keyCode)
@@ -373,8 +375,12 @@ namespace Player
       private void OnShoot(InputAction.CallbackContext ctx)
       {
          if(IsUnarmed) return;
-         if(!_canShoot) return;
+         if (_inReloading) //장전 중단
+         {
+            _inReloading = false;
+         }
          
+         if(!_canShoot) return;
          
          switch (CurrentFireMode)
          {
@@ -439,25 +445,27 @@ namespace Player
       {
          if(IsUnarmed) return;
          if(_inReloading) return;
-         _canRotateArm = false; //팔회전 불가
-         _canShoot = false; //사격 불가
-         InShooting = false; //사격 중인 경우 중단
-         _inReloading = true;
+         InShooting = false; //장전 시 사격 중인 경우 중단
          OnPlayerReload?.Invoke();//장전 이벤트 전달
       }
 
-      public void ReloadOneRound() //한발씩 장전(내부탄창)시 조작 제한 메서드
+      public void SetReloadState(bool inReloading)
       {
-         _canRotateArm = false;
-         _canShoot = false;
-         InShooting = false;
-         _inReloading = true;
-         OnPlayerReload?.Invoke();
+         _canRotateArm = !inReloading; //장전 중 팔회전 불가
+         _canShoot = !inReloading; //장전 중 사격 불가
+         _inReloading = inReloading;
       }
 
-      public void OnReloadOneRoundEnd()
+      public void OnReloadOneRoundEnd() //한발씩 장전 종료시
       {
-         OnReloadEndAction?.Invoke();
+         if (!_inReloading) //장전을 중단했다면
+         {
+            SetReloadState(false);
+         }
+         else
+         {
+            OnReloadEndAction?.Invoke();
+         }
       }
       
       public void OnReloadEnd()//장전 종료시 호출

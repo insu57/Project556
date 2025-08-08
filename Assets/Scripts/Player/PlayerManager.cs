@@ -175,17 +175,16 @@ namespace Player
         
         private void HandleOnPlayerReloadAction() //장전 시 애니메이션 재생
         {
-            _playerAnimation.ChangeAnimationReload();
+            if (CheckHaveAmmo()) //장탄이 있으면
+            {
+                _playerAnimation.ChangeAnimationReload();//장전 애니메이션 전환
+                _playerControl.SetReloadState(true); //장전시 조작제한
+            }
         }
 
         private bool CheckWeaponIsOneHanded()
         {
             return _currentWeaponItem != null && _currentWeaponItem.WeaponData.IsOneHanded;
-        }
-
-        public bool CheckWeaponIsFullyLoaded()
-        {
-            return _currentWeaponItem != null && _currentWeaponItem.IsFullyLoaded();
         }
 
         public bool CheckWeaponHasNotDetachMag() //내장탄창인지 체크
@@ -257,13 +256,25 @@ namespace Player
             _playerAnimation.ChangeAnimationLoadAmmo(weaponActionType);
         }
 
+        private bool CheckHaveAmmo()
+        {
+            var weaponData = _currentWeaponItem.WeaponData;
+            var (canReload, _, _) = _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, 1);//한발이라도 있는지 체크
+            if (canReload) //장탄이 한발이라도 있다면 장전가능
+            {
+                return true;
+            }
+            OnReloadNoAmmo?.Invoke();
+            return false;
+        }
+        
         private void HandleOnReloadEnd() //개선?
         {
             //Inven -> weapon
             if (_currentWeaponItem == null) return;
             
             var weaponData = _currentWeaponItem.WeaponData;
-            var magazineSize = weaponData.DefaultMagazineSize;
+            var magazineSize = _currentWeaponItem.MaxMagazineCount;
             var currentAmmo = _currentWeaponItem.CurrentMagazineCount;
             int ammoToRefill;
             
@@ -282,24 +293,31 @@ namespace Player
             }
             
             var (canReload, reloadAmmo, ammoData)  = 
-                _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill);
+                _inventoryManager.LoadAmmo(weaponData.AmmoCaliber, ammoToRefill); //Ammo 아이템 처리
 
             if (canReload)
             {
-                _currentWeaponItem.ReloadAmmo(ammoData, currentAmmo + reloadAmmo);
+                _currentWeaponItem.ReloadAmmo(ammoData, currentAmmo + reloadAmmo); //무기에 장전
                 OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), _currentWeaponItem.CurrentMagazineCount);
-                _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID);
+                _inventoryManager.UpdateWeaponMagCount(_currentWeaponItem.InstanceID); //ItemDrag장탄표시
                 _playerWeapon.SetAmmoData(ammoData);
-                if (!_currentWeaponItem.IsFullyLoaded() && !_currentWeaponItem.WeaponData.HasDetachableMagazine)
+                if (!_currentWeaponItem.WeaponData.HasDetachableMagazine)
                 {
-                    Debug.Log("Need More Ammo");
-                    _playerAnimation.ChangeAnimationReload();
+                    var needAmmo = _currentWeaponItem.MaxMagazineCount + 1 - _currentWeaponItem.CurrentMagazineCount;
+                    if (needAmmo > 0) //총알이 더 필요하다면 계속 장전
+                    {
+                        _playerAnimation.ChangeAnimationReload();
+                    }
+                    else
+                    {
+                        _playerControl.SetReloadState(false);//장전종료
+                    }
                     //장전 매커니즘 수정필요...(장전 시퀀스 개선?)
                 }
             }
             else
             {
-                OnReloadNoAmmo?.Invoke(); //장전할 탄이 하나도 없으면 경고문구 띄우기 -> 개선??
+                _playerControl.SetReloadState(false); //장전 불가 시 종료
             }
             //장전 제어?(약실비었으면 다른 애니메이션?)
         }

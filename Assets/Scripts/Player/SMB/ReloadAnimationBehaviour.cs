@@ -27,9 +27,7 @@ public class ReloadAnimationBehaviour : StateMachineBehaviour
     {
         if (_playerManager.CheckWeaponHasNotDetachMag())
         {
-            if(_playerManager.CheckWeaponIsFullyLoaded())
-                _playerControl.OnReloadEnd();
-            else _playerControl.OnReloadOneRoundEnd();
+            _playerControl.OnReloadOneRoundEnd();
         }
         else
         {
