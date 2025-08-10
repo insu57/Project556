@@ -1,24 +1,23 @@
 using UnityEngine;
 
-public class WeaponInstance : ItemInstance
+public class WeaponInstance : ItemInstance //무기 아이템 인스턴스
 {
     public WeaponData WeaponData { get; }
     public int CurrentMagazineCount { get; private set; }
     public int MaxMagazineCount { get; private set; }
-    //public bool IsFullyLoaded
-    public bool HasChamber {get; private set;}
-    public FireMode CurrentFireMode { get; private set; }
-    private int _fireModeIdx;
-    public AmmoData CurrentAmmoData { get; private set; }//탄종 시스템 진행중
-    public AmmoCategory AmmoCategory => EnumManager.GetAmmoCategory(WeaponData.AmmoCaliber);
+    public bool HasChamber {get; private set;} //챔버(약실) 관련 미구현.(장전세분화)
+    public FireMode CurrentFireMode { get; private set; } //현재 발사모드(조정간)
+    private int _fireModeIdx; //무기 조정간 인덱스
+    public AmmoData CurrentAmmoData { get; private set; }//탄종 시스템 진행중(구경별 탄종)
+    public AmmoCategory AmmoCategory => EnumManager.GetAmmoCategory(WeaponData.AmmoCaliber); //탄 구경
     public WeaponInstance( WeaponData weaponData) : base(weaponData)
     {
         WeaponData = weaponData;
-        var ammoIdx = Random.Range(0,weaponData.DefaultAmmoData.Length);
+        var ammoIdx = Random.Range(0,weaponData.DefaultAmmoData.Length); //초기 총알 데이터
         CurrentAmmoData = weaponData.DefaultAmmoData[ammoIdx];
-        MaxMagazineCount = weaponData.DefaultMagazineSize;
+        MaxMagazineCount = weaponData.DefaultMagazineSize; //탄창크기
 
-        CurrentFireMode = weaponData.FireModes[0]; 
+        CurrentFireMode = weaponData.FireModes[0]; //초기 조정간
         _fireModeIdx = 0;//기본 FireMode
     }
 
@@ -27,12 +26,12 @@ public class WeaponInstance : ItemInstance
         CurrentMagazineCount = magazineCount;
     }
     
-    public void UseAmmo() 
+    public void UseAmmo() //탄 사용
     {
         CurrentMagazineCount--;
     }
 
-    public void ReloadAmmo(AmmoData ammoData, int reloadAmmo) //주머니 탄 소모...
+    public void ReloadAmmo(AmmoData ammoData, int reloadAmmo) //장전. //탄 교체
     {
         CurrentAmmoData = ammoData;
         CurrentMagazineCount = reloadAmmo;
@@ -45,13 +44,13 @@ public class WeaponInstance : ItemInstance
             return CurrentMagazineCount >= MaxMagazineCount;
         }
     
-        return CurrentMagazineCount > MaxMagazineCount; //총알이 없으면 약실에 없음
+        return CurrentMagazineCount > MaxMagazineCount; //(탄창크기+1 -> 최대)
     }
 
-    public void ToggleFireMode()
+    public void ToggleFireMode() //발사모드 변경.
     {
-        _fireModeIdx++;
-        if(_fireModeIdx >= WeaponData.FireModes.Length) _fireModeIdx = 0;
-        CurrentFireMode = WeaponData.FireModes[_fireModeIdx];
+        _fireModeIdx++; //인덱스 증가
+        if(_fireModeIdx >= WeaponData.FireModes.Length) _fireModeIdx = 0; //넘으면 초기화
+        CurrentFireMode = WeaponData.FireModes[_fireModeIdx]; //현재 발사모드
     }
 }

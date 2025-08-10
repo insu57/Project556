@@ -4,16 +4,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [CreateAssetMenu(fileName = "FireModeImage", menuName = "Scriptable Objects/FireModeImage")]
-public class FireModeImage : ScriptableObject
+public class FireModeImage : ScriptableObject //탄종별 우하단UI 발사모드(조정간) 표시 스프라이트 데이터.
 {
     [Serializable]
-    private struct FireModeSpriteData
+    private struct FireModeSpriteData//스프라이트 정보
     {
         public FireMode fireMode;
         public Sprite fireModeImage;
     }
     
-    [SerializeField] private AmmoCategory ammoCategory;
+    [SerializeField] private AmmoCategory ammoCategory;//탄종
 
     [SerializeField] private List<FireModeSpriteData> fireModeImageMaps = new()
     {
@@ -24,7 +24,7 @@ public class FireModeImage : ScriptableObject
     };
     
     public AmmoCategory AmmoCategory => ammoCategory;
-    public Dictionary<FireMode, Sprite> FireModeSpriteDict => FireModeSpriteMapping(fireModeImageMaps);
+    public Dictionary<FireMode, Sprite> FireModeSpriteDict => FireModeSpriteMapping(fireModeImageMaps);//Dictionary매핑
 
     private Dictionary<FireMode, Sprite> FireModeSpriteMapping(List<FireModeSpriteData> fireModeSprites)
     {

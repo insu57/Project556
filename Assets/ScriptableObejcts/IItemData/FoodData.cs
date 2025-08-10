@@ -1,3 +1,4 @@
+using Item;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "FoodData", menuName = "Scriptable Objects/FoodData")]
@@ -6,9 +7,9 @@ public class FoodData : BaseItemDataSO, IConsumableItem
     [SerializeField] private string itemID;
     [SerializeField] private string itemName;
     
-    [SerializeField] private StatAdjustAmount[] adjustAmount;
-    [SerializeField] private StatEffectPerSecond[] effectPerSecond;
-    [SerializeField] private float useDuration = 1;
+    [SerializeField] private StatAdjustAmount[] adjustAmount; //아이템 효과(증감량, 아이템 사용시간, 초당 증감량/사용시간)
+    [SerializeField] private StatEffectPerSecond[] effectPerSecond;//아이템 효과(초당 효과, 지속 시간)
+    [SerializeField] private float useDuration = 1; //사용시간
     
     [SerializeField] private Sprite itemSprite;
    
@@ -26,7 +27,6 @@ public class FoodData : BaseItemDataSO, IConsumableItem
     public override GearType GearType => GearType.None;
     public override float ItemWeight => itemWeight;
     public override bool IsStackable => isStackable;
-    public override bool IsConsumable => true;
     public override int MaxStackAmount => maxStackAmount;
     
     public StatAdjustAmount[] AdjustAmount =>  adjustAmount;

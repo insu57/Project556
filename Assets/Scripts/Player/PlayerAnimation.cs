@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public static class PlayerAnimatorHash
+    public static class PlayerAnimatorHash //애니메이션 Hash
     {
         public static readonly int Idle = Animator.StringToHash("IDLE");
         public static readonly int IsMove = Animator.StringToHash("isMove");
@@ -16,12 +16,9 @@ namespace Player
 
     public class PlayerAnimation : MonoBehaviour
     {
-        public const string Walk = "Walk";
-        public const string Run = "Run";
-        public const string Climb = "Climb";
-    
         [SerializeField] private Animator upperAnimator;
-        [SerializeField] private Animator lowerAnimator;
+        [SerializeField] private Animator lowerAnimator; 
+        //상,하체 애니메이터
         public Animator UpperAnimator => upperAnimator;
         public Animator LowerAnimator => lowerAnimator;
     
@@ -35,33 +32,29 @@ namespace Player
         [Header("OverrideController")] 
         [SerializeField] private OverrideController unarmedController;
         [SerializeField] private OverrideController pistolAnimator;
-        [SerializeField] private OverrideController rifleAnimator;
-    
-        private WeaponType _currentWeaponType; //현재 들고있는 무기 종류 - Manager에서 관리하니 제거?
-        //하반신 애니메이터 별도로..
-    
-        public void ChangeAnimationMove(bool isMove)
+        [SerializeField] private OverrideController rifleAnimator; //각 무기별 OverrideController(기존 애니메이션 대체)
+        
+        public void ChangeAnimationMove(bool isMove) //move animation transition
         {
             upperAnimator.SetBool(PlayerAnimatorHash.IsMove, isMove);
             lowerAnimator.SetBool(PlayerAnimatorHash.IsMove, isMove);
         }
 
-        public void ChangeAnimationSprint(bool isSprint)
+        public void ChangeAnimationSprint(bool isSprint) //sprint animation transition
         {
             upperAnimator.SetBool(PlayerAnimatorHash.IsSprint, isSprint);
             lowerAnimator.SetBool(PlayerAnimatorHash.IsSprint, isSprint);
         }
 
-        public void ChangeAnimationReload()
+        public void ChangeAnimationReload() //Reload Trigger
         {
-            //upperAnimator.SetBool(PlayerAnimatorHash.IsReload, true);
             upperAnimator.SetTrigger(PlayerAnimatorHash.Reload);
         }
 
-        public void ChangeAnimationLoadAmmo(WeaponActionType type)
+        public void ChangeAnimationLoadAmmo(WeaponActionType type) //LoadAmmo Trigger(차탄 공급)
         {
             int id;
-            if(type is WeaponActionType.PumpAction) id = PlayerAnimatorHash.Pump;
+            if(type is WeaponActionType.PumpAction) id = PlayerAnimatorHash.Pump; //액션타입에 따라 다른 애니메이션
             else if (type is WeaponActionType.BoltAction) id = PlayerAnimatorHash.Bolt;
             else return;
             upperAnimator.SetTrigger(id);
@@ -69,19 +62,18 @@ namespace Player
         
         public void ChangeWeapon(WeaponType newWeaponType) //애니메이션 전환
         {
-            _currentWeaponType = newWeaponType;
             switch (newWeaponType)
             {
-                case WeaponType.Pistol:
+                case WeaponType.Pistol: //한손무기
                     upperAnimator.runtimeAnimatorController = pistolAnimator.upperController;
                     lowerAnimator.runtimeAnimatorController = pistolAnimator.lowerController;
                     break;
                 case WeaponType.Melee:
-                case WeaponType.Unarmed:
+                case WeaponType.Unarmed: //비무장 (근접무기 미구현)
                     upperAnimator.runtimeAnimatorController = unarmedController.upperController;
                     lowerAnimator.runtimeAnimatorController = unarmedController.lowerController;
                     break;
-                default:
+                default: //두손무기
                     upperAnimator.runtimeAnimatorController = rifleAnimator.upperController;
                     lowerAnimator.runtimeAnimatorController = rifleAnimator.lowerController;
                     break;
