@@ -11,9 +11,10 @@ namespace Player
    public class PlayerControl : MonoBehaviour
    {
       [ShowInInspector] private float _currentMoveSpeed;
-      public float MoveSpeed { set; get; }
-      public float SprintSpeedMultiplier { set; get; }
-      public float JumpSpeed { set; get; } 
+      public float MoveSpeed { set; get; } //이동 속도
+      public float SprintSpeedMultiplier { set; get; } //달리기 배수
+      public float JumpForce { set; get; }  //점프 운동량  
+      //PlayerData에서 할당(개선 방안 필요?)
    
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;
@@ -438,7 +439,7 @@ namespace Player
       {
          if (ctx.performed && _isGrounded) //땅에 있을 때
          {
-            _rigidbody.AddForce(new Vector2(0, JumpSpeed), ForceMode2D.Impulse); //Rigidbody기반
+            _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse); //Rigidbody기반
          }
       }
 

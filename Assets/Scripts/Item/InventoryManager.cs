@@ -50,6 +50,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
     public event Action<Guid, bool, int> OnUpdateWeaponItemMagCount; //무기 장탄량 업데이트(ItemDrag)
     public event Action<Guid> OnRemoveItemFromPlayer; //아이템 필드로 떨구기
     public event Action<Guid, QuickSlotIdx> OnRemoveQuickSlotItem; //퀵슬롯에서 제거
+    public event Action<float, GearType> OnRemoveItemInventory; //인벤토리 제거 시 UI 재정렬(float 인벤토리 높이(y))
     
     //PlayerManager
     public event Action<float> OnUpdateArmorAmount; //방어도 총합 업데이트
@@ -179,6 +180,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
                 {
                     inventory.OnItemRemovedCheckQuickSlot -= CheckRemoveItemIsQuickSlot;
                 }
+                OnRemoveItemInventory?.Invoke(inventory.Height, gearType);//ItemUI재정렬
 
                 if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig) RigInventory = null; //인벤토리 할당 초기화
                 else BackpackInventory = null;

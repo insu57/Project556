@@ -80,14 +80,8 @@ public class InventoryUIPresenter : MonoBehaviour
         _invenMap[_itemUI.LootSlotParent] = null;
         
         //test
-        HandleOnInitInventory(crate01Test, null); //Loot
-        SetItemToInventory(pistolTestData);
-        SetItemToInventory(itemDataTest);
-        SetStackableItem(bullet556TestData, 50);
-        SetStackableItem(bullet556TestData, 10);
         SetGearItem(backpackTestData, _itemUI.BackpackSlotRT);
         SetGearItem(rigTestData, _itemUI.RigSlotRT);
-        SetItemToInventory(rigTanTestData);
     }
 
     private void OnEnable()
@@ -103,6 +97,7 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnUpdateWeaponItemMagCount += HandleOnUpdateWeaponItemMagCount;
         _inventoryManager.OnRemoveItemFromPlayer += HandleOnRemoveItemHandler;
         _inventoryManager.OnRemoveQuickSlotItem += HandleOnRemoveQuickSlotItem;
+        _inventoryManager.OnRemoveItemInventory += HandleOnRemoveItemInventory;
         
         //ItemUIManager
         _itemUI.OnItemContextMenuClick += HandleOnItemContextMenuClick;
@@ -125,6 +120,7 @@ public class InventoryUIPresenter : MonoBehaviour
         _inventoryManager.OnUpdateWeaponItemMagCount -= HandleOnUpdateWeaponItemMagCount;
         _inventoryManager.OnRemoveItemFromPlayer -= HandleOnRemoveItemHandler;
         _inventoryManager.OnRemoveQuickSlotItem -= HandleOnRemoveQuickSlotItem;
+        _inventoryManager.OnRemoveItemInventory -= HandleOnRemoveItemInventory;
         
         //ItemUIManager
         _itemUI.OnItemContextMenuClick -= HandleOnItemContextMenuClick;
@@ -439,7 +435,7 @@ public class InventoryUIPresenter : MonoBehaviour
         }
         else item = _inventoryManager.ItemDict[instanceID].item;
         
-        RemoveItem(instanceID);
+        RemoveItemFromPlayer(instanceID);
         
         ItemPickUp itemPickUp =  ObjectPoolingManager.Instance.GetItemPickUp(); //Position?
         itemPickUp.transform.position = gameObject.transform.position + new Vector3(0, .5f, 0);
@@ -558,7 +554,7 @@ public class InventoryUIPresenter : MonoBehaviour
         }
     }
 
-    private void RemoveItem(Guid instanceID)
+    private void RemoveItemFromPlayer(Guid instanceID)
     {
         var itemDrag = _itemDragHandlers[instanceID];
         var inventoryRT = itemDrag.InventoryRT;
@@ -672,21 +668,15 @@ public class InventoryUIPresenter : MonoBehaviour
         return isAvailable;
     }
 
-    private void HandleOnInitInventory(GameObject inventoryPrefab, ItemInstance item)
+    private void HandleOnInitInventory(GameObject inventoryPrefab, ItemInstance item) //장비 인벤토리
     {
-        GearType gearType;
-        Guid instanceID;
+        if (item == null) //null 체크
+        {
+            return;
+        }
 
-        if (item == null) //아이템이 없으면 LootInventorySlot
-        {
-            gearType = GearType.None;
-            instanceID = Guid.Empty;
-        }
-        else
-        {
-            gearType = item.GearType;
-            instanceID = item.InstanceID;
-        }
+        var gearType = item.GearType;
+        var instanceID = item.InstanceID;
 
         var inventory = _itemUI.SetInventorySlot(inventoryPrefab, gearType, instanceID, true);
 
@@ -703,6 +693,11 @@ public class InventoryUIPresenter : MonoBehaviour
         OnSetInventory(item, gearType, inventory);
     }
 
+    private void HandleOnRemoveItemInventory(float inventoryHeight, GearType gearType)
+    {
+        _itemUI.RebuildOnRemoveItemInventory(inventoryHeight, gearType);
+    }
+    
     private void HandleOnSetLootInventory(LootCrate lootCrate)
     {
         var inventory = lootCrate?.GetLootInventory();
@@ -786,9 +781,6 @@ public class InventoryUIPresenter : MonoBehaviour
             case GearType.Backpack:
                 itemDragHandlerInstance.SetItemDragPos(pos, size, itemRT, _itemUI.BackpackInvenParent);
                 break;
-            case GearType.None:
-                //Unavailable 표시 -> UI Manager
-                break;
         }
     }
 
@@ -854,13 +846,17 @@ public class InventoryUIPresenter : MonoBehaviour
 
     private void HandleOnCloseItemUI()
     {
-        if(!_inventoryManager.LootInventory) return;
+        _itemUI.CloseItemContextMenu();//ContextMenu닫기
+        _itemUI.CloseItemInfo(); //아이템 설명창 끄기
+        
+        if(!_inventoryManager.LootInventory) return; //플레이어 창(인벤창) 루트 인벤토리 가리기
         _inventoryManager.LootInventory.gameObject.SetActive(false);
         _inventoryManager.SetLootInventory(null);
     }
     
     //임시?
-    private void SetItemToInventory(BaseItemDataSO itemData)
+    private void SetItemToInventory(BaseItemDataSO itemData) 
+        //수정 -> 로드 시 장비 인벤토리 / 루트 인벤토리 에 있는 아이템배치 메서드로 
     {
         var inventory = _inventoryManager.LootInventory;
         var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);

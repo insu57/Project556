@@ -64,9 +64,9 @@ public class PlayerWeapon : MonoBehaviour
                     new Vector2(Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
                 bulletAngle = shootAngle;
             }
-            Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoData.AmmoCategory);
-            bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서
-            bullet.ShootBullet(bulletAngle, direction, _muzzleTransform); //Muzzle위치 수정!!
+            Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoData.AmmoCategory);//Pool에서 Get(탄종에 따라)
+            bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서 값을 받아오게 수정 필요
+            bullet.ShootBullet(bulletAngle, direction, _muzzleTransform);
         }
 
         if (_weaponData.WeaponActionType == WeaponActionType.PumpAction)
@@ -77,7 +77,7 @@ public class PlayerWeapon : MonoBehaviour
         return true;
     }
     
-    public void SetMuzzleTransform(Transform muzzleTransform)
+    public void SetMuzzleTransform(Transform muzzleTransform) //총구 위치 설정
     {
         _muzzleTransform = muzzleTransform;
     }

@@ -19,8 +19,6 @@ public class Inventory: MonoBehaviour
         public RectTransform slotRT;
         public RectTransform itemRT;
         public Vector2Int cellCount;
-        public bool isGearSlot;
-        public GearType gearType;
     }
     
     [SerializeField] private List<SlotData> slotDataList = new();

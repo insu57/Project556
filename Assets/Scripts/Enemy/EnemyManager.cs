@@ -17,5 +17,11 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
     public void TakeDamage(float damage)
     {
         _currentHealth -= damage;
+        if (_currentHealth <= 0)
+        {
+            gameObject.SetActive(false);
+        }
     }
+    
+    
 }

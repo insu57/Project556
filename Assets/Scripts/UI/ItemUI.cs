@@ -30,7 +30,6 @@ namespace UI
     
         [Header("Player Inventory")]
         [Header("Left Panel")]
-        [SerializeField] private RectTransform leftPanel;
         [SerializeField] private RectTransform headwearSlot;
         [SerializeField] private RectTransform eyewearSlot;
         [SerializeField] private RectTransform bodyArmorSlot;
@@ -42,9 +41,9 @@ namespace UI
         public RectTransform BodyArmorSlotRT => bodyArmorSlot;
         public RectTransform PWeaponSlotRT => primaryWeaponSlot;
         public RectTransform SWeaponSlotRT => secondaryWeaponSlot;
-    
+
         [Header("Middle Panel")]
-        [SerializeField] private RectTransform middlePanel;
+        [SerializeField] private RectTransform middlePanelVerticalGroup;
         [SerializeField] private RectTransform chestRigSlot;
         [SerializeField] private RectTransform chestRigParent;
         [SerializeField] private RectTransform rigInvenParent;
@@ -68,7 +67,6 @@ namespace UI
 
         [Header("Right Panel")]
         [SerializeField] private TMP_Text lootCrateName;
-        [SerializeField] private RectTransform rightPanel;
         [SerializeField] private RectTransform lootSlotParent;
         [SerializeField] private float minLootSlotHeight = 800f;
         public RectTransform LootSlotParent => lootSlotParent;
@@ -131,9 +129,7 @@ namespace UI
             
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.AddListener(CloseItemInfo);
-            
-            CloseItemContextMenu();//ContextMenu닫기
-            CloseItemInfo(); //아이템 설명창 끄기
+           
         }
 
         private void OnDisable()
@@ -146,7 +142,6 @@ namespace UI
             
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);
-            
             
         }
         
@@ -216,7 +211,7 @@ namespace UI
                     slotPrefabHeight = inventory.Height;
                     
                     rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-                    if (slotPrefabHeight > minMiddlePanelItemHeight)
+                    if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight)
                     {
                         chestRigParent.sizeDelta = 
                             new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
@@ -246,7 +241,7 @@ namespace UI
                     slotPrefabHeight = inventory.Height;
                     
                     packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-                    if (slotPrefabHeight > minMiddlePanelItemHeight)
+                    if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight)
                     {
                         backpackParent.sizeDelta = 
                             new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
@@ -257,28 +252,30 @@ namespace UI
                     }
                     break; 
                 }
-
-                case GearType.None:
-                {
-                    _lootSlotInstance = Instantiate(inventoryGO, lootSlotParent);
-                    _lootSlotInstance.TryGetComponent(out inventory);
-                    inventory.Init(CellSize, instanceID);
-                    slotPrefabHeight = inventory.Height + PanelSlotPadding;
-                    
-                    lootSlotParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-                    if (slotPrefabHeight > minLootSlotHeight)
-                    {
-                        lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, slotPrefabHeight);
-                    }
-                    else
-                    {
-                        lootSlotParent.sizeDelta = new Vector2(lootSlotParent.sizeDelta.x, minLootSlotHeight);
-                    }
-                    break;
-                }
-                    
+                //ScrollView 크기는 ContentSizeFitter를 이용
             }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(middlePanelVerticalGroup);//UI 재정렬
             return inventory;
+        }
+
+        public void RebuildOnRemoveItemInventory(float inventoryHeight, GearType gearType)
+        {
+            if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig)
+            {
+                if (inventoryHeight + PanelSlotPadding > minMiddlePanelItemHeight)
+                {
+                    chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(middlePanelVerticalGroup);//UI 재정렬
+                }
+            }
+            else if (gearType is GearType.Backpack)
+            {
+                if (inventoryHeight + PanelSlotPadding > minMiddlePanelItemHeight)
+                {
+                    backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(middlePanelVerticalGroup);//UI 재정렬
+                }
+            }
         }
 
         public void SetLootInventory(LootCrate lootCrate)
@@ -420,7 +417,7 @@ namespace UI
             itemInfoDescriptionTxt.text = infoTxt;
         }
 
-        private void CloseItemInfo()
+        public void CloseItemInfo()
         {
             itemInfoMenu.gameObject.SetActive(false);
         }

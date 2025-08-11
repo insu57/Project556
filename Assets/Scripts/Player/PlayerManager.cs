@@ -59,7 +59,7 @@ namespace Player
             
             _playerControl.MoveSpeed = _playerData.MoveSpeed;
             _playerControl.SprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
-            _playerControl.JumpSpeed = _playerData.JumpSpeed; //개선?
+            _playerControl.JumpForce = _playerData.JumpForce; //개선?
             
             //SMB Init
             var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
