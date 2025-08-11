@@ -104,11 +104,11 @@ public enum SFXType
     Footstep, Weapon, UI, //...
 }
 
-public enum SFX //개선...
+public enum SFX //개선 -> json 파일로 저장하고 불러오기?
 {
-    None, FootstepDirt, FootstepRock, //Footstep
-    PistolShoot, ARShoot, SgShoot ,PistolReload, ARReload, SgReloadNoMag,SgPump ,Selector //Weapon
-    //UI...
+    None, FootstepDirt, FootstepRock, 
+    PistolShoot, ARShoot, SgShoot ,PistolReload, ARReload, SgReloadNoMag,SgPump ,Selector,
+    SRShoot, SMGShoot
 }
 
 public enum FootStepSFX

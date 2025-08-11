@@ -29,7 +29,7 @@ MonoBehaviour:
   hasDetachableMagazine: 1
   itemSprite: {fileID: 5985368622149440744, guid: 652ddd8ee8712364287fed45474e0d55, type: 3}
   shootSFX: 4
-  reloadSFX: 6
+  reloadSFX: 7
   loadAmmoSFX: 0
   reloadTime: 1.1
   itemWidth: 4

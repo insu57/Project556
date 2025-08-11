@@ -28,7 +28,7 @@ MonoBehaviour:
   weaponActionType: 0
   hasDetachableMagazine: 1
   itemSprite: {fileID: -9111391492136400292, guid: 34b31df824b30df4cb1a026bb82296ba, type: 3}
-  shootSFX: 3
+  shootSFX: 12
   reloadSFX: 6
   loadAmmoSFX: 0
   reloadTime: 0.7

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a45b0ce3f01a934b9ddbebf8ea6757e, type: 3}
   m_Name: 338Lapua AP
   m_EditorClassIdentifier: 
-  ammoCaliber: 0
-  ammoCategory: 0
+  ammoCaliber: 8
+  ammoCategory: 1
   itemID: ammo_338_01
   itemName: AP .338 Lapua Magnum
   itemSprite: {fileID: 1833901363245245110, guid: 4362b0ee692b4464a9ef3f749481145c, type: 3}

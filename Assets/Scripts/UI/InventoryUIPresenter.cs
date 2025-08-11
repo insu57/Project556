@@ -476,6 +476,13 @@ public class InventoryUIPresenter : MonoBehaviour
                 
                 if (idx == quickSlotIdx) return; //같은 퀵슬롯으로 Invoke(등록 해제), 새로 등록하는 하단 코드를 실행하지않음
             }
+
+            if (_inventoryManager.QuickSlotDict[quickSlotIdx].ID != Guid.Empty) //등록할 슬롯에 다른 아이템이 있다면
+            {
+                var id =  _inventoryManager.QuickSlotDict[quickSlotIdx].ID;
+                var quickSlotItemDrag = _itemDragHandlers[id];
+                quickSlotItemDrag.ClearQuickSlotKey(); //그 아이템의 ItemDrag 퀵슬롯 표시 초기화
+            }
             
             itemDrag.SetQuickSlotKey((int)quickSlotIdx);
             _inventoryManager.QuickSlotDict[quickSlotIdx] = (instanceID, targetInven);

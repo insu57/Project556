@@ -28,11 +28,11 @@ MonoBehaviour:
   weaponActionType: 2
   hasDetachableMagazine: 1
   itemSprite: {fileID: 4532097585892698541, guid: 850102b0e4abc3c49af6d7f1a73b92b8, type: 3}
-  shootSFX: 5
+  shootSFX: 11
   reloadSFX: 7
   loadAmmoSFX: 0
   reloadTime: 1.2
   itemWidth: 5
   itemHeight: 2
   itemWeight: 0
-  weaponSetup: {fileID: 0}
+  weaponSetup: {fileID: 3112169903689920657, guid: 1257d6e252fa11d458198820d1ef7486, type: 3}
