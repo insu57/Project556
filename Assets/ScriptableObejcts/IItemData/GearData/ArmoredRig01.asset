@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: ArmoredRig01
   m_EditorClassIdentifier: 
   itemID: armored_rig_01
-  itemName: 
+  itemName: "AA  A18 \uBC29\uD0C4\uB9AC\uADF8"
   gearType: 3
-  armorAmount: 0
+  armorAmount: 80
   itemSprite: {fileID: 1230890756813509920, guid: e084167b350465149a64cc7c631fa9d4, type: 3}
   itemWidth: 3
   itemHeight: 2

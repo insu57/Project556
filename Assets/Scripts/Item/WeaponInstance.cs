@@ -47,6 +47,26 @@ public class WeaponInstance : ItemInstance //무기 아이템 인스턴스
         return CurrentMagazineCount > MaxMagazineCount; //(탄창크기+1 -> 최대)
     }
 
+    public int GetAmmoToRefill() //장전에 사용될 탄약량
+    {
+        if (!WeaponData.HasDetachableMagazine) //내부 탄창
+        {
+            return 1; //내부 탄창(관형탄창 등)이라면 1발씩
+        }
+        return NeedAmmo();
+    }
+
+    public int NeedAmmo() //최대치까지 부족한 탄약량
+    {
+        if (WeaponData.IsOpenBolt)
+        {
+            return MaxMagazineCount -  CurrentMagazineCount;
+        }
+        
+        if (CurrentMagazineCount == 0) return MaxMagazineCount;
+        return MaxMagazineCount - CurrentMagazineCount + 1;//약실 한 발
+    }
+    
     public void ToggleFireMode() //발사모드 변경.
     {
         _fireModeIdx++; //인덱스 증가

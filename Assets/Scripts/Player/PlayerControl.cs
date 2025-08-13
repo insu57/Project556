@@ -14,7 +14,7 @@ namespace Player
       public float MoveSpeed { set; get; } //이동 속도
       public float SprintSpeedMultiplier { set; get; } //달리기 배수
       public float JumpForce { set; get; }  //점프 운동량  
-      //PlayerData에서 할당(개선 방안 필요?)
+      //PlayerData에서 할당(개선 필요)
    
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;

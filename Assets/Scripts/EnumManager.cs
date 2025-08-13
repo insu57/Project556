@@ -191,4 +191,16 @@ public class EnumManager : MonoBehaviour
 
         return "None";
     }
+
+    public static string PlayerStatToString(PlayerStat stat) //개선(Localization)
+    {
+        switch (stat)
+        {
+            case PlayerStat.Health: return "Health";
+            case PlayerStat.Stamina: return "Stamina";
+            case PlayerStat.Hydration: return "Hydration";
+            case PlayerStat.Energy: return "Energy";
+        }
+        return "None";
+    }
 }

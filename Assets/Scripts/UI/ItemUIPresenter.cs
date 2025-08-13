@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
-public class InventoryUIPresenter : MonoBehaviour
+public class ItemUIPresenter : MonoBehaviour
 {
     private InventoryManager _inventoryManager;
     private ItemUI _itemUI;
@@ -33,13 +33,8 @@ public class InventoryUIPresenter : MonoBehaviour
     private ItemInstance _currentCotextMenuItem;
     
     //test
-    [SerializeField, Space] private GameObject crate01Test;
-    [SerializeField] private BaseItemDataSO pistolTestData;
-    [SerializeField] private BaseItemDataSO itemDataTest;
     [SerializeField] private BaseItemDataSO backpackTestData;
     [SerializeField] private BaseItemDataSO rigTestData;
-    [SerializeField] private BaseItemDataSO bullet556TestData;
-    [SerializeField] private BaseItemDataSO rigTanTestData;
     
     private void Awake()
     {
@@ -209,8 +204,7 @@ public class InventoryUIPresenter : MonoBehaviour
             _targetIsAvailable = false;
             return;
         }
-
-        //_targetIsGearSlot = slotInfo.isGearSlot;
+        
         _matchRT = slotInfo.matchSlot;
 
         ItemInstance dragItem;
@@ -285,13 +279,11 @@ public class InventoryUIPresenter : MonoBehaviour
             {
                 if (!originInvenRT) //GearSlot
                 {
-                    var originCell = _inventoryManager.ItemDict[_currentDragItem.InstanceID].cell;
                     _inventoryManager.RemoveGearItem(_currentDragItem.InstanceID); //drag아이템 기존 슬롯에서 제거
                 }
                 else //Inventory
                 {
                     var originInven = _invenMap[originInvenRT];
-
                     bool hasRotated = _rotatedOnClick != _currentDragItem.IsRotated; //드래그 중에 회전했는지 체크
                     originInven.RemoveItem(_currentDragItem.InstanceID, hasRotated); //기존 Inven에서 제거
                 }

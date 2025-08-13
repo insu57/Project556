@@ -23,7 +23,7 @@ namespace UI
         private Vector2 _slotImageSize;
         private bool _isRotated;
 
-        private InventoryUIPresenter _inventoryUIPresenter;
+        private ItemUIPresenter _itemUIPresenter;
         private ItemUI _itemUI;
 
         public Guid InstanceID { private set; get; }
@@ -53,21 +53,21 @@ namespace UI
         //이벤트 구독
         private void OnEnable()
         {
-            if (!_inventoryUIPresenter) return;
+            if (!_itemUIPresenter) return;
             if(_isSubscribed) return; //이미 구독된 상태면 스킵
             SubscribeEvents();
         }
 
         private void OnDisable()
         {
-            if (!_inventoryUIPresenter) return;
+            if (!_itemUIPresenter) return;
             UnsubscribeEvents();
             _isSubscribed = false;
         }
 
         private void SubscribeEvents()
         {
-            _inventoryUIPresenter.InitItemDragHandler(this);
+            _itemUIPresenter.InitItemDragHandler(this);
             _inputActions[ItemDragAction.Rotate].performed += OnRotateItemAction;
             _inputActions[ItemDragAction.QuickAddItem].performed += OnQuickAddItemAction;
             _inputActions[ItemDragAction.QuickDropItem].performed += OnQuickDropItemAction;
@@ -76,17 +76,17 @@ namespace UI
 
         private void UnsubscribeEvents()
         {
-            _inventoryUIPresenter.OnDisableItemDragHandler(this);
+            _itemUIPresenter.OnDisableItemDragHandler(this);
             _inputActions[ItemDragAction.Rotate].performed -= OnRotateItemAction;
             _inputActions[ItemDragAction.QuickAddItem].performed -= OnQuickAddItemAction;
             _inputActions[ItemDragAction.QuickDropItem].performed -= OnQuickDropItemAction;
             _inputActions[ItemDragAction.SetQuickSlot].performed -= OnSetQuickSlotAction;
         }
 
-        public void Init(ItemInstance item, InventoryUIPresenter presenter, 
+        public void Init(ItemInstance item, ItemUIPresenter presenter, 
             Dictionary<ItemDragAction, InputAction> inputActions, Transform uiParent)
         {
-            var cellSize = InventoryUIPresenter.CellSize;
+            var cellSize = ItemUIPresenter.CellSize;
 
             _itemRT = GetComponent<RectTransform>();
         
@@ -107,7 +107,7 @@ namespace UI
             keyImage.enabled = false;
             
             //Set
-            _inventoryUIPresenter = presenter;
+            _itemUIPresenter = presenter;
             _inputActions = inputActions;
             //초기 이벤트 구독
             SubscribeEvents();

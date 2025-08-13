@@ -377,14 +377,17 @@ namespace UI
                 case GearType.ArmoredRig or GearType.BodyArmor or GearType.HeadWear or GearType.EyeWear:
                 {
                     var gearData = item.ItemData as GearData;
+                    infoTxt += $"내구도: {item.Durability}\n";
                     infoTxt += $"방어도: {gearData?.ArmorAmount}";
+                    
                     break;
                 }
                 case GearType.Weapon:
                 {
                     var weaponData = item.ItemData as WeaponData;
                     if(item is not WeaponInstance weapon || !weaponData) return; //null이면 return
-                
+
+                    infoTxt += $"내구도: {item.Durability}\n";
                     infoTxt += $"탄종: {EnumManager.AmmoCaliberToString(weaponData.AmmoCaliber)}\n"; //개선(enum)
                     infoTxt += $"장탄: {weapon.CurrentMagazineCount} ";
                     infoTxt += $"탄창 크기: {weaponData.DefaultMagazineSize}\n";
@@ -406,7 +409,21 @@ namespace UI
                             //세부 스탯...
                             break;
                         case IConsumableItem consumableItem:
-                            //infoTxt += $"체력 회복량: {medicalData.HealAmount}\n";
+                            foreach (var statAdjustAmount in consumableItem.AdjustAmount)
+                            {
+                                var stat = statAdjustAmount.stat;
+                                var amount = statAdjustAmount.amount;
+                                infoTxt += $"{EnumManager.PlayerStatToString(stat)}: {amount}\n";
+                            }
+
+                            foreach (var statEffectPerSecond in consumableItem.EffectPerSecond)
+                            {
+                                var stat = statEffectPerSecond.stat;
+                                var amountPerSecond = statEffectPerSecond.amountPerSecond;
+                                var duration = statEffectPerSecond.effectDuration;
+                                infoTxt += $"{duration}초동안 {EnumManager.PlayerStatToString(stat)}: {amountPerSecond} \n";
+                            }
+                          
                             //상태 이상 회복 등
                             break;
                     }

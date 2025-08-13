@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Item;
 using Unity.VisualScripting;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.Scripting;
 using UnityEngine.Serialization;
@@ -38,7 +39,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
     public Dictionary<QuickSlotIdx, (Guid ID, Inventory inventory)> QuickSlotDict { get; } = new(); //퀵슬롯 Dictionary
    
 
-    //ItemUI Presenter
+    //To ItemUI Presenter
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 초기화 이벤트.  (인벤토리, 해당 인벤토리 아이템.)
     //장비 인벤토리 관련 초기화 개선 필요(Stage초기화)
     public event Action<ItemInstance> OnShowInventory; //인벤토리 active(이미 초기화가 된 경우)
@@ -52,7 +53,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
     public event Action<Guid, QuickSlotIdx> OnRemoveQuickSlotItem; //퀵슬롯에서 제거
     public event Action<float, GearType> OnRemoveItemInventory; //인벤토리 제거 시 UI 재정렬(float 인벤토리 높이(y))
     
-    //PlayerManager
+    //To PlayerManager
     public event Action<float> OnUpdateArmorAmount; //방어도 총합 업데이트
     public event Action<EquipWeaponIdx> OnUnequipWeapon; // 무기 장비 해제 이벤트
     public event Action<IConsumableItem> OnUseItem; //소비 아이템 사용 이벤트
@@ -168,6 +169,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
     public void RemoveGearItem(Guid itemID) //장비 장착 해제
     {
         var gearType = ItemDict[itemID].item.GearType; //해당 장비 타입
+        var item = ItemDict[itemID].item;
         
         switch (gearType)//장비 타입(슬롯 종류)
         {
@@ -203,7 +205,8 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
             }
             case GearType.None: //Pocket 
             {
-                CheckRemoveItemIsQuickSlot(itemID); //퀵슬롯에 등록 되어있는지 체크
+                if(item.ItemData is IConsumableItem) 
+                    CheckRemoveItemIsQuickSlot(itemID); //퀵슬롯에 등록 되어있는지 체크
                 break;
             }
         }
@@ -288,14 +291,42 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
         
         OnAddFieldItemToInventory?.Invoke(inventoryType, pos, itemRT, item); //ItemDrag 추가 이벤트
     }
-    
-    //QuickSlot...
 
+    private static AmmoData CheckItemAmmoCaliber(ItemInstance item, AmmoCaliber caliber)
+    {
+        if (item.ItemData is not AmmoData ammoData) return null;
+        return ammoData.AmmoCaliber == caliber ? ammoData : null;
+    }
+    
+    public bool CheckHaveMatchAmmo(AmmoCaliber ammoCaliber) //해당 구경의 AmmoData 아이템이 있는지 체크
+    {
+        if (RigInventory)
+        {
+            foreach (var (_, (cells, _, _)) in RigInventory.SlotDict)
+            {
+                foreach (var cell in cells)
+                {
+                    if(cell.IsEmpty) continue; //비었다면 건너뛰기
+                    var (item, _, _) = RigInventory.ItemDict[cell.InstanceID]; //해당 Cell의 아이템
+                    if(CheckItemAmmoCaliber(item, ammoCaliber)) return true;
+                }
+            }
+        }
+        foreach (var pocket in PocketSlots)
+        {
+            if(pocket.IsEmpty) continue; //비었다면 스킵. 상단 코드와 같은 방식 -> 개선?
+            var (item, _) = ItemDict[pocket.InstanceID];
+            if(CheckItemAmmoCaliber(item, ammoCaliber)) return true;
+        }
+        return false;
+    }
+    
     public (bool canReload, int reloadAmmo, AmmoData ammoData) 
         LoadAmmo(AmmoCaliber ammoCaliber, int neededAmmo) //장전 (탄 소모)  /탄종구분 -> 탄 구분 변경 필요 (ex M855, M855A1...)
     {
         int reloadAmmo = 0; //장전할 탄 수량(0~neededAmmo)
         AmmoData ammoData = null; //해당 탄 구경의 Data -> Data단위로 구분으로 수정예정. (Hold R로 탄 변경(같은 구경이라면))
+
         if (RigInventory)
         {
             foreach (var (_, (cells, _, _)) in RigInventory.SlotDict) //리그 인벤 슬롯 Cell검사
@@ -304,25 +335,10 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
                 {
                     if(cell.IsEmpty) continue; //비었다면 건너뛰기
                     var (item, _, _) = RigInventory.ItemDict[cell.InstanceID]; //해당 Cell의 아이템
-                    if(item.ItemData is not AmmoData itemData) continue; //Ammo가 아니라면 건너뛰기
-                    ammoData = itemData;
-                    if(ammoData.AmmoCaliber != ammoCaliber) continue; //탄 구경이 다르면 스킵.(아예 Data가 다르면 불가 - 같은 탄만)
-                    
-                    var stackAmount = item.CurrentStackAmount; //아이템의 스택
-                    if (stackAmount > neededAmmo) //필요치보다 스택이 많을 경우
-                    {
-                        reloadAmmo += neededAmmo; //
-                        item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
-                        OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
-                        return (true, reloadAmmo, ammoData); //요구치 전부
-                    }
-
-                    //필요치가 더 많다면 -> item 삭제
-                    neededAmmo -= stackAmount; //요구치 스택만큼 감소
-                    reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
-                    OnRemoveItemFromPlayer?.Invoke(item.InstanceID); //아이템 제거
-                    RigInventory.ItemDict.Remove(item.InstanceID); //ItemDict제거, CellData 초기화...
-                    cell.SetEmpty(true, Guid.Empty); //Cell Empty
+                    ammoData = CheckItemAmmoCaliber(item, ammoCaliber);
+                    if(!ammoData) continue;
+                    if (UseAmmo(item)) return (true, reloadAmmo, ammoData); //탄 사용(요구 탄 수량보다 많은 경우)
+                    RigInventory.RemoveItem(item.InstanceID, false);//ItemDict 및 Cell에서 아이템 제거
                 }
             }
         }
@@ -331,23 +347,10 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
         {
             if(pocket.IsEmpty) continue; //비었다면 스킵. 상단 코드와 같은 방식 -> 개선?
             var (item, _) = ItemDict[pocket.InstanceID];
-            if(item.ItemData is not AmmoData itemData) continue;
-            ammoData = itemData;
-            if(ammoData.AmmoCaliber != ammoCaliber) continue;
-            var stackAmount = item.CurrentStackAmount;
-            if (stackAmount > neededAmmo)
-            {
-                reloadAmmo += neededAmmo;
-                item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
-                OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount);
-                return (true, reloadAmmo, ammoData); //요구치 전부
-            }
-            //item 삭제...
-            neededAmmo -= stackAmount; //요구치 스택만큼 감소
-            reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
-            OnRemoveItemFromPlayer?.Invoke(item.InstanceID); //아이템 제거
-            ItemDict.Remove(item.InstanceID);
-            pocket.SetEmpty(true, Guid.Empty);
+            ammoData = CheckItemAmmoCaliber(item, ammoCaliber);
+            if(!ammoData) continue;
+            if (UseAmmo(item)) return (true, reloadAmmo, ammoData); //탄 사용(요구 탄 수량보다 많은 경우)
+            RemoveGearItem(item.InstanceID);//ItemDict 및 Cell에서 아이템 제거
         }
         
         if (reloadAmmo <= 0) //장전할 탄이 없다면
@@ -357,6 +360,23 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
         }
         
         return (true, reloadAmmo, ammoData); //누적된 장전탄약 
+
+        bool UseAmmo(ItemInstance item) //지역 함수(인벤토리에서 탄 소모)
+        {
+            var stackAmount = item.CurrentStackAmount; //아이템의 스택
+            if (stackAmount > neededAmmo) //필요치보다 스택이 많을 경우
+            {
+                reloadAmmo += neededAmmo; //장전할 탄 수량에 추가
+                item.AdjustStackAmount(-neededAmmo); //스택에서 요구치만큼 차감
+                OnUpdateItemStack?.Invoke(item.InstanceID, item.CurrentStackAmount); //스택 표시 갱신
+                return true;
+            }
+            //필요치가 더 많다면 -> item 삭제
+            neededAmmo -= stackAmount; //요구치 스택만큼 감소
+            reloadAmmo += stackAmount; //장전할 탄약에 스택만큼 추가
+            OnRemoveItemFromPlayer?.Invoke(item.InstanceID); //아이템 제거(ItemDragHandler UI)
+            return false;
+        }
     }
 
     public void UpdateWeaponMagCount(Guid id) //무기 장탄량 ItemDrag UI 업데이트

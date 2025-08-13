@@ -40,7 +40,7 @@ namespace Player
             lowerAnimator.SetBool(PlayerAnimatorHash.IsMove, isMove);
         }
 
-        public void ChangeAnimationSprint(bool isSprint) //sprint animation transition
+        public void ChangeAnimationSprint(bool isSprint) //sprint animation transition 개선?
         {
             upperAnimator.SetBool(PlayerAnimatorHash.IsSprint, isSprint);
             lowerAnimator.SetBool(PlayerAnimatorHash.IsSprint, isSprint);

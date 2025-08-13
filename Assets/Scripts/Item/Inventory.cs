@@ -99,7 +99,7 @@ public class Inventory: MonoBehaviour
             var firstX = firstIdx % slotCount.x;
             var firstY = firstIdx / slotCount.x;
     
-            Vector2 localPos = cells[firstIdx].MinPos; 
+            Vector2 localPos = cells[firstIdx].CellLocalPos; 
             Vector3 worldPos = matchSlot.TransformPoint(localPos);
 
             var firstIdxPos = worldPos;//CellRT.position; //아이템 첫번째 슬롯의 Position(World)
@@ -200,9 +200,9 @@ public class Inventory: MonoBehaviour
 
         ItemDict[item.InstanceID] = (item, slotRT, firstIdx);
        
-        var minPos = cells[firstIdx].MinPos; //CellRT.anchoredPosition;
+        var minPos = cells[firstIdx].CellLocalPos; //CellRT.anchoredPosition;
         var maxPos = cells[firstIdx + itemCount.x -1 + slotCount.x * (itemCount.y - 1)]
-            .MinPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
+            .CellLocalPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
         var targetPos = (minPos + maxPos) / 2;
         
         return (targetPos, itemRT);
@@ -283,9 +283,9 @@ public class Inventory: MonoBehaviour
         
         ItemDict[item.InstanceID] = (item, slotRT, firstIdx);
        
-        var minPos = cells[firstIdx].MinPos; //CellRT.anchoredPosition;
+        var minPos = cells[firstIdx].CellLocalPos; //CellRT.anchoredPosition;
         var maxPos = cells[firstIdx + itemCount.x -1 + slotCount.x * (itemCount.y - 1)]
-            .MinPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
+            .CellLocalPos + new Vector2(_cellSize, -_cellSize); //아이템 우하단의 인덱스(최대)
         var targetPos = (minPos + maxPos) / 2;
         
         return (targetPos, itemRT);
@@ -294,6 +294,7 @@ public class Inventory: MonoBehaviour
     public void RemoveItem(Guid id, bool hasRotated)
     {
         //아이템 제거
+        var item = ItemDict[id].item;
         var slotRT = ItemDict[id].slotRT; //아이템의 SlotRT
         var firstIdx = ItemDict[id].firstIdx; //아이템의 첫번째 인덱스
         var itemCount = ItemDict[id].item.ItemCellCount; //아이템 Cell개수
@@ -312,6 +313,6 @@ public class Inventory: MonoBehaviour
             } //회전된 아이템에서 버그... -> 들고있을때 회전 후 옮기기(회전 전 기준으로 비워야함....)
         }
         ItemDict.Remove(id); //Dict에서 제거
-        OnItemRemovedCheckQuickSlot?.Invoke(id);
+        if(item.ItemData is IConsumableItem) OnItemRemovedCheckQuickSlot?.Invoke(id);//소비 아이템이라면 
     }
 }

@@ -108,10 +108,9 @@ public class PlayerData : MonoBehaviour, IDamageable
         {
             _statsPerSecond[PlayerStat.Stamina] = defaultStaminaPerSecond;
         }
-        if(!CanSprint) _statsPerSecond[PlayerStat.Stamina] = defaultStaminaPerSecond; //달리기 불가 시 회복으로
     }
     
-    private void UpdatePlayerStat(PlayerStat stat , float amount) //스태미나 업데이트
+    private void UpdatePlayerStat(PlayerStat stat , float amount) //스탯 변화량 업데이트
     {
         if(amount == 0) return; //변화량 0이면 return
         
@@ -128,8 +127,12 @@ public class PlayerData : MonoBehaviour, IDamageable
                 break;
             case PlayerStat.Stamina:
             {
-                CanSprint = !(_playerStats[stat].current <= 0); //스태미나 고갈 시 달리기 제한
-                if(!CanSprint) OnStaminaEmpty?.Invoke(); //스태미나 고갈 이벤트
+                CanSprint = _playerStats[stat].current > 0; 
+                if(!CanSprint) //스태미나 고갈 시 달리기 제한
+                {
+                    OnStaminaEmpty?.Invoke(); //스태미나 고갈 이벤트
+                    SprintStaminaSpend(false);//달리기 불가 시 회복으로
+                }
                 break;
             }
             case PlayerStat.Energy:
