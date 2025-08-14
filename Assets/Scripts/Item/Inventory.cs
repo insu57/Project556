@@ -100,9 +100,7 @@ public class Inventory: MonoBehaviour
             var firstY = firstIdx / slotCount.x;
     
             Vector2 localPos = cells[firstIdx].CellLocalPos; 
-            Vector3 worldPos = matchSlot.TransformPoint(localPos);
-
-            var firstIdxPos = worldPos;//CellRT.position; //아이템 첫번째 슬롯의 Position(World)
+            Vector3 firstIdxPos = matchSlot.TransformPoint(localPos);//CellRT.position; //아이템 첫번째 슬롯의 Position(World)
             
             if (!cells[firstIdx].IsEmpty && item.IsStackable) //빈 상태가 아닐 때 stackable 아이템이라면
             {
@@ -174,11 +172,8 @@ public class Inventory: MonoBehaviour
         Vector2 firstPos = localPoint - new Vector2(itemCellCount.x * _cellSize / 2f , -itemCellCount.y * _cellSize / 2f) 
                              + new Vector2(_cellSize, -_cellSize)/2f;
         // 중심(아이템)에서 좌상단 MinPosition(가로세로 절반)(좌상단Cell, 첫번째Cell) + 해당 Cell의 Center
-        // ***y하단 -> '-'(음수)
-        
         int x = (int) (firstPos.x / _cellSize);
         int y = (int)(-firstPos.y / _cellSize);//y는 음수
-        //x,y 체크...
         firstIdx = x + width * y;
         if (x < 0 || x >= slotSize.x || y < 0 || y >= slotSize.y) firstIdx = -1;
     }
@@ -208,24 +203,22 @@ public class Inventory: MonoBehaviour
         return (targetPos, itemRT);
     }
 
-    public (bool isAvailable, int firstIdx, RectTransform slotRT) CheckCanAddItem(IItemData item)
+    public (bool isAvailable, int firstIdx, RectTransform slotRT) CheckCanAddItem(Vector2Int itemCellCount)
     {
         foreach (var slotData in slotDataList)
         {
-            var (cells, slotCount, slotItemRT) = SlotDict[slotData.slotRT]; //슬롯정보
+            var (cells, slotCount, _) = SlotDict[slotData.slotRT]; //슬롯정보
 
             for (int h = 0; h < slotCount.y; h++)
             {
                 for (int w = 0; w < slotCount.x; w++)
                 {
                     int firstIdx = w + h * slotCount.x; //빈 슬롯 체크 시작 Idx
-                    int firstIdxX = firstIdx % slotCount.x;
-                    int firstIdxY = firstIdx / slotCount.x;
                     bool isAvailable = true;
                     
-                    for (int y = h; y < h + item.ItemHeight; y++)
+                    for (int y = h; y < h + itemCellCount.y; y++)
                     {
-                        for (int x = w; x < w + item.ItemWidth; x++)
+                        for (int x = w; x < w + itemCellCount.x; x++)
                         {
                             var idx = x + slotCount.x * y;
 

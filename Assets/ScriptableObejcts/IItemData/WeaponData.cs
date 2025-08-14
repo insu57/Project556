@@ -16,7 +16,9 @@ public class WeaponData : BaseItemDataSO
     [SerializeField] private bool isOpenBolt; //오픈볼트인지(장전시 약실에 탄이 없음)
     [SerializeField] private float fireRate; //발사속도(차탄 발사까지 걸리는 시간)
     [SerializeField] private float accuracy; //정확도
-    [SerializeField] private float bulletSpeed; //Bullet에 따로?(탄속)
+    [SerializeField] private float bulletSpeed; //Bullet(탄속) -> 수정(탄환의 탄속 * 총구 속도)
+    [SerializeField] private float muzzleVelocityMultiplier = 1; //탄속 배수
+    [SerializeField] private float damageMultiplier = 1; //피해량 배수
     [SerializeField] private FireMode[] fireModes = { //발사모드 단발/점사/연발, 기본 단발.
         FireMode.SemiAuto
     };
@@ -54,17 +56,20 @@ public class WeaponData : BaseItemDataSO
     
     public float FireRate => fireRate;
     public float Accuracy => accuracy;
-    public float BulletSpeed => bulletSpeed;
-    //데미지 : 탄환*무기 배율
-    //탄속 : 탄환 탄속 * 무기 보정
+    public float BulletSpeed => bulletSpeed;//x
+    public float MuzzleVelocityMultiplier => muzzleVelocityMultiplier;
+    public float DamageMultiplier => damageMultiplier;
+    
+    //데미지 : 탄환*무기 배율(무기 배수는 없이?)
+    //탄속 : 탄환 탄속 * 무기 탄속 배수
     //방어관통 : 탄환만
-    //사거리 (고려x)
     //기타: 소음, 무게
     [ShowInInspector] public float RPM => 1 / FireRate * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
 
     public override Sprite ItemSprite => itemSprite;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
+    public override Vector2Int ItemCellCount => new (itemWidth, itemHeight);
     public override GearType GearType => GearType.Weapon;
     public override float ItemWeight => itemWeight;
     public Vector3 MuzzlePosition => weaponSetup.MuzzleOffset;

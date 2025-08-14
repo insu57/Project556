@@ -17,6 +17,7 @@ namespace Item
         private BoxCollider2D _crateBoxCollider2D;
         private Inventory _lootInventory; //상자 인벤토리
         private ItemUIPresenter _itemUIPresenter;
+        private ItemUI _itemUI;
         [SerializeField] private CrateData crateData; //상자 데이터
         [SerializeField] private LootCrateItemInput[] lootCrateItemInputs; //상자 아이템(추후 Stage Manager초기화)
         public string CrateName => crateData.CrateName;
@@ -28,13 +29,14 @@ namespace Item
             
             _crateSpriteRenderer.sprite = crateData.CrateSprite; //크기 조절
             _crateBoxCollider2D.size = _crateSpriteRenderer.bounds.size;
-            
-            _lootInventory = Instantiate(crateData.InventoryPrefab, transform).GetComponent<Inventory>(); //상자 인벤토리 초기화
+            //StageManager 초기화 함수  수정예정
+            _itemUIPresenter = FindAnyObjectByType<ItemUIPresenter>();
+            _itemUI = FindAnyObjectByType<ItemUI>();
+            _lootInventory = Instantiate(crateData.InventoryPrefab, _itemUI.LootInventoryInitParent)
+                .GetComponent<Inventory>(); //상자 인벤토리 초기화
             _lootInventory.gameObject.SetActive(false);
             _lootInventory.Init(GameManager.Instance.CellSize, Guid.Empty);
-            //StageManager 초기화 함수  수정예정
-            
-            _itemUIPresenter = FindAnyObjectByType<ItemUIPresenter>();
+           
         }
 
         private void Start()

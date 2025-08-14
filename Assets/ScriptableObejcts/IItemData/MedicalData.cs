@@ -25,6 +25,7 @@ public class MedicalData : BaseItemDataSO, IConsumableItem
     public override Sprite ItemSprite => itemSprite;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
+    public override Vector2Int ItemCellCount => new (itemWidth, itemHeight);
     public override GearType GearType => GearType.None;
     public override float ItemWeight => itemWeight;
     public override bool IsStackable => isStackable;

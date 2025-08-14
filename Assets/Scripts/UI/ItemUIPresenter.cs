@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
-public class ItemUIPresenter : MonoBehaviour
+public class ItemUIPresenter : MonoBehaviour //리팩터링 진행 중(기능 분리)
 {
     private InventoryManager _inventoryManager;
     private ItemUI _itemUI;
@@ -31,6 +31,7 @@ public class ItemUIPresenter : MonoBehaviour
     private Guid _targetCellItemID; //타겟인 Cell의 아이템ID(Stack아이템 용)
     //ItemContextMenu
     private ItemInstance _currentCotextMenuItem;
+    private ItemInstance _currentInfoItem;
     
     //test
     [SerializeField] private BaseItemDataSO backpackTestData;
@@ -130,7 +131,7 @@ public class ItemUIPresenter : MonoBehaviour
         itemDrag.OnPointerDownEvent += HandleOnPointerEnter;
         itemDrag.OnDragEvent += HandleOnDragItem;
         itemDrag.OnEndDragEvent += HandleOnEndDragItem;
-        itemDrag.OnRotateItem += HandleOnRotateItem;
+        itemDrag.OnRotateItem += HandleOnRotateDragItem;
         itemDrag.OnQuickAddItem += HandleOnQuickAddItem;
         itemDrag.OnQuickDropItem += HandleOnQuickDropItem;
         itemDrag.OnSetQuickSlot += HandleOnSetQuickSlot;
@@ -143,7 +144,7 @@ public class ItemUIPresenter : MonoBehaviour
         itemDrag.OnPointerDownEvent -= HandleOnPointerEnter;
         itemDrag.OnDragEvent -= HandleOnDragItem;
         itemDrag.OnEndDragEvent -= HandleOnEndDragItem;
-        itemDrag.OnRotateItem -= HandleOnRotateItem;
+        itemDrag.OnRotateItem -= HandleOnRotateDragItem;
         itemDrag.OnQuickAddItem -= HandleOnQuickAddItem;
         itemDrag.OnQuickDropItem -= HandleOnQuickDropItem;
         itemDrag.OnSetQuickSlot -= HandleOnSetQuickSlot;
@@ -160,6 +161,8 @@ public class ItemUIPresenter : MonoBehaviour
         var instanceID = itemDrag.InstanceID;
         
         ItemInstance item;
+        
+       
 
         if (!originInvenRT) //기존 위치 인벤토리 체크
         {
@@ -187,11 +190,15 @@ public class ItemUIPresenter : MonoBehaviour
             item = inventory.ItemDict[instanceID].item; //Inventory의 ItemDict
         }
 
-        if (item != null)
+        if (item == null) return;
+        
+        if(item == _currentInfoItem) 
         {
-            _currentDragItem = item;
-            _rotatedOnClick = item.IsRotated;
+            _itemUI.CloseItemInfo(); //세부정보 창의 아이템과 동일하면 창 닫기
         }
+        _itemUI.CloseItemContextMenu();
+        _currentDragItem = item;
+        _rotatedOnClick = item.IsRotated;
     }
 
     private void HandleOnDragItem(ItemDragHandler itemDrag, Vector2 mousePos)
@@ -240,7 +247,7 @@ public class ItemUIPresenter : MonoBehaviour
         {
             if (_rotatedOnClick != _currentDragItem.IsRotated)
             {
-                HandleOnRotateItem(itemDrag); //초기 회전상태로
+                HandleOnRotateDragItem(itemDrag); //초기 회전상태로
             }
 
             itemDrag.ReturnItemDrag();
@@ -331,7 +338,7 @@ public class ItemUIPresenter : MonoBehaviour
         {
             if (_currentDragItem.IsRotated) //회전된 상태면 기본 상태로
             {
-                HandleOnRotateItem(itemDrag); 
+                HandleOnRotateDragItem(itemDrag); 
             }
 
             SetGearItem(itemDrag, _targetGearSlot, _currentDragItem);
@@ -348,17 +355,23 @@ public class ItemUIPresenter : MonoBehaviour
         }
     }
 
-    private void HandleOnRotateItem(ItemDragHandler itemDrag)
+    private void HandleOnRotateDragItem(ItemDragHandler itemDrag)
     {
         if (_currentDragItem == null) return;
        
         _itemUI.ClearShowAvailable();
         _targetIsAvailable = false; //CellCheck 다시
-        _currentDragItem.RotateItem();
+        //_currentDragItem.RotateItem();
+        //var size = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y) * CellSize;
+        //itemDrag.SetItemDragRotate(_currentDragItem.IsRotated, size);.
+        RotateItem(itemDrag, _currentDragItem);
+    }
 
-        var size = new Vector2(_currentDragItem.ItemCellCount.x, _currentDragItem.ItemCellCount.y) * CellSize;
-        itemDrag.SetItemDragRotate(_currentDragItem.IsRotated, size);
-        //GearSlot rotate 해제...
+    private static void RotateItem(ItemDragHandler itemDrag, ItemInstance item)
+    {
+        item.RotateItem();
+        var size = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * CellSize;
+        itemDrag.SetItemDragRotate(item.IsRotated, size);
     }
 
     private void SetGearItem(ItemDragHandler itemDrag, CellData gearSlot ,ItemInstance itemInstance)
@@ -370,7 +383,7 @@ public class ItemUIPresenter : MonoBehaviour
         itemDrag.SetItemDragPos(pos, size, gearRT,null);//itemDrag 설정
     }
     
-    private void HandleOnQuickAddItem(ItemDragHandler itemDrag)//빠른 획득
+    private void HandleOnQuickAddItem(ItemDragHandler itemDrag)//loot에서 빠른 획득
     {
         var instanceID = itemDrag.InstanceID;
         var inventoryRT = itemDrag.InventoryRT;
@@ -397,7 +410,7 @@ public class ItemUIPresenter : MonoBehaviour
         
         if (targetInven != null) //backpack or rig Inven
         {
-            var (isAvailable,  firstIdx, slotRT) = targetInven.CheckCanAddItem(item.ItemData);
+            var (isAvailable,  firstIdx, slotRT) = targetInven.CheckCanAddItem(item.ItemCellCount);
             if(!isAvailable) return;
             var (targetPos, itemRT) = targetInven.AddItem(item, firstIdx, slotRT);
             var itemSize = new Vector2(item.ItemCellCount.x, item.ItemCellCount.y) * CellSize;
@@ -514,7 +527,7 @@ public class ItemUIPresenter : MonoBehaviour
         }
         else
         {
-            isAvailable = item.ItemData is MedicalData or FoodData;//사용가능한 아이템 만...(의약품, 음식)..
+            isAvailable = item.ItemData is IConsumableItem;//사용가능한 아이템 만...(의약품, 음식)..
         }
         
         _itemUI.OpenItemContextMenu(itemDrag.transform.position, isAvailable, isGear);//List 설정
@@ -531,6 +544,8 @@ public class ItemUIPresenter : MonoBehaviour
     {
         var instanceID = _currentCotextMenuItem.InstanceID;
         var itemDrag = _itemDragHandlers[instanceID];
+        var inventoryRT = itemDrag.InventoryRT;
+        var inventory = inventoryRT ? _invenMap[inventoryRT] : null;
         switch (contextType)
         {
             case ItemContextType.Info:
@@ -538,13 +553,17 @@ public class ItemUIPresenter : MonoBehaviour
                 break;
             case ItemContextType.Use:
                 //use
-                var inventoryRT = itemDrag.InventoryRT;
-                var inventory = inventoryRT ? _invenMap[inventoryRT] : null;
                 _inventoryManager.UseItem(instanceID, inventory);
                 break;
             case ItemContextType.Equip:
                 var cell = _inventoryManager
                     .CheckCanEquipItem(_currentCotextMenuItem.GearType, _currentCotextMenuItem.ItemCellCount);
+                if(inventory) inventory.RemoveItem(instanceID, false);
+                else _inventoryManager.RemoveGearItem(instanceID);
+                if (_currentCotextMenuItem.IsRotated)
+                {
+                    RotateItem(itemDrag, _currentCotextMenuItem);
+                }
                 SetGearItem(itemDrag, cell, _currentCotextMenuItem);
                 break;
             case ItemContextType.Drop:
@@ -569,7 +588,8 @@ public class ItemUIPresenter : MonoBehaviour
         ItemInstance item;
         if(itemDrag.InventoryRT) item = _invenMap[itemDrag.InventoryRT].ItemDict[id].item;
         else item = _inventoryManager.ItemDict[id].item;
-        
+
+        _currentInfoItem = item;
         _itemUI.OpenItemInfo(item);
     }
     
@@ -677,7 +697,7 @@ public class ItemUIPresenter : MonoBehaviour
         var gearType = item.GearType;
         var instanceID = item.InstanceID;
 
-        var inventory = _itemUI.SetInventorySlot(inventoryPrefab, gearType, instanceID, true);
+        var inventory = _itemUI.SetGearInventoryUI(inventoryPrefab, gearType, instanceID, true);
 
         OnSetInventory(item, gearType, inventory);//인벤토리 Set
     }
@@ -687,7 +707,7 @@ public class ItemUIPresenter : MonoBehaviour
         var inventory = item.ItemInventory;
         var gearType = item.GearType;
         var instanceID = item.InstanceID;
-        _itemUI.SetInventorySlot(inventory.gameObject, gearType, instanceID, false);
+        _itemUI.SetGearInventoryUI(inventory.gameObject, gearType, instanceID, false);
         
         OnSetInventory(item, gearType, inventory);
     }
@@ -822,7 +842,8 @@ public class ItemUIPresenter : MonoBehaviour
         foreach (var lootCrateItemInput in lootCrateItemInputs)
         {
             var itemData = lootCrateItemInput.itemData; //아이템
-            var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
+            Vector2Int itemCellCount = new(itemData.ItemWidth, itemData.ItemHeight);
+            var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemCellCount);
             if (!isAvailable) return;
 
             var invenItem = ItemInstance.CreateItemInstance(itemData);
@@ -858,7 +879,8 @@ public class ItemUIPresenter : MonoBehaviour
         //수정 -> 로드 시 장비 인벤토리 / 루트 인벤토리 에 있는 아이템배치 메서드로 
     {
         var inventory = _inventoryManager.LootInventory;
-        var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
+        Vector2Int itemCellCount = new(itemData.ItemWidth, itemData.ItemHeight);
+        var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemCellCount);
         
         if(!isAvailable) return;
 
@@ -876,7 +898,8 @@ public class ItemUIPresenter : MonoBehaviour
         if(!itemData.IsStackable) return;
         
         var inventory = _inventoryManager.LootInventory;
-        var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData);
+        Vector2Int itemCellCount = new(itemData.ItemWidth, itemData.ItemHeight);
+        var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemCellCount);
         
         if(!isAvailable) return;
         
@@ -892,7 +915,7 @@ public class ItemUIPresenter : MonoBehaviour
         itemDrag.SetStackAmountText(stackAmount);
     }
 
-    private void SetGearItem(BaseItemDataSO itemData, RectTransform gearSlot) //처리?
+    private void SetGearItem(BaseItemDataSO itemData, RectTransform gearSlot) 
     {
         if (!_gearSlotsMap.TryGetValue(gearSlot, out var gearCell)) return;
         

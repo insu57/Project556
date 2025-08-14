@@ -480,7 +480,7 @@ namespace Player
 
                 if (inventory) //가방이나 리그를 장착한 상태라면 (해당 inventory가 있음)
                 {
-                    var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(itemData); //빈 공간 검사
+                    var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(item.ItemCellCount); //빈 공간 검사
                     canPickup = isAvailable;
                     _pickupTargetInvenSlotInfo = (firstIdx, slotRT, inventory);
                     _pickupTargetIsPocket = false;

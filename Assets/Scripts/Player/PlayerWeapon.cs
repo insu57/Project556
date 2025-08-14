@@ -65,7 +65,9 @@ public class PlayerWeapon : MonoBehaviour
                 bulletAngle = shootAngle;
             }
             Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoData.AmmoCategory);//Pool에서 Get(탄종에 따라)
-            bullet.Init(_weaponData.BulletSpeed, 20f, 0.1f); //data에서 값을 받아오게 수정 필요
+            var finalDamage = _ammoData.AmmoDamage * _weaponData.DamageMultiplier; //탄환 데미지 * 무기 피해량 배수
+            var finalSpeed = _ammoData.ProjectileSpeed * _weaponData.MuzzleVelocityMultiplier; //탄환 속도 * 무기 총구 속도 배수
+            bullet.Init(finalSpeed, finalDamage, _ammoData.AmmoPiercing);
             bullet.ShootBullet(bulletAngle, direction, _muzzleTransform);
         }
 

@@ -70,8 +70,9 @@ namespace UI
         [SerializeField] private RectTransform lootSlotParent;
         [SerializeField] private float minLootSlotHeight = 800f;
         public RectTransform LootSlotParent => lootSlotParent;
-    
         private GameObject _lootSlotInstance;
+        [SerializeField] private RectTransform lootInventoryInitParent;
+        public RectTransform LootInventoryInitParent => lootInventoryInitParent;
     
         [SerializeField, Space] private Image slotAvailable;
         
@@ -165,15 +166,15 @@ namespace UI
             slotAvailable.enabled = false;
         }
     
-        public (RectTransform matchSlot, bool isGearSlot) GetItemSlotRT(Vector2 mousePos)
+        public (RectTransform matchSlot, bool isGearSlot) GetItemSlotRT(Vector2 mousePos) //아이템 슬롯 RectTransform 확인
         {
-            foreach (var slot in _gearSlotRT)
+            foreach (var slot in _gearSlotRT)//장비 슬롯
             {
                 if (!RectTransformUtility.RectangleContainsScreenPoint(slot, mousePos)) continue;
                 return (slot, true);
             }
 
-            foreach (var inventory in _inventoriesRT)
+            foreach (var inventory in _inventoriesRT) //인벤토리 슬롯
             {
                 if(!RectTransformUtility.RectangleContainsScreenPoint(inventory, mousePos)) continue;
                 return (inventory, false);
@@ -181,9 +182,9 @@ namespace UI
             return (null,  false);
         }
         
-        public Inventory SetInventorySlot(GameObject inventoryGO, GearType itemType, Guid instanceID, bool isInit)
+        //장비 인벤토리 배치
+        public Inventory SetGearInventoryUI(GameObject inventoryGO, GearType itemType, Guid instanceID, bool isInit)
         {
-            //초기화...
             if (!inventoryGO) return null;
         
             Inventory inventory = null;
@@ -194,13 +195,13 @@ namespace UI
                 case GearType.ArmoredRig:
                 case GearType.UnarmoredRig:
                 {
-                    if (isInit)
+                    if (isInit) //초기화라면
                     {
                         _rigSlotInstance = Instantiate(inventoryGO, rigInvenParent);
                         _rigSlotInstance.TryGetComponent(out inventory);
                         inventory.Init(CellSize, instanceID);
                     }
-                    else
+                    else //아니라면 다시 활성화
                     {
                         _rigSlotInstance = inventoryGO;
                         _rigSlotInstance.TryGetComponent(out inventory);
@@ -211,7 +212,7 @@ namespace UI
                     slotPrefabHeight = inventory.Height;
                     
                     rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-                    if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight)
+                    if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight) 
                     {
                         chestRigParent.sizeDelta = 
                             new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
@@ -278,7 +279,7 @@ namespace UI
             }
         }
 
-        public void SetLootInventory(LootCrate lootCrate)
+        public void SetLootInventory(LootCrate lootCrate) //Loot 인벤토리 배치
         {
             var lootInventory = lootCrate?.GetLootInventory();
             if (!lootInventory)
@@ -312,45 +313,45 @@ namespace UI
         }
         
         
-        public void SetQuickSlot(int idx, bool isStackable, Sprite itemSprite, int count)
+        public void SetQuickSlot(int idx, bool isStackable, Sprite itemSprite, int count) //아이템 퀵슬롯 설정
         {
             _quickSlotDict[idx].img.sprite = itemSprite;
             _quickSlotDict[idx].img.enabled = true;
-            if (!isStackable) return;
+            if (!isStackable) return; //스택 아이템인 경우
             _quickSlotDict[idx].txt.enabled = true;
             _quickSlotDict[idx].txt.text = count.ToString();
         }
 
-        public void UpdateQuickSlotCount(int idx, int count)
+        public void UpdateQuickSlotCount(int idx, int count) //퀵슬롯 스택 업데이트
         {
             _quickSlotDict[idx].txt.text = count.ToString();
         }
 
-        public void ClearQuickSlot(int idx)
+        public void ClearQuickSlot(int idx) //퀵슬롯 비우기
         {
             _quickSlotDict[idx].img.enabled = false;
             _quickSlotDict[idx].txt.enabled = false;
         }
 
-        public void OpenItemContextMenu(Vector3 pos, bool isAvailable, bool isGear)
+        public void OpenItemContextMenu(Vector3 pos, bool isAvailable, bool isGear) //아이템 컨텍스트 메뉴 열기
         {
             itemContextMenu.gameObject.SetActive(true);
-            if (isGear)
+            if (isGear) //장비 아이템
             {
                 itemContextEquip.gameObject.SetActive(true);
                 itemContextUse.gameObject.SetActive(false);
-                itemContextEquip.interactable = isAvailable;
+                itemContextEquip.interactable = isAvailable; //장착가능하면 활성화
             }
-            else
+            else 
             {
                 itemContextEquip.gameObject.SetActive(false);
                 itemContextUse.gameObject.SetActive(true);
-                itemContextUse.interactable = isAvailable;
+                itemContextUse.interactable = isAvailable; //소비 아이템이면 활성화
             }
             itemContextMenu.transform.position = pos;
         }
 
-        public void CloseItemContextMenu()
+        public void CloseItemContextMenu() //컨텍스트 메뉴 닫기
         {
             itemContextMenu.gameObject.SetActive(false);
         }
@@ -361,14 +362,14 @@ namespace UI
             OnCloseItemContextMenu?.Invoke();//ContextMenu가 enable이면 클릭으로 닫기
         }
 
-        public void OpenItemInfo(ItemInstance item) //다른 방법?
+        public void OpenItemInfo(ItemInstance item) //아이템 세부정보 창 열기 -> 개선(복수의 창 열기 가능)
         {
-            itemInfoMenu.localPosition = Vector3.zero;
+            itemInfoMenu.localPosition = Vector3.zero; //기본 중앙에서
             itemInfoMenu.gameObject.SetActive(true);
           
             //ItemInfo Set...
-            itemInfoNameTxt.text = item.ItemData.ItemName;
-            itemInfoIcon.sprite = item.ItemData.ItemSprite;
+            itemInfoNameTxt.text = item.ItemData.ItemName; //이름
+            itemInfoIcon.sprite = item.ItemData.ItemSprite; //스프라이트
             //item type...
             var infoTxt = "";
             var gearType = item.ItemData.GearType;
@@ -379,7 +380,6 @@ namespace UI
                     var gearData = item.ItemData as GearData;
                     infoTxt += $"내구도: {item.Durability}\n";
                     infoTxt += $"방어도: {gearData?.ArmorAmount}";
-                    
                     break;
                 }
                 case GearType.Weapon:
@@ -396,7 +396,7 @@ namespace UI
                 }
                 case GearType.None:
                 {
-                    if (item.IsStackable)
+                    if (item.IsStackable) //스택 표시
                     {
                         infoTxt += $"수량: {item.CurrentStackAmount} ";
                         infoTxt += $"최대 수량: {item.MaxStackAmount}\n";
@@ -408,7 +408,7 @@ namespace UI
                             infoTxt += $"탄종: {EnumManager.AmmoCaliberToString(ammoData.AmmoCaliber)}\n";
                             //세부 스탯...
                             break;
-                        case IConsumableItem consumableItem:
+                        case IConsumableItem consumableItem: //소모아이템
                             foreach (var statAdjustAmount in consumableItem.AdjustAmount)
                             {
                                 var stat = statAdjustAmount.stat;
@@ -430,7 +430,6 @@ namespace UI
                     break;
                 }
             }
-            
             itemInfoDescriptionTxt.text = infoTxt;
         }
 

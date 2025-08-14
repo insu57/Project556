@@ -24,6 +24,8 @@ MonoBehaviour:
   fireRate: 0.08
   accuracy: 85
   bulletSpeed: 15
+  muzzleVelocityMultiplier: 1.2
+  damageMultiplier: 1.1
   fireModes: 000000000200000003000000
   weaponActionType: 0
   hasDetachableMagazine: 1

@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Item;
-using Unity.VisualScripting;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
-using UnityEngine.Scripting;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬롯 정보, 인벤토리 관리)
 {

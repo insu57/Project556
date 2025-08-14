@@ -267,7 +267,6 @@ namespace UI
             }
         
             OnEndDragEvent?.Invoke(this);
-            
         }
 
         private void OnRotateItemAction(InputAction.CallbackContext context)

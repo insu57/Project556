@@ -9,6 +9,7 @@ namespace Item
         public Sprite ItemSprite { get; }
         public int ItemWidth { get; } //아이템 크기
         public int ItemHeight { get; }
+        public Vector2Int ItemCellCount { get; }
         public GearType GearType { get; }
         public float ItemWeight { get; } //아이템 무게(관련 시스템 구현 필요)
         public bool IsStackable { get; }

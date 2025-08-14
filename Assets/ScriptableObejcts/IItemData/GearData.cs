@@ -23,6 +23,7 @@ public class GearData : BaseItemDataSO
 
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
+    public override Vector2Int ItemCellCount => new (itemWidth, itemHeight);
     public override float ItemWeight => itemWeight;
     public GameObject SlotPrefab => slotPrefab;
     public override bool IsStackable => false;

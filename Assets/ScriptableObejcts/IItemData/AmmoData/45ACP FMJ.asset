@@ -21,6 +21,8 @@ MonoBehaviour:
   itemHeight: 1
   itemWeight: 0
   maxStackAmount: 80
-  ammoDamage: 0
-  ammoPiercing: 0
-  velocityModify: 0
+  ammoDamage: 20
+  ammoPiercing: 10
+  projectileSpeed: 12
+  isBuckshot: 0
+  pelletCount: 1

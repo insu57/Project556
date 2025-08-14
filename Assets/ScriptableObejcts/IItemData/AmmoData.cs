@@ -18,7 +18,7 @@ public class AmmoData : BaseItemDataSO
     
     [SerializeField] private float ammoDamage; //탄 피해량
     [SerializeField] private float ammoPiercing; //방어 관통력
-    [SerializeField] private float velocityModify; //탄속 보정치
+    [SerializeField] private float projectileSpeed = 15f; //탄속
     [SerializeField] private bool isBuckshot; //벅샷(여러 펠릿 발사)
     [SerializeField] private int pelletCount = 1; //펠릿 숫자
     
@@ -31,6 +31,7 @@ public class AmmoData : BaseItemDataSO
     public override Sprite ItemSprite => itemSprite;
     public override int ItemWidth => itemWidth;
     public override int ItemHeight => itemHeight;
+    public override Vector2Int ItemCellCount => new (itemWidth, itemHeight);
     public override GearType GearType => GearType.None;
     public override float ItemWeight => itemWeight;
     public override bool IsStackable => true;
@@ -38,7 +39,7 @@ public class AmmoData : BaseItemDataSO
     
     public float AmmoDamage => ammoDamage;
     public float AmmoPiercing => ammoPiercing;
-    public float VelocityModify => velocityModify;
+    public float ProjectileSpeed => projectileSpeed;
     public bool IsBuckshot => isBuckshot;
     public int PelletCount => pelletCount;
     
