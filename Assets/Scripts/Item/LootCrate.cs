@@ -36,12 +36,12 @@ namespace Item
                 .GetComponent<Inventory>(); //상자 인벤토리 초기화
             _lootInventory.gameObject.SetActive(false);
             _lootInventory.Init(GameManager.Instance.CellSize, Guid.Empty);
-           
         }
 
         private void Start()
         {
             _itemUIPresenter.SetItemToLootCrate(lootCrateItemInputs, _lootInventory); //아이템 초기화(ItemDrag)
+            //StageManager수정...
         }
 
         public Inventory GetLootInventory() //상자 인벤토리

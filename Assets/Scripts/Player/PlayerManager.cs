@@ -43,10 +43,14 @@ namespace Player
         private int _currentItemInteractIdx;
         private readonly List<(bool available, InteractType type)> _currentItemInteractList = new();
         private ItemPickUp _currentItemPickUp;
+        private Dictionary<GameObject, ItemPickUp> _itemPickUps = new();
+        
         private LootCrate _currentLootCrate;
         private CellData _pickupTargetCell;
         private (int firstIdx, RectTransform slotRT, Inventory inventory) _pickupTargetInvenSlotInfo;
         private bool _pickupTargetIsPocket;
+        
+        
 
         //UI Manager 개선?
         private void Awake()
@@ -444,9 +448,11 @@ namespace Player
                 Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
             
                 other.TryGetComponent<ItemPickUp>(out var itemPickUp);
+
+                _itemPickUps[other.gameObject] = itemPickUp;
+                
                 _currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
                 var item = itemPickUp.GetItemInstance();
-                var itemData = item.ItemData;
                 bool canEquip = false;
                 //장착
                 bool isGear = item.GearType != GearType.None; //Gear인지 체크

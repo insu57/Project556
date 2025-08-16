@@ -47,18 +47,16 @@ namespace UI
         [SerializeField] private RectTransform chestRigSlot;
         [SerializeField] private RectTransform chestRigParent;
         [SerializeField] private RectTransform rigInvenParent;
-        [SerializeField] private RectTransform rigItemRT;
         private GameObject _rigSlotInstance;
         [SerializeField] private RectTransform backpackSlot;
         [SerializeField] private RectTransform backpackParent;
         [SerializeField] private RectTransform packInvenParent;
-        [SerializeField] private RectTransform backpackItemRT;
         private GameObject _backpackSlotInstance;
         [SerializeField] private float minMiddlePanelItemHeight = 250f;
-        [SerializeField, Space] private RectTransform pocketsParent;
         [SerializeField] private List<RectTransform> pockets = new();
-        [SerializeField] private RectTransform pocketsItemRT;
-    
+        [SerializeField] private LayoutElement chestRigLayoutElement;
+        [SerializeField] private LayoutElement backpackLayoutElement;
+        
         public RectTransform RigSlotRT => chestRigSlot;
         public RectTransform BackpackSlotRT => backpackSlot;
         public List<RectTransform> PocketsSlotRT => pockets;
@@ -210,22 +208,21 @@ namespace UI
                     }
                 
                     slotPrefabHeight = inventory.Height;
+                    rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height); //장비 인벤토리의 크기로
                     
-                    rigInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
-                    if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight) 
+                    if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight) //최소 크기를 넘으면
                     {
-                        chestRigParent.sizeDelta = 
-                            new Vector2(chestRigParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
+                        chestRigLayoutElement.preferredHeight = slotPrefabHeight + PanelSlotPadding; //인벤토리 + 패딩 
                     }
                     else
                     {
-                        chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
+                       chestRigLayoutElement.preferredHeight = minMiddlePanelItemHeight; //최소치
                     }
                     break;
                 }
                 case GearType.Backpack:
                 {
-                    if (isInit)
+                    if (isInit) //위와 동일(개선방안?)
                     {
                         _backpackSlotInstance = Instantiate(inventoryGO, packInvenParent);
                         _backpackSlotInstance.TryGetComponent(out inventory);
@@ -244,16 +241,15 @@ namespace UI
                     packInvenParent.sizeDelta = new Vector2(inventory.Width, inventory.Height);
                     if (slotPrefabHeight + PanelSlotPadding > minMiddlePanelItemHeight)
                     {
-                        backpackParent.sizeDelta = 
-                            new Vector2(backpackParent.sizeDelta.x, slotPrefabHeight + PanelSlotPadding);
+                        backpackLayoutElement.preferredHeight = slotPrefabHeight + PanelSlotPadding;
                     }
                     else
                     {
-                        backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
+                        backpackLayoutElement.preferredHeight = minMiddlePanelItemHeight;
                     }
                     break; 
                 }
-                //ScrollView 크기는 ContentSizeFitter를 이용
+                //Scroll Content의 크기는 ContentSizeFitter를 이용
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(middlePanelVerticalGroup);//UI 재정렬
             return inventory;
@@ -263,9 +259,9 @@ namespace UI
         {
             if (gearType is GearType.ArmoredRig or GearType.UnarmoredRig)
             {
-                if (inventoryHeight + PanelSlotPadding > minMiddlePanelItemHeight)
+                if (inventoryHeight + PanelSlotPadding > minMiddlePanelItemHeight) //최소보다 컸다면 최소로
                 {
-                    chestRigParent.sizeDelta = new Vector2(chestRigParent.sizeDelta.x, minMiddlePanelItemHeight);
+                    chestRigLayoutElement.preferredHeight = minMiddlePanelItemHeight;
                     LayoutRebuilder.ForceRebuildLayoutImmediate(middlePanelVerticalGroup);//UI 재정렬
                 }
             }
@@ -273,7 +269,7 @@ namespace UI
             {
                 if (inventoryHeight + PanelSlotPadding > minMiddlePanelItemHeight)
                 {
-                    backpackParent.sizeDelta = new Vector2(backpackParent.sizeDelta.x, minMiddlePanelItemHeight);
+                    backpackLayoutElement.preferredHeight = minMiddlePanelItemHeight;
                     LayoutRebuilder.ForceRebuildLayoutImmediate(middlePanelVerticalGroup);//UI 재정렬
                 }
             }
@@ -290,10 +286,10 @@ namespace UI
             
             if (_lootSlotInstance)
             {
-                _lootSlotInstance.SetActive(false);
+                _lootSlotInstance.SetActive(false); //이전에 있던 루팅 인벤토리 비활성
             }
 
-            lootCrateName.text = lootCrate.CrateName;
+            lootCrateName.text = lootCrate.CrateName; //새로운 루팅 인벤토리
             _lootSlotInstance = lootInventory.gameObject;
             _lootSlotInstance.transform.SetParent(lootSlotParent);
             _lootSlotInstance.transform.localPosition = Vector3.zero;
