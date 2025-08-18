@@ -717,11 +717,10 @@ public class ItemUIPresenter : MonoBehaviour //리팩터링 진행 중(기능 �
         _itemUI.RebuildOnRemoveItemInventory(inventoryHeight, gearType);
     }
     
-    private void HandleOnSetLootInventory(LootCrate lootCrate)
+    private void HandleOnSetLootInventory(Inventory lootInventory, string crateName)
     {
-        var inventory = lootCrate?.GetLootInventory();
-        _invenMap[_itemUI.LootSlotParent] = inventory;
-        _itemUI.SetLootInventory(lootCrate);
+        _invenMap[_itemUI.LootSlotParent] = lootInventory;
+        _itemUI.SetLootInventory(lootInventory, crateName);
     }
 
     private void OnSetInventory(ItemInstance item, GearType gearType, Inventory inventory)
@@ -871,7 +870,7 @@ public class ItemUIPresenter : MonoBehaviour //리팩터링 진행 중(기능 �
         
         if(!_inventoryManager.LootInventory) return; //플레이어 창(인벤창) 루트 인벤토리 가리기
         _inventoryManager.LootInventory.gameObject.SetActive(false);
-        _inventoryManager.SetLootInventory(null);
+        _inventoryManager.SetLootInventory(null, null);
     }
     
     //임시?

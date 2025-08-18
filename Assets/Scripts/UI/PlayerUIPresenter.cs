@@ -70,7 +70,7 @@ namespace UI
             _playerUI.UpdateAmmoText(isFullyLoaded, ammo);
         }
 
-        private void HandleOnShowFieldInteract(Vector2 pos, List<(bool available, InteractType type)> availableList)
+        private void HandleOnShowFieldInteract(Vector3 pos, List<(bool available, InteractType type)> availableList)
         {
             _playerUI.ShowItemPickup(pos, availableList);//상호작용 리스트(해당 좌표에 표시)
         }

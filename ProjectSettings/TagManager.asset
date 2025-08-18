@@ -9,7 +9,6 @@ TagManager:
   - Bullet
   - Item
   - Climbing
-  - FxTemporaire
   - Crate
   layers:
   - Default

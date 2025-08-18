@@ -38,7 +38,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
     public event Action<GameObject, ItemInstance> OnInitInventory;  //인벤토리 초기화 이벤트.  (인벤토리, 해당 인벤토리 아이템.)
     //장비 인벤토리 관련 초기화 개선 필요(Stage초기화)
     public event Action<ItemInstance> OnShowInventory; //인벤토리 active(이미 초기화가 된 경우)
-    public event Action<LootCrate> OnSetLootInventory; //Loot인벤토리 처리
+    public event Action<Inventory, string> OnSetLootInventory; //Loot인벤토리 처리
     public event Action<CellData, ItemInstance> OnEquipFieldItem; //필드 아이템 장착 이벤트.(장비 Cell, 아이템)
     public event Action<GearType, Vector2, RectTransform ,ItemInstance> OnAddFieldItemToInventory;
     //필드아이템 획득.(인벤토리 장비타입, 슬롯에서 위치, 아이템RT(부모), 아이템)
@@ -52,6 +52,7 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
     public event Action<float> OnUpdateArmorAmount; //방어도 총합 업데이트
     public event Action<EquipWeaponIdx> OnUnequipWeapon; // 무기 장비 해제 이벤트
     public event Action<IConsumableItem> OnUseItem; //소비 아이템 사용 이벤트
+    public event Action<EquipWeaponIdx> OnEquipFieldWeapon;
     
     private void Awake()
     {
@@ -85,11 +86,10 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
         }
     }
 
-    public void SetLootInventory(LootCrate lootCrate) //LootInventory 설정
-    {
-        var inventory = lootCrate?.GetLootInventory(); //LootCrate의 인벤토리
-        LootInventory = inventory; //할당
-        OnSetLootInventory?.Invoke(lootCrate); //UI 인벤토리 설정
+    public void SetLootInventory(Inventory lootInventory, string crateName) //LootInventory 설정
+    { 
+        LootInventory = lootInventory; //할당
+        OnSetLootInventory?.Invoke(lootInventory, crateName); //UI 인벤토리 설정
     }
 
     public CellData CheckCanEquipItem(GearType gearType, Vector2Int itemCellCount) //GearSlot 장착 가능 여부 확인
@@ -222,9 +222,12 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
         }
     }
     
-    public void EquipFieldItem(CellData gearSlot, ItemInstance item) //필드 아이템 장착
+    public void EquipFieldItem(ItemInstance item) //필드 아이템 장착
     {
+        var gearSlot = CheckCanEquipItem(item.GearType, item.ItemCellCount);
         SetGearItem(gearSlot, item); //장비 장착 메서드
+        if(gearSlot == PrimaryWeaponSlot) OnEquipFieldWeapon?.Invoke(EquipWeaponIdx.Primary);
+        else if (gearSlot == SecondaryWeaponSlot) OnEquipFieldWeapon?.Invoke(EquipWeaponIdx.Secondary);
         OnEquipFieldItem?.Invoke(gearSlot, item); //아이템 장착(ItemDrag UI) 이벤트
     }
 
@@ -273,18 +276,35 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
         //각 장비별 방어도 총합 구하기
         return totalArmor;
     }
-    
-    public void AddFieldItemToInventory(int firstIdx, RectTransform slotRT, Inventory inventory  ,ItemInstance item)
+
+    public void AddFieldItem(ItemInstance item)
     {
-        //필드 아이템 줍기(인벤토리)
-        GearType inventoryType = GearType.None;
-        if(inventory == BackpackInventory)  inventoryType = GearType.Backpack; //장비 인벤토리가 있는지 체크
-        else if(inventory == RigInventory) inventoryType = GearType.ArmoredRig;
-        else Debug.LogWarning("Add Field Item To Inventory Error : Inventory is null.");
+        List<(Inventory inventory, GearType gearType)> inventoryList = new();
+        if (item.ItemData is AmmoData) //Ammo면 리그부터 검사
+        {
+            if (RigInventory) inventoryList.Add((RigInventory, GearType.ArmoredRig));
+            if(BackpackInventory) inventoryList.Add((BackpackInventory, GearType.Backpack));
+        }
+        else //아니라면 가방부터
+        {
+            if(BackpackInventory) inventoryList.Add((BackpackInventory, GearType.Backpack));
+            if(RigInventory) inventoryList.Add((RigInventory, GearType.ArmoredRig));
+        }
         
-        var (pos, itemRT) = inventory.AddItem(item, firstIdx, slotRT); //인벤토리에 추가
+        foreach (var (inventory, inventoryType) in inventoryList)
+        {
+            if (!inventory) continue;
+            
+            var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(item.ItemCellCount);
+            
+            if (!isAvailable) continue;
+            var (pos, itemRT) = inventory.AddItem(item, firstIdx, slotRT);
+            OnAddFieldItemToInventory?.Invoke(inventoryType, pos, itemRT, item); //ItemDrag 추가 이벤트
+            return;
+        }
         
-        OnAddFieldItemToInventory?.Invoke(inventoryType, pos, itemRT, item); //ItemDrag 추가 이벤트
+        //인벤토리가 아니면 Pockets
+        EquipFieldItem(item);
     }
 
     private static AmmoData CheckItemAmmoCaliber(ItemInstance item, AmmoCaliber caliber)
@@ -372,6 +392,60 @@ public class InventoryManager : MonoBehaviour //인벤토리 매니저(장비슬
             OnRemoveItemFromPlayer?.Invoke(item.InstanceID); //아이템 제거(ItemDragHandler UI)
             return false;
         }
+    }
+
+    public List<(bool available, InteractType type)> CheckFieldItemPickup(ItemInstance item)
+    {
+        bool canEquip = false; //장착 가능 여부
+        bool isGear = item.GearType != GearType.None; //Gear인지 체크
+        if (item.GearType is not GearType.None)
+        {
+            var checkCell = CheckCanEquipItem(item.GearType, item.ItemCellCount);
+            if (checkCell is not null)
+            {
+                canEquip = true;
+            }
+        }
+        //inventory
+        bool canPickup = false;
+        List<Inventory> inventoryList = new(); 
+
+        if (item.ItemData is AmmoData) //Ammo면 리그부터 검사
+        {
+            if (RigInventory) inventoryList.Add(RigInventory);
+            if (BackpackInventory) inventoryList.Add(BackpackInventory);
+        }
+        else //아니라면 가방부터
+        {
+            if (BackpackInventory) inventoryList.Add(BackpackInventory);
+            if (RigInventory) inventoryList.Add(RigInventory);
+        }
+        
+        foreach (var inventory in inventoryList)
+        {
+            if(canPickup) break;
+            var (isAvailable, _, _) = inventory.CheckCanAddItem(item.ItemCellCount);
+            canPickup = isAvailable;
+        }
+        
+        if(!canPickup) //리그, 가방에 공간이 없을 때
+        {
+            var checkCell = CheckCanEquipItem(item.GearType, item.ItemCellCount);
+            if(checkCell is not null) 
+            {
+                canPickup = true; //Cell크기 고려
+            }
+        }
+        
+        //Use
+        bool isConsumable = item.ItemData is IConsumableItem;
+
+        List<(bool available, InteractType type)> currentItemInteractList = new();
+        if(isGear) currentItemInteractList.Add((canEquip, InteractType.Equip)); //Pickup UI 리스트
+        currentItemInteractList.Add((canPickup, InteractType.PickUp));
+        if(isConsumable) currentItemInteractList.Add((true, InteractType.Use));
+        
+        return currentItemInteractList;
     }
 
     public void UpdateWeaponMagCount(Guid id) //무기 장탄량 ItemDrag UI 업데이트

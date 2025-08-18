@@ -1,7 +1,8 @@
 using System;
+using Player;
 using UnityEngine;
 
-public class ItemPickUp : MonoBehaviour //오브젝트 풀링으로 관리.
+public class ItemPickUp : MonoBehaviour, IFieldInteractable //오브젝트 풀링으로 관리.
 {
     [SerializeField] private BaseItemDataSO itemData; //아이템 데이터.(StageManager에서 주입.  SerializeField(테스트 용))
     private ItemInstance _itemInstance;
@@ -33,12 +34,17 @@ public class ItemPickUp : MonoBehaviour //오브젝트 풀링으로 관리.
         if(itemData is null) return;
         itemData = newItemData;
         _spriteRenderer.sprite = newItemData.ItemSprite;
-        _collider.size = _spriteRenderer.sprite.bounds.size;
+        _collider.size = _spriteRenderer.sprite.bounds.size * 2f;//Collider 크기(Sprite보다 크게)
         _itemInstance = ItemInstance.CreateItemInstance(itemData);
     }
 
     public ItemInstance GetItemInstance()
     {
         return _itemInstance;
+    }
+    
+    public void PlayerGetFieldInteractInfo(PlayerManager playerManager)
+    {
+        playerManager.GetFieldItemData(_itemInstance, gameObject.transform.position);
     }
 }

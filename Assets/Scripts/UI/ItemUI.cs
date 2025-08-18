@@ -141,7 +141,6 @@ namespace UI
             
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);
-            
         }
         
         private void OnItemContextMenu(ItemContextType contextType)
@@ -275,9 +274,8 @@ namespace UI
             }
         }
 
-        public void SetLootInventory(LootCrate lootCrate) //Loot 인벤토리 배치
+        public void SetLootInventory(Inventory lootInventory, string crateName) //Loot 인벤토리 배치
         {
-            var lootInventory = lootCrate?.GetLootInventory();
             if (!lootInventory)
             {
                 lootCrateName.text = string.Empty;
@@ -289,7 +287,7 @@ namespace UI
                 _lootSlotInstance.SetActive(false); //이전에 있던 루팅 인벤토리 비활성
             }
 
-            lootCrateName.text = lootCrate.CrateName; //새로운 루팅 인벤토리
+            lootCrateName.text = crateName; //새로운 루팅 인벤토리
             _lootSlotInstance = lootInventory.gameObject;
             _lootSlotInstance.transform.SetParent(lootSlotParent);
             _lootSlotInstance.transform.localPosition = Vector3.zero;

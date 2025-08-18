@@ -81,7 +81,6 @@ public class AudioManager : Singleton<AudioManager>
             Debug.LogError($"{sfxType} not found");
             return;
         }
-        
         source.outputAudioMixerGroup = sfxGroup;
         source.PlayOneShot(clip);
     }

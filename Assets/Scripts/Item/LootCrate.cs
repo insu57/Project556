@@ -1,4 +1,5 @@
 using System;
+using Player;
 using UI;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace Item
         public int stackAmount;
     }
     
-    public class LootCrate : MonoBehaviour
+    public class LootCrate : MonoBehaviour, IFieldInteractable
     {
         private SpriteRenderer _crateSpriteRenderer;
         private BoxCollider2D _crateBoxCollider2D;
@@ -47,6 +48,11 @@ namespace Item
         public Inventory GetLootInventory() //상자 인벤토리
         {
             return _lootInventory;
+        }
+        
+        public void PlayerGetFieldInteractInfo(PlayerManager playerManager)
+        {
+            playerManager.GetLootCrateData(_lootInventory, gameObject.transform.position);
         }
     }
 }

@@ -89,7 +89,7 @@ namespace UI
             }
         }
     
-        public void ShowItemPickup (Vector2 position, List<(bool, InteractType)> availableList)
+        public void ShowItemPickup (Vector3 position, List<(bool, InteractType)> availableList)
         {
             //설정...아이템 따라
             pickupUI.gameObject.SetActive(true);

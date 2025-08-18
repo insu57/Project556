@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Item;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Player
 {
@@ -31,26 +33,21 @@ namespace Player
         public float LastFootstepTime { get; set; } //마지막 재생된 발소리 시간
         
         public event Action<bool, int> OnUpdateMagazineCountUI; //장탄수 UI 업데이트
-        public event Action<Vector2, List<(bool available, InteractType type)>> OnShowFieldInteract; //현재 ItemPickUP
+        public event Action<Vector3, List<(bool available, InteractType type)>> OnShowFieldInteract; //현재 ItemPickUP
         public event Action<int> OnScrollItemPickup; //아이템 픽업 UI 스크롤
         public event Action OnHideFieldInteract; //가리기
         public event Action OnReloadNoAmmo; //남은 탄약이 없을 때 경고
         public event Action<AmmoCategory, FireMode> OnToggleFireMode; //FireMode변경
         public event Action<bool> OnShowAmmoIndicator; //무기 전환 시 장탄, 조정관 표시
-     
-
+        
+        private int _interactableLayer;//Layer : Interactable
         private bool _canInteract;
-        private int _currentItemInteractIdx;
-        private readonly List<(bool available, InteractType type)> _currentItemInteractList = new();
-        private ItemPickUp _currentItemPickUp;
-        private Dictionary<GameObject, ItemPickUp> _itemPickUps = new();
-        
-        private LootCrate _currentLootCrate;
-        private CellData _pickupTargetCell;
-        private (int firstIdx, RectTransform slotRT, Inventory inventory) _pickupTargetInvenSlotInfo;
-        private bool _pickupTargetIsPocket;
-        
-        
+        private int _currentFieldInteractIdx;
+        private List<(bool available, InteractType type)> _currentFieldInteractList = new();
+        private ItemInstance _currentFieldItem;
+        private Inventory _currentLootInventory;
+        private readonly Dictionary<GameObject, IFieldInteractable> _fieldInteractables = new();
+        private IFieldInteractable _currentFieldInteractable;
 
         //UI Manager 개선?
         private void Awake()
@@ -82,6 +79,8 @@ namespace Player
             
             _mainCamera = Camera.main;
             _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
+            
+            _interactableLayer =  LayerMask.NameToLayer("Interactable");
         }
 
         private void Start()
@@ -115,6 +114,7 @@ namespace Player
             _inventoryManager.OnUpdateArmorAmount += HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon += HandleOnUnequipWeapon;
             _inventoryManager.OnUseItem += HandleOnUseItem;
+            _inventoryManager.OnEquipFieldWeapon += HandleOnChangeWeapon;
         }
         
         private void OnDisable()
@@ -139,6 +139,7 @@ namespace Player
             _inventoryManager.OnUpdateArmorAmount -= HandleOnUpdateArmorAmount;
             _inventoryManager.OnUnequipWeapon -= HandleOnUnequipWeapon;
             _inventoryManager.OnUseItem -= HandleOnUseItem;
+            _inventoryManager.OnEquipFieldWeapon -= HandleOnChangeWeapon;
         }
 
         private void HandleOnShowMuzzleFlash() //사격 시 총구화염 VFX 오브젝트(애니메이션 자동 재생)
@@ -408,12 +409,12 @@ namespace Player
         {
             if(!_canInteract) return;
             
-            _currentItemInteractIdx += (int)scrollDeltaY;
-            if (_currentItemInteractIdx < 0) _currentItemInteractIdx = _currentItemInteractList.Count - 1;
-            else if (_currentItemInteractIdx >= _currentItemInteractList.Count) _currentItemInteractIdx = 0;
+            _currentFieldInteractIdx += (int)scrollDeltaY;
+            if (_currentFieldInteractIdx < 0) _currentFieldInteractIdx = _currentFieldInteractList.Count - 1;
+            else if (_currentFieldInteractIdx >= _currentFieldInteractList.Count) _currentFieldInteractIdx = 0;
             //범위 넘기면 처리
       
-            OnScrollItemPickup?.Invoke(_currentItemInteractIdx);
+            OnScrollItemPickup?.Invoke(_currentFieldInteractIdx);
         }
 
         private void HandleOnItemEffectStatAdjust(StatAdjustAmount statAdjustAmount, float useDuration)
@@ -441,99 +442,74 @@ namespace Player
         
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.CompareTag("Item"))
-            {
-                //pick up ui
-                _canInteract = true;
-                Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
-            
-                other.TryGetComponent<ItemPickUp>(out var itemPickUp);
-
-                _itemPickUps[other.gameObject] = itemPickUp;
-                
-                _currentItemPickUp = itemPickUp;  //장착-획득 여부... -> InventoryManager참조...
-                var item = itemPickUp.GetItemInstance();
-                bool canEquip = false;
-                //장착
-                bool isGear = item.GearType != GearType.None; //Gear인지 체크
-                if (item.GearType is not GearType.None)
-                {
-                    var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType, item.ItemCellCount);
-                    if (checkCell is not null)
-                    {
-                        canEquip = true;
-                        _pickupTargetCell = checkCell;
-                    }
-                }
-                //Use
-                bool isConsumable = item.ItemData is IConsumableItem;
-                
-                //inventory
-                bool canPickup = false;
-
-                Inventory inventory = null;
-
-                if (item.ItemData is AmmoData) //Ammo면 리그부터 검사
-                {
-                    if(_inventoryManager.RigInventory) inventory = _inventoryManager.RigInventory;
-                    else if(_inventoryManager.BackpackInventory) inventory = _inventoryManager.BackpackInventory;
-                }
-                else //아니라면 가방부터
-                {
-                    if(_inventoryManager.BackpackInventory) inventory = _inventoryManager.BackpackInventory;
-                    else if(_inventoryManager.RigInventory) inventory = _inventoryManager.RigInventory;
-                }
-
-                if (inventory) //가방이나 리그를 장착한 상태라면 (해당 inventory가 있음)
-                {
-                    var (isAvailable, firstIdx, slotRT) = inventory.CheckCanAddItem(item.ItemCellCount); //빈 공간 검사
-                    canPickup = isAvailable;
-                    _pickupTargetInvenSlotInfo = (firstIdx, slotRT, inventory);
-                    _pickupTargetIsPocket = false;
-                }
-                else //리그, 가방에 공간이 없을 때
-                {
-                    var checkCell = _inventoryManager.CheckCanEquipItem(item.GearType, item.ItemCellCount);
-                    if(checkCell is not null) 
-                    {
-                        canPickup = true; //Cell크기 고려
-                        _pickupTargetCell = checkCell;
-                        _pickupTargetIsPocket = true;
-                    }
-                }
-            
-                _currentItemInteractList.Clear();
-                _currentItemInteractIdx = 0;
-                if(isGear) _currentItemInteractList.Add((canEquip, InteractType.Equip)); //Pickup UI 리스트
-                _currentItemInteractList.Add((canPickup, InteractType.PickUp));
-                if(isConsumable) _currentItemInteractList.Add((true, InteractType.Use));
-                
-                OnShowFieldInteract?.Invoke(pos, _currentItemInteractList);
-            }
-            else if (other.CompareTag("Crate"))
+            if (other.gameObject.layer == _interactableLayer)
             {
                 _canInteract = true;
-                Vector2 pos = _mainCamera.WorldToScreenPoint(other.transform.position);
-                
-                other.TryGetComponent(out _currentLootCrate);
-                
-                _currentItemInteractList.Clear();
-                _currentItemInteractIdx = 0;
-                _currentItemInteractList.Add((true, InteractType.Open));
-                _currentItemPickUp = null;
-                
-                OnShowFieldInteract?.Invoke(pos, _currentItemInteractList);
+                if (!_fieldInteractables.ContainsKey(other.gameObject))
+                {
+                    var fieldInteractable = other.GetComponent<IFieldInteractable>();
+                    _fieldInteractables[other.gameObject] = fieldInteractable;
+                }
+                GetNearestFieldInteractable(); //가장 가까운 상호작용 오브젝트 
+                _currentFieldInteractable.PlayerGetFieldInteractInfo(this);
             }
-            
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
             if (other.CompareTag("Item") || other.CompareTag("Crate"))
             {
+                RemoveFieldInteractable(other.gameObject);
+            }
+        }
+
+        private void RemoveFieldInteractable(GameObject interactableObject)
+        {
+            _fieldInteractables.Remove(interactableObject);
+            if (_fieldInteractables.Count == 0) //비었으면 가리기
+            {
                 _canInteract = false;
-                _currentItemPickUp = null;
                 OnHideFieldInteract?.Invoke();
+            }
+            else
+            {
+                GetNearestFieldInteractable();
+                _currentFieldInteractable.PlayerGetFieldInteractInfo(this);
+            }
+        }
+        
+        public void GetFieldItemData(ItemInstance itemInstance, Vector3 pos) //ScreenPos관련 수정필요
+        { 
+            _currentFieldInteractList = _inventoryManager.CheckFieldItemPickup(itemInstance);
+            _currentFieldInteractIdx = 0;
+            _currentFieldItem = itemInstance;
+            _currentLootInventory = null;
+            var screenPoint = _mainCamera.WorldToScreenPoint(pos);
+            OnShowFieldInteract?.Invoke(screenPoint, _currentFieldInteractList);
+        }
+
+        public void GetLootCrateData(Inventory inventory, Vector3 pos)
+        {
+            _currentFieldInteractList.Clear();
+            _currentFieldInteractIdx = 0;
+            _currentFieldInteractList.Add((true, InteractType.Open));
+            _currentFieldItem = null;
+            _currentLootInventory = inventory;
+            var screenPoint = _mainCamera.WorldToScreenPoint(pos);
+            OnShowFieldInteract?.Invoke(screenPoint, _currentFieldInteractList);
+        }
+        
+        private void GetNearestFieldInteractable()
+        {
+            float nearestDist = float.MaxValue;
+
+            foreach (var (go, fieldInteractable) in _fieldInteractables)
+            {
+                float dist = Vector3.Distance(gameObject.transform.position, go.transform.position);
+                if (nearestDist <= dist) continue;
+                //가장 가까운 상호작용으로 
+                nearestDist = dist; 
+                _currentFieldInteractable = fieldInteractable;
             }
         }
 
@@ -541,42 +517,31 @@ namespace Player
         {
             if(!_canInteract) return;
             
-            var (isAvailable, interactType) = _currentItemInteractList[_currentItemInteractIdx];
+            var (isAvailable, interactType) = _currentFieldInteractList[_currentFieldInteractIdx];
         
             if (!isAvailable) return;
             
-            var item = _currentItemPickUp?.GetItemInstance(); //아이템 픽업이 아니라면 null
             switch (interactType)
             {
                 case InteractType.Equip: //장착
-                    if(item is null) return; //null체크
-                    _inventoryManager.EquipFieldItem(_pickupTargetCell, item); //아이템 장착
-                    if (_pickupTargetCell == _inventoryManager.PrimaryWeaponSlot) //무기라면 장착하고 그 무기로 전환
-                    {
-                        HandleOnChangeWeapon(EquipWeaponIdx.Primary);
-                    }
-                    else if (_pickupTargetCell == _inventoryManager.SecondaryWeaponSlot)
-                    {
-                        HandleOnChangeWeapon(EquipWeaponIdx.Secondary);
-                    }
+                    if(_currentFieldItem == null) return; //null체크
+                    _inventoryManager.EquipFieldItem(_currentFieldItem);
                     break;
                 case InteractType.PickUp: //획득
-                    if(item is null) return; //null체크
-                    if (!_pickupTargetIsPocket)
-                    {
-                        var (firstIdx, slotRT, inventory) = _pickupTargetInvenSlotInfo;
-                        _inventoryManager.AddFieldItemToInventory(firstIdx, slotRT, inventory ,item);
-                    }
-                    else _inventoryManager.EquipFieldItem(_pickupTargetCell, item);
+                    if(_currentFieldItem == null) return; //null체크
+                    _inventoryManager.AddFieldItem(_currentFieldItem);
                     break;
                 case InteractType.Use: //사용
-                    if (item?.ItemData is IConsumableItem consumableItem) //소비아이템 이면
+                    if (_currentFieldItem?.ItemData is IConsumableItem consumableItem) //소비아이템 이면
                     {
                         HandleOnUseItem(consumableItem);
                     }
                     break;
-                case InteractType.Open:
-                    _inventoryManager.SetLootInventory(_currentLootCrate);
+                case InteractType.Open: //상자 열기
+                    if(!_currentLootInventory) return;
+                    var crate = _currentFieldInteractable as LootCrate;
+                    var crateName = crate?.CrateName;
+                    _inventoryManager.SetLootInventory(_currentLootInventory, crateName);
                     _playerControl.OnOpenCrate();
                     break;
                 default:
@@ -584,14 +549,16 @@ namespace Player
                     break;
             }
 
-            if (interactType is not InteractType.Open)
+            if (_currentFieldInteractable is ItemPickUp itemPickUp)
             {
-                _canInteract = false;
-                OnHideFieldInteract?.Invoke(); //개선?
+                RemoveFieldInteractable(itemPickUp.gameObject);
+                ObjectPoolingManager.Instance.ReleaseItemPickUp(itemPickUp);
+            }
+            else if (_currentFieldInteractable is LootCrate lootCrate)
+            {
+                RemoveFieldInteractable(lootCrate.gameObject);
             }
             
-            if(_currentItemPickUp is not null)
-                ObjectPoolingManager.Instance.ReleaseItemPickUp(_currentItemPickUp);
         }
 
         
