@@ -1617,13 +1617,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c87817b8a70e5e7438e29cb6eb76d138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  crate01Test: {fileID: 7321939041111035002, guid: e595211f0a5e07d4db98e9fc054a0b4b, type: 3}
-  pistolTestData: {fileID: 11400000, guid: 53960c62b9c69a14f8c913e94fe1e107, type: 2}
-  itemDataTest: {fileID: 11400000, guid: 4edd6477f6f6ec343beb8a5c1db1d5ed, type: 2}
   backpackTestData: {fileID: 11400000, guid: 78135379f6834fc43a5165875e3c3751, type: 2}
   rigTestData: {fileID: 11400000, guid: 39986b537ed07b246a05da7f85657663, type: 2}
-  bullet556TestData: {fileID: 11400000, guid: 5b70e39c2e2bf2c458c4a7d1c911b520, type: 2}
-  rigTanTestData: {fileID: 11400000, guid: b0385b768e84dff46ab79b94fbcbee91, type: 2}
 --- !u!1 &3694176857987904705
 GameObject:
   m_ObjectHideFlags: 0
@@ -4217,6 +4212,7 @@ GameObject:
   - component: {fileID: 7789147893518112731}
   - component: {fileID: 644758073575750261}
   - component: {fileID: 9050450742271964904}
+  - component: {fileID: 9163962542330445428}
   - component: {fileID: 7135259940196754618}
   - component: {fileID: 3122469000606546045}
   - component: {fileID: 3902235042742185205}
@@ -4277,9 +4273,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b646e2b649c76d747b2d73668be143a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
-  runSpeedMultiplier: 1.5
-  jumpSpeed: 4
   rightArm: {fileID: 1669731848458698949}
   leftArm: {fileID: 5413740005232500178}
 --- !u!114 &3389974225602303106
@@ -4463,14 +4456,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdb545add8956af4e953f0fb515e43e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 3
+  sprintSpeedMultiplier: 1.5
+  jumpForce: 4
   playerHealth: 100
   playerStamina: 100
   playerEnergy: 100
   playerHydration: 100
-  healthPerSecond: 0
-  staminaPerSecond: 0
-  energyPerSecond: -0.1
-  hydrationPerSecond: -0.3
+  defaultHealthPerSecond: 0
+  defaultStaminaPerSecond: 5
+  defaultEnergyPerSecond: -0.1
+  defaultHydrationPerSecond: -0.3
+  defaultSprintStaminaPerSecond: -15
+--- !u!114 &9163962542330445428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6380820316290436997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 199c82c3636104046a387015a5f901f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!50 &7135259940196754618
 Rigidbody2D:
   serializedVersion: 5
@@ -5968,7 +5977,7 @@ SortingGroup:
   m_GameObject: {fileID: 8957759039995085862}
   m_Enabled: 1
   m_SortingLayerID: -670215859
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 5
   m_SortAtRoot: 0
 --- !u!95 &6411596332340496012
@@ -6150,6 +6159,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4886838393056702428, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7601804714044999584, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 8386081289750346863, guid: 235bc17a146b7ad4f88f68f4f3ee21f6, type: 3}
+    - target: {fileID: 7601804714044999584, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
+      propertyPath: m_SortingLayer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7601804714044999584, guid: b09d9fd0042bf0e4b84ac95d168cbdc2, type: 3}
+      propertyPath: m_SortingLayerID
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

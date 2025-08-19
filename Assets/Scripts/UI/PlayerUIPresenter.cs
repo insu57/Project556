@@ -10,6 +10,7 @@ namespace UI
         private PlayerUI _playerUI;
         private PlayerManager _playerManager;
         private PlayerData _playerData;
+        private PlayerInteract _playerInteract;
         
         private void Awake()
         {
@@ -23,9 +24,6 @@ namespace UI
             _playerData.OnPlayerStatChanged += HandleOnUpdatePlayerStat;
             
             _playerManager.OnUpdateMagazineCountUI += HandleOnUpdateMagazineCountUI;
-            _playerManager.OnShowFieldInteract += HandleOnShowFieldInteract;
-            _playerManager.OnScrollItemPickup += HandleOnScrollItemPickup;
-            _playerManager.OnHideFieldInteract += HandleOnHideFieldInteract;
             _playerManager.OnReloadNoAmmo += HandleOnReloadNoAmmo;
             _playerManager.OnToggleFireMode += HandleOnToggleFireMode;
             _playerManager.OnShowAmmoIndicator += HandleOnShowAmmoIndicator;
@@ -36,9 +34,6 @@ namespace UI
             _playerData.OnPlayerStatChanged -= HandleOnUpdatePlayerStat;
          
             _playerManager.OnUpdateMagazineCountUI -= HandleOnUpdateMagazineCountUI;
-            _playerManager.OnShowFieldInteract -= HandleOnShowFieldInteract;
-            _playerManager.OnScrollItemPickup -= HandleOnScrollItemPickup;
-            _playerManager.OnHideFieldInteract -= HandleOnHideFieldInteract;
             _playerManager.OnReloadNoAmmo -= HandleOnReloadNoAmmo;
             _playerManager.OnToggleFireMode -= HandleOnToggleFireMode;
             _playerManager.OnShowAmmoIndicator -= HandleOnShowAmmoIndicator;
@@ -69,22 +64,7 @@ namespace UI
         {
             _playerUI.UpdateAmmoText(isFullyLoaded, ammo);
         }
-
-        private void HandleOnShowFieldInteract(Vector3 pos, List<(bool available, InteractType type)> availableList)
-        {
-            _playerUI.ShowItemPickup(pos, availableList);//상호작용 리스트(해당 좌표에 표시)
-        }
-
-        private void HandleOnScrollItemPickup(int idx)
-        {
-            _playerUI.ScrollItemPickup(idx);
-        }
-    
-        private void HandleOnHideFieldInteract()
-        {
-            _playerUI.HideItemPickup();
-        }
-
+        
         private void HandleOnReloadNoAmmo()
         {
             _playerUI.ShowNoAmmoWarning();

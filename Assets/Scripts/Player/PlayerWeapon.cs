@@ -7,9 +7,9 @@ using Random = UnityEngine.Random;
 
 public class PlayerWeapon : MonoBehaviour
 {
-    private WeaponData _weaponData;
+    private WeaponData _currentWeaponData;
     private Transform _muzzleTransform;
-    private AmmoData _ammoData;
+    private AmmoData _currentAmmoData;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
     private float _normalizedAccuracy; //정규화 정확도
     private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도
@@ -21,8 +21,8 @@ public class PlayerWeapon : MonoBehaviour
     
     public void ChangeWeaponData(WeaponData weaponData, AmmoData ammoData)
     {
-        _weaponData = weaponData;
-        _ammoData = ammoData;
+        _currentWeaponData = weaponData;
+        _currentAmmoData = ammoData;
         
         _normalizedAccuracy = Mathf.Clamp01(weaponData.Accuracy / MaxAccuracy); //정확도 정규화
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy); //탄퍼짐 각도 편차
@@ -30,17 +30,17 @@ public class PlayerWeapon : MonoBehaviour
 
     public void SetAmmoData(AmmoData ammoData)
     {
-        _ammoData = ammoData;
+        _currentAmmoData = ammoData;
     }
     
     public bool Shoot(bool isFlipped, float shootAngle)
     {
-        if(Time.time - _lastShotTime < _weaponData.FireRate) return false; //FireRate제한
+        if(Time.time - _lastShotTime < _currentWeaponData.FireRate) return false; //FireRate제한
         _lastShotTime = Time.time;
         
         OnShowMuzzleFlash?.Invoke(); //show flash
 
-        var palletCount = _ammoData.IsBuckshot ? _ammoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
+        var palletCount = _currentAmmoData.IsBuckshot ? _currentAmmoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
         
         for (var i = 0; i < palletCount; i++)
         {
@@ -64,14 +64,14 @@ public class PlayerWeapon : MonoBehaviour
                     new Vector2(Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
                 bulletAngle = shootAngle;
             }
-            Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_ammoData.AmmoCategory);//Pool에서 Get(탄종에 따라)
-            var finalDamage = _ammoData.AmmoDamage * _weaponData.DamageMultiplier; //탄환 데미지 * 무기 피해량 배수
-            var finalSpeed = _ammoData.ProjectileSpeed * _weaponData.MuzzleVelocityMultiplier; //탄환 속도 * 무기 총구 속도 배수
-            bullet.Init(finalSpeed, finalDamage, _ammoData.AmmoPiercing);
+            Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_currentAmmoData.AmmoCategory);//Pool에서 Get(탄종에 따라)
+            var finalDamage = _currentAmmoData.AmmoDamage * _currentWeaponData.DamageMultiplier; //탄환 데미지 * 무기 피해량 배수
+            var finalSpeed = _currentAmmoData.ProjectileSpeed * _currentWeaponData.MuzzleVelocityMultiplier; //탄환 속도 * 무기 총구 속도 배수
+            bullet.Init(finalSpeed, finalDamage, _currentAmmoData.AmmoPiercing);
             bullet.ShootBullet(bulletAngle, direction, _muzzleTransform);
         }
 
-        if (_weaponData.WeaponActionType == WeaponActionType.PumpAction)
+        if (_currentWeaponData.WeaponActionType == WeaponActionType.PumpAction)
         {
             OnEndWeaponAction?.Invoke(WeaponActionType.PumpAction);
         }

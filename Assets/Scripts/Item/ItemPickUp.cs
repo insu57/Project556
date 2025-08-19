@@ -43,8 +43,8 @@ public class ItemPickUp : MonoBehaviour, IFieldInteractable //오브젝트 풀�
         return _itemInstance;
     }
     
-    public void PlayerGetFieldInteractInfo(PlayerManager playerManager)
+    public void PlayerGetFieldInteractInfo(PlayerInteract playerInteract)
     {
-        playerManager.GetFieldItemData(_itemInstance, gameObject.transform.position);
+        playerInteract.GetFieldItemData(_itemInstance, gameObject.transform.position);
     }
 }

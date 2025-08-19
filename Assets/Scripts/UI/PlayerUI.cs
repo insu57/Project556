@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI
@@ -16,40 +17,42 @@ namespace UI
         [SerializeField] private TMP_Text ammoText;
         [SerializeField] private List<FireModeImage> fireModeImageData;
         private readonly Dictionary<AmmoCategory, Dictionary<FireMode, Sprite>> _fireModeSpriteDict = new();
+        [SerializeField] private GameObject noAmmoWarning;
         
         [SerializeField, Space] private TMP_Text healthTxt;
         [SerializeField] private TMP_Text staminaTxt;
         [SerializeField] private TMP_Text energyTxt;
         [SerializeField] private TMP_Text hydrationTxt;
         
-        [SerializeField, Space] private RectTransform pickupUI;
-        private readonly List<TMP_Text> _pickupTextList = new();
+        [SerializeField, Space] private RectTransform fieldInteractUI;
+        private readonly List<TMP_Text> _fieldInteractTextList = new();
         [SerializeField] private TMP_Text equipText;
         [SerializeField] private TMP_Text pickupText;
         [SerializeField] private TMP_Text useText;
         [SerializeField] private TMP_Text openText;
-        [SerializeField] private float pickupTextSize = 50f;
-        [SerializeField] private RectTransform itemInteractUI;
-        [SerializeField] private Image pickupHighlight;
-        [SerializeField] private Color pickupHighlightAvailableColor;
-        [SerializeField] private Color pickupHighlightUnavailableColor;
-        private List<(bool isAvailable, InteractType type)> _pickupAvailableList;
-        private int _pickupTextListCount;
-        private int _pickupCurrentIdx;
-        [SerializeField] private GameObject noAmmoWarning;
+        [SerializeField] private float fieldInteractTextSize = 50f;
+        [SerializeField] private RectTransform currentInteract;
+        [SerializeField] private Image interactHighlight;
+        [SerializeField] private Color interactHighlightAvailableColor;
+        [SerializeField] private Color interactHighlightUnavailableColor;
+        private List<(bool isAvailable, InteractType type)> _interactAvailableList;
+        
+        private Camera _mainCamera;
         
         private void Awake()
         {
             //ItemInteract UI
-            _pickupTextList.Add(equipText);
-            _pickupTextList.Add(pickupText);
-            _pickupTextList.Add(useText);
-            _pickupTextList.Add(openText);
+            _fieldInteractTextList.Add(equipText);
+            _fieldInteractTextList.Add(pickupText);
+            _fieldInteractTextList.Add(useText);
+            _fieldInteractTextList.Add(openText);
 
             foreach (var data in fireModeImageData)
             {
                 _fireModeSpriteDict[data.AmmoCategory] = data.FireModeSpriteDict;
             }
+            
+            _mainCamera = Camera.main;
         }
     
         public void UpdateHealthUI(float health, float maxHealth)
@@ -87,63 +90,6 @@ namespace UI
             {
                 ammoText.text = ammo.ToString();
             }
-        }
-    
-        public void ShowItemPickup (Vector3 position, List<(bool, InteractType)> availableList)
-        {
-            //설정...아이템 따라
-            pickupUI.gameObject.SetActive(true);
-            itemInteractUI.anchoredPosition = Vector2.zero;
-
-            pickupUI.position = position; //개선...WorldCanvas로 따로?
-        
-            _pickupAvailableList = availableList;
-
-            foreach (var text in _pickupTextList)
-            {
-                text.gameObject.SetActive(false);
-            }
-        
-            foreach (var (_, type) in _pickupAvailableList) //여기가 문제... 색만 변경
-            {
-                switch (type)
-                {
-                    case InteractType.Equip:
-                        equipText.gameObject.SetActive(true);
-                        break;
-                    case InteractType.PickUp:
-                        pickupText.gameObject.SetActive(true);
-                        break;
-                    case InteractType.Use:
-                        useText.gameObject.SetActive(true);
-                        break;
-                    case InteractType.Open:
-                        openText.gameObject.SetActive(true);
-                        break;
-                    default:
-                        Debug.LogWarning("ItemInteractType Error: None.");
-                        break;
-                }
-            }
-            LayoutRebuilder.ForceRebuildLayoutImmediate(pickupUI);
-        
-            pickupHighlight.color = _pickupAvailableList[0].isAvailable
-                ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
-        }
-
-        public void HideItemPickup()
-        {
-            pickupUI.gameObject.SetActive(false); //버그?
-        }
-    
-        public void ScrollItemPickup(int idx)
-        {
-            var uiPos = itemInteractUI.anchoredPosition;
-
-            uiPos.y = -idx * pickupTextSize;
-            var isAvailable = _pickupAvailableList[idx];
-            pickupHighlight.color = isAvailable.isAvailable ? pickupHighlightAvailableColor : pickupHighlightUnavailableColor;
-            itemInteractUI.anchoredPosition =  uiPos;
         }
 
         public void ShowNoAmmoWarning()

@@ -17,11 +17,11 @@ namespace Player
         [SerializeField] private Transform twoHandMuzzleTransform; //두손무기 Muzzle Transform
         [SerializeField] private GameObject muzzleFlashVFX; //총구화염VFX
     
-        private Camera _mainCamera;
         private PlayerData _playerData;
         private PlayerWeapon _playerWeapon;
         private PlayerAnimation _playerAnimation;
         private PlayerControl _playerControl;
+        private PlayerInteract _playerInteract;
         private InventoryManager _inventoryManager;
     
         private WeaponInstance _currentWeaponItem; //현재 장착한 무기 아이템
@@ -33,21 +33,9 @@ namespace Player
         public float LastFootstepTime { get; set; } //마지막 재생된 발소리 시간
         
         public event Action<bool, int> OnUpdateMagazineCountUI; //장탄수 UI 업데이트
-        public event Action<Vector3, List<(bool available, InteractType type)>> OnShowFieldInteract; //현재 ItemPickUP
-        public event Action<int> OnScrollItemPickup; //아이템 픽업 UI 스크롤
-        public event Action OnHideFieldInteract; //가리기
         public event Action OnReloadNoAmmo; //남은 탄약이 없을 때 경고
         public event Action<AmmoCategory, FireMode> OnToggleFireMode; //FireMode변경
         public event Action<bool> OnShowAmmoIndicator; //무기 전환 시 장탄, 조정관 표시
-        
-        private int _interactableLayer;//Layer : Interactable
-        private bool _canInteract;
-        private int _currentFieldInteractIdx;
-        private List<(bool available, InteractType type)> _currentFieldInteractList = new();
-        private ItemInstance _currentFieldItem;
-        private Inventory _currentLootInventory;
-        private readonly Dictionary<GameObject, IFieldInteractable> _fieldInteractables = new();
-        private IFieldInteractable _currentFieldInteractable;
 
         //UI Manager 개선?
         private void Awake()
@@ -56,7 +44,9 @@ namespace Player
             TryGetComponent(out _playerAnimation);
             TryGetComponent(out _playerControl);
             TryGetComponent(out _playerWeapon);
+            TryGetComponent(out _playerInteract);
             var stageManager = FindAnyObjectByType<StageManager>();
+            _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
             
             _playerControl.MoveSpeed = _playerData.MoveSpeed;
             _playerControl.SprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
@@ -76,11 +66,6 @@ namespace Player
             {
                 behaviour.Init(this);
             }
-            
-            _mainCamera = Camera.main;
-            _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
-            
-            _interactableLayer =  LayerMask.NameToLayer("Interactable");
         }
 
         private void Start()
@@ -407,14 +392,7 @@ namespace Player
 
         private void ScrollItemPickup(float scrollDeltaY)
         {
-            if(!_canInteract) return;
-            
-            _currentFieldInteractIdx += (int)scrollDeltaY;
-            if (_currentFieldInteractIdx < 0) _currentFieldInteractIdx = _currentFieldInteractList.Count - 1;
-            else if (_currentFieldInteractIdx >= _currentFieldInteractList.Count) _currentFieldInteractIdx = 0;
-            //범위 넘기면 처리
-      
-            OnScrollItemPickup?.Invoke(_currentFieldInteractIdx);
+            _playerInteract.ScrollItemPickup(scrollDeltaY);
         }
 
         private void HandleOnItemEffectStatAdjust(StatAdjustAmount statAdjustAmount, float useDuration)
@@ -439,109 +417,40 @@ namespace Player
                 HandleOnItemEffectStatPerSecond(effectPerSecond); //초당효과 중복 제한... 같은 종류면 덮어씌우기?
             }
         }
-        
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            if (other.gameObject.layer == _interactableLayer)
-            {
-                _canInteract = true;
-                if (!_fieldInteractables.ContainsKey(other.gameObject))
-                {
-                    var fieldInteractable = other.GetComponent<IFieldInteractable>();
-                    _fieldInteractables[other.gameObject] = fieldInteractable;
-                }
-                GetNearestFieldInteractable(); //가장 가까운 상호작용 오브젝트 
-                _currentFieldInteractable.PlayerGetFieldInteractInfo(this);
-            }
-        }
-
-        private void OnTriggerExit2D(Collider2D other)
-        {
-            if (other.CompareTag("Item") || other.CompareTag("Crate"))
-            {
-                RemoveFieldInteractable(other.gameObject);
-            }
-        }
-
-        private void RemoveFieldInteractable(GameObject interactableObject)
-        {
-            _fieldInteractables.Remove(interactableObject);
-            if (_fieldInteractables.Count == 0) //비었으면 가리기
-            {
-                _canInteract = false;
-                OnHideFieldInteract?.Invoke();
-            }
-            else
-            {
-                GetNearestFieldInteractable();
-                _currentFieldInteractable.PlayerGetFieldInteractInfo(this);
-            }
-        }
-        
-        public void GetFieldItemData(ItemInstance itemInstance, Vector3 pos) //ScreenPos관련 수정필요
-        { 
-            _currentFieldInteractList = _inventoryManager.CheckFieldItemPickup(itemInstance);
-            _currentFieldInteractIdx = 0;
-            _currentFieldItem = itemInstance;
-            _currentLootInventory = null;
-            var screenPoint = _mainCamera.WorldToScreenPoint(pos);
-            OnShowFieldInteract?.Invoke(screenPoint, _currentFieldInteractList);
-        }
-
-        public void GetLootCrateData(Inventory inventory, Vector3 pos)
-        {
-            _currentFieldInteractList.Clear();
-            _currentFieldInteractIdx = 0;
-            _currentFieldInteractList.Add((true, InteractType.Open));
-            _currentFieldItem = null;
-            _currentLootInventory = inventory;
-            var screenPoint = _mainCamera.WorldToScreenPoint(pos);
-            OnShowFieldInteract?.Invoke(screenPoint, _currentFieldInteractList);
-        }
-        
-        private void GetNearestFieldInteractable()
-        {
-            float nearestDist = float.MaxValue;
-
-            foreach (var (go, fieldInteractable) in _fieldInteractables)
-            {
-                float dist = Vector3.Distance(gameObject.transform.position, go.transform.position);
-                if (nearestDist <= dist) continue;
-                //가장 가까운 상호작용으로 
-                nearestDist = dist; 
-                _currentFieldInteractable = fieldInteractable;
-            }
-        }
-
+      
         private void FieldInteract()
         {
-            if(!_canInteract) return;
-            
-            var (isAvailable, interactType) = _currentFieldInteractList[_currentFieldInteractIdx];
+            if(!_playerInteract.CanInteract) return;
+
+            var (isAvailable, interactType) = _playerInteract.CurrentFieldInteract;
         
             if (!isAvailable) return;
+
+            var currentFieldItem = _playerInteract.CurrentFieldItem;
+            var currentLootInventory = _playerInteract.CurrentLootInventory;
+            var currentFieldInteractable = _playerInteract.CurrentFieldInteractable;
             
             switch (interactType)
             {
                 case InteractType.Equip: //장착
-                    if(_currentFieldItem == null) return; //null체크
-                    _inventoryManager.EquipFieldItem(_currentFieldItem);
+                    if(currentFieldItem == null) return; //null체크
+                    _inventoryManager.EquipFieldItem(currentFieldItem);
                     break;
                 case InteractType.PickUp: //획득
-                    if(_currentFieldItem == null) return; //null체크
-                    _inventoryManager.AddFieldItem(_currentFieldItem);
+                    if(currentFieldItem == null) return; //null체크
+                    _inventoryManager.AddFieldItem(currentFieldItem);
                     break;
                 case InteractType.Use: //사용
-                    if (_currentFieldItem?.ItemData is IConsumableItem consumableItem) //소비아이템 이면
+                    if (currentFieldItem?.ItemData is IConsumableItem consumableItem) //소비아이템 이면
                     {
                         HandleOnUseItem(consumableItem);
                     }
                     break;
                 case InteractType.Open: //상자 열기
-                    if(!_currentLootInventory) return;
-                    var crate = _currentFieldInteractable as LootCrate;
+                    if(!currentLootInventory) return;
+                    var crate = currentFieldInteractable as LootCrate;
                     var crateName = crate?.CrateName;
-                    _inventoryManager.SetLootInventory(_currentLootInventory, crateName);
+                    _inventoryManager.SetLootInventory(currentLootInventory, crateName);
                     _playerControl.OnOpenCrate();
                     break;
                 default:
@@ -549,18 +458,15 @@ namespace Player
                     break;
             }
 
-            if (_currentFieldInteractable is ItemPickUp itemPickUp)
+            if (currentFieldInteractable is ItemPickUp itemPickUp)
             {
-                RemoveFieldInteractable(itemPickUp.gameObject);
+                _playerInteract.RemoveFieldInteractable(itemPickUp.gameObject);
                 ObjectPoolingManager.Instance.ReleaseItemPickUp(itemPickUp);
             }
-            else if (_currentFieldInteractable is LootCrate lootCrate)
+            else if (currentFieldInteractable is LootCrate lootCrate)
             {
-                RemoveFieldInteractable(lootCrate.gameObject);
+                _playerInteract.RemoveFieldInteractable(lootCrate.gameObject);
             }
-            
         }
-
-        
     }
 }

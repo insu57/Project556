@@ -44,15 +44,10 @@ namespace Item
             _itemUIPresenter.SetItemToLootCrate(lootCrateItemInputs, _lootInventory); //아이템 초기화(ItemDrag)
             //StageManager수정...
         }
-
-        public Inventory GetLootInventory() //상자 인벤토리
-        {
-            return _lootInventory;
-        }
         
-        public void PlayerGetFieldInteractInfo(PlayerManager playerManager)
+        public void PlayerGetFieldInteractInfo(PlayerInteract playerInteract)
         {
-            playerManager.GetLootCrateData(_lootInventory, gameObject.transform.position);
+            playerInteract.GetLootCrateData(_lootInventory, gameObject.transform.position);
         }
     }
 }
