@@ -37,11 +37,6 @@ public class ItemPickUp : MonoBehaviour, IFieldInteractable //오브젝트 풀�
         _collider.size = _spriteRenderer.sprite.bounds.size * 2f;//Collider 크기(Sprite보다 크게)
         _itemInstance = ItemInstance.CreateItemInstance(itemData);
     }
-
-    public ItemInstance GetItemInstance()
-    {
-        return _itemInstance;
-    }
     
     public void PlayerGetFieldInteractInfo(PlayerInteract playerInteract)
     {

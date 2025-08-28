@@ -29,17 +29,16 @@ public class PlayerInteract : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.layer == _interactableLayer)
+        if (other.gameObject.layer != _interactableLayer) return;
+        
+        CanInteract = true;
+        if (!_fieldInteractableDict.ContainsKey(other.gameObject))
         {
-            CanInteract = true;
-            if (!_fieldInteractableDict.ContainsKey(other.gameObject))
-            {
-                var fieldInteractable = other.GetComponent<IFieldInteractable>();
-                _fieldInteractableDict[other.gameObject] = fieldInteractable;
-            }
-            GetNearestFieldInteractable(); //가장 가까운 상호작용 오브젝트 
-            CurrentFieldInteractable.PlayerGetFieldInteractInfo(this);
+            var fieldInteractable = other.GetComponent<IFieldInteractable>();
+            _fieldInteractableDict[other.gameObject] = fieldInteractable;
         }
+        GetNearestFieldInteractable(); //가장 가까운 상호작용 오브젝트 
+        CurrentFieldInteractable.PlayerGetFieldInteractInfo(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -90,7 +89,7 @@ public class PlayerInteract : MonoBehaviour
         OnScrollItemPickup?.Invoke(_currentFieldInteractIdx);
     }
     
-    public void GetFieldItemData(ItemInstance itemInstance, Vector3 pos) //ScreenPos관련 수정필요
+    public void GetFieldItemData(ItemInstance itemInstance, Vector3 pos)
     { 
         _currentFieldInteractList = _inventoryManager.CheckFieldItemPickup(itemInstance);
         _currentFieldInteractIdx = 0;

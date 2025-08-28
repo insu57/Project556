@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Item;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -134,10 +135,10 @@ namespace UI
         private void OnDisable()
         {
             //ItemContextMenu
-            itemContextInfo.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Info));
-            itemContextUse.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Use));
-            itemContextEquip.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Equip));
-            itemContextDrop.onClick.RemoveListener(() => OnItemContextMenu(ItemContextType.Drop));
+            itemContextInfo.onClick.RemoveAllListeners();
+            itemContextUse.onClick.RemoveAllListeners();
+            itemContextEquip.onClick.RemoveAllListeners();
+            itemContextDrop.onClick.RemoveAllListeners();
             
             //ItemInfoMenu
             itemInfoCloseBtn.onClick.RemoveListener(CloseItemInfo);

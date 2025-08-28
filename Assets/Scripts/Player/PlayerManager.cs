@@ -418,17 +418,17 @@ namespace Player
             }
         }
       
-        private void FieldInteract()
+        private void FieldInteract() //필드 상호작용
         {
             if(!_playerInteract.CanInteract) return;
 
-            var (isAvailable, interactType) = _playerInteract.CurrentFieldInteract;
+            var (isAvailable, interactType) = _playerInteract.CurrentFieldInteract; //현재 상호작용 타입
         
             if (!isAvailable) return;
 
             var currentFieldItem = _playerInteract.CurrentFieldItem;
             var currentLootInventory = _playerInteract.CurrentLootInventory;
-            var currentFieldInteractable = _playerInteract.CurrentFieldInteractable;
+            var currentFieldInteractable = _playerInteract.CurrentFieldInteractable; //현재 상호작용 중인 오브젝트(Interactable)
             
             switch (interactType)
             {
@@ -443,14 +443,14 @@ namespace Player
                 case InteractType.Use: //사용
                     if (currentFieldItem?.ItemData is IConsumableItem consumableItem) //소비아이템 이면
                     {
-                        HandleOnUseItem(consumableItem);
+                        HandleOnUseItem(consumableItem); //사용
                     }
                     break;
                 case InteractType.Open: //상자 열기
                     if(!currentLootInventory) return;
                     var crate = currentFieldInteractable as LootCrate;
                     var crateName = crate?.CrateName;
-                    _inventoryManager.SetLootInventory(currentLootInventory, crateName);
+                    _inventoryManager.SetLootInventory(currentLootInventory, crateName); //루팅 인벤토리 열기
                     _playerControl.OnOpenCrate();
                     break;
                 default:
@@ -458,14 +458,11 @@ namespace Player
                     break;
             }
 
+            //상호작용 나가기(비활성)
             if (currentFieldInteractable is ItemPickUp itemPickUp)
             {
                 _playerInteract.RemoveFieldInteractable(itemPickUp.gameObject);
                 ObjectPoolingManager.Instance.ReleaseItemPickUp(itemPickUp);
-            }
-            else if (currentFieldInteractable is LootCrate lootCrate)
-            {
-                _playerInteract.RemoveFieldInteractable(lootCrate.gameObject);
             }
         }
     }
