@@ -15,6 +15,7 @@ namespace Player
       public float SprintSpeedMultiplier { set; get; } //달리기 배수
       public float JumpForce { set; get; }  //점프 운동량  
       //PlayerData에서 할당(개선 필요)
+      [SerializeField, Range(0f, 1f)] private float airDragMultiplier = 0.95f;
    
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;
@@ -54,6 +55,7 @@ namespace Player
       private bool _isGrounded = false; //ground위 인지 체크
       private bool _canClimb = false; //Climb 가능 여부
       private bool _canRotateArm = true; //팔 회전 여부
+      private bool _inJumping = false;
       
       private UIControl _uiControl;
       
@@ -181,7 +183,6 @@ namespace Player
             direction = mousePos - leftArm.transform.position;
             Debug.DrawRay(leftArm.transform.position, direction, Color.red);
          }
- 
       
          float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg; //팔 - 마우스 각도 계산
 
@@ -231,7 +232,6 @@ namespace Player
             //SPUM캐릭터에서 scale.-x로 Flip시킨 것을 디폴트로 만듦. -> 그래서 캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준
             //조작하는 방향대로 설정과 기존 캐릭터를 기준으로...
          }
-      
       }
    
       private bool ColliderCheck() //플레이어 Ground 체크
@@ -256,10 +256,6 @@ namespace Player
          if(isGrounded && !_isGrounded && _playerMoveVector.x != 0) OnPlayerMove?.Invoke(true); //착지 시 전환
          
          _isGrounded = isGrounded;
-         if (_isGrounded) //Ground라면
-         {
-            _rigidbody.linearVelocityX = _playerMoveVector.x * _currentMoveSpeed; //rigidbody기반 이동
-         }
          
          if (_canClimb)
          {
@@ -270,6 +266,22 @@ namespace Player
          else
          {
             _rigidbody.gravityScale = 1;
+            
+            if (_isGrounded) //Ground라면
+            {
+               if (_rigidbody.linearVelocityY <= 0f) //착지 시(양수라면 점프하는 순간)
+               {
+                  _inJumping =  false; //점프 끝
+               }
+               _rigidbody.linearVelocityX = _playerMoveVector.x * _currentMoveSpeed; //rigidbody기반 이동
+            }
+            else
+            {
+               if (!_inJumping) //점프가 아닐 때(추락 중)
+               {
+                  _rigidbody.linearVelocityX *= airDragMultiplier; //공중 속도 감소
+               }
+            }
          }
       }
 
@@ -440,6 +452,7 @@ namespace Player
          if (ctx.performed && _isGrounded) //땅에 있을 때
          {
             _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse); //Rigidbody기반
+            _inJumping =  true;
          }
       }
 
