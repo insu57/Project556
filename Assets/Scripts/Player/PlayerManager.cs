@@ -46,13 +46,13 @@ namespace Player
             TryGetComponent(out _playerWeapon);
             TryGetComponent(out _playerInteract);
             var stageManager = FindAnyObjectByType<StageManager>();
-            _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점???
+            _inventoryManager = FindFirstObjectByType<InventoryManager>(); //개선점?
             
             _playerControl.MoveSpeed = _playerData.MoveSpeed;
             _playerControl.SprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
             _playerControl.JumpForce = _playerData.JumpForce; //개선?
             
-            //SMB Init
+            //애니메이션별 SMB Init
             var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
             reloadAnimationBehaviour.Init(_playerControl, this);
             var sprintAnimationBehaviours =  
@@ -465,5 +465,12 @@ namespace Player
                 ObjectPoolingManager.Instance.ReleaseItemPickUp(itemPickUp);
             }
         }
+
+        public bool PlayerIsFlipped() //시야각, 시야거리 변환 시 manager -> Control -> FOV
+        {
+            return _playerControl.IsFlipped;
+        }
+
+       
     }
 }

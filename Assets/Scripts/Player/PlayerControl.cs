@@ -16,12 +16,14 @@ namespace Player
       public float JumpForce { set; get; }  //점프 운동량  
       //PlayerData에서 할당(개선 필요)
       [SerializeField, Range(0f, 1f)] private float airDragMultiplier = 0.95f;
-   
+
+      [SerializeField] private GameObject playerSprite;
+      [SerializeField] private Transform eyesPos;
       [SerializeField] private GameObject rightArm;
       [SerializeField] private GameObject leftArm;
       private Vector3 _baseRArmPosition;
-      private float _shootAngle;
-      
+      public float ShootAngle { private set; get; }
+
       private PlayerInput _playerInput; 
       private InputAction _moveAction; //플레이어 InputAction...   개선방안?
       private InputAction _sprintAction;
@@ -51,7 +53,8 @@ namespace Player
       public bool InShooting { set; get; } //사격 중 인지
       private bool _inReloading; //장전 중 인지
       private bool _canShoot  = true; //사격 가능 여부
-      private bool _isFlipped = false; //플레이어 스프라이트 flip여부
+      public bool IsFlipped { private set; get; }
+      //플레이어 스프라이트 flip여부
       private bool _isGrounded = false; //ground위 인지 체크
       private bool _canClimb = false; //Climb 가능 여부
       private bool _canRotateArm = true; //팔 회전 여부
@@ -68,8 +71,9 @@ namespace Player
       public event Action<QuickSlotIdx> OnQuickSlotAction; //퀵슬롯 사용(퀵슬롯 인덱스)
       public event Action<bool, float> OnShootAction; //사격 이벤트 (isFlipped, shootAngle)
       public event Action<int, bool, float> OnBurstShootAction; //점사 이벤트 (burstCount, isFlipped, shootAngle)
-      public event Action OnReloadEndAction;
-      public event Action OnToggleFireModeAction;
+      public event Action OnReloadEndAction; //장전 끝
+      public event Action OnToggleFireModeAction; //사격방식 변경
+      public event Action<bool> OnPlayerFlip; //isFlipped 
       
       private void Awake()
       {
@@ -93,6 +97,9 @@ namespace Player
          
          _uiControl = FindAnyObjectByType<UIControl>(); //UIControl
          _uiControl.Init(this); //초기화
+         
+         var fov = GetComponentInChildren<FieldOfView>();
+         fov.Init(this);
       }
 
       private void Start()
@@ -163,16 +170,35 @@ namespace Player
          PlayerMovement(); //플레이어 이동(Rigidbody 기반)
       }
       
-      private void RotateArm() 
+      private void RotateArm()
       {
-         if(IsUnarmed) return;//비무장 제한...
+         float angle;
+         Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
+         mousePos.z = 0;
+         Vector2 direction; //방향 계산
+         
+         if(IsUnarmed) //수정중
+         {
+            direction = mousePos - eyesPos.position;
+            angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            if (IsFlipped) //좌측 flip에 맞게 계산
+            {
+               if (angle > 0) //각도 부호에 따라
+               {
+                  angle = 180 - angle;
+               }
+               else
+               {
+                  angle = -180 - angle;
+               }
+            }
+            angle = Mathf.Clamp(angle, -60f, 60f);//시야 각도(기본 각도 + 아이템 등 효과)로 수정 필요
+            ShootAngle =  angle;
+            return;//비무장 제한...
+         }
          //장전 등 행동에서는 안움직여야한다.
          if (!_canRotateArm) return; //팔 이동 제한 체크
          
-         Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition); //마우스위치
-         mousePos.z = 0;
-
-         Vector2 direction; //방향 계산
          if (IsOneHanded)
          {
             direction = mousePos - rightArm.transform.position; //마우스 - 팔 벡터 
@@ -184,9 +210,9 @@ namespace Player
             Debug.DrawRay(leftArm.transform.position, direction, Color.red);
          }
       
-         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg; //팔 - 마우스 각도 계산
+         angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg; //팔 - 마우스 각도 계산
 
-         if (_isFlipped) //좌측 flip에 맞게 계산
+         if (IsFlipped) //좌측 flip에 맞게 계산
          {
             if (angle > 0) //각도 부호에 따라
             {
@@ -202,13 +228,13 @@ namespace Player
          {
             angle = Mathf.Clamp(angle, -60f, 60f); //각도제한
       
-            _shootAngle = angle; //발사 각도 할당
+            ShootAngle = angle; //발사 각도 할당
             rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);//팔 각도 할당
          }
          else //TwoHanded
          {
             angle = Mathf.Clamp(angle, -40f, 40f); //각도 제한  85f center -125~-45
-            _shootAngle = angle;
+            ShootAngle = angle;
          
             float t = Mathf.InverseLerp(-40f, 40f, -angle); //현재 조준각도의 보간치 
             float targetAngle = Mathf.Lerp(-90, 70, t); //조준각도의 보간치에 맞추어 RightArm 회전보간
@@ -229,8 +255,7 @@ namespace Player
          
             rightArm.transform.localRotation = Quaternion.Euler(0, 0, targetAngle); //팔 각도 회전
             leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle - 85f);   
-            //SPUM캐릭터에서 scale.-x로 Flip시킨 것을 디폴트로 만듦. -> 그래서 캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준
-            //조작하는 방향대로 설정과 기존 캐릭터를 기준으로...
+            //캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준(SPUM 에셋 이슈)
          }
       }
    
@@ -354,8 +379,10 @@ namespace Player
       {
          _playerMoveVector = context.ReadValue<Vector2>();//Vector2 wasd 
       
-         Vector3 playerScale = transform.localScale; //플레이어 방향
-      
+         //전체 x 스프라이트만
+         
+         Vector3 playerScale = playerSprite.transform.localScale;
+         
          if (_playerMoveVector.x == 0 ) //x축 이동입력이 없을 때
          {
             OnPlayerMove?.Invoke(false); 
@@ -364,8 +391,13 @@ namespace Player
          {
             playerScale.x = Mathf.Abs(playerScale.x) * Mathf.Sign(_playerMoveVector.x); //이동키에 따라 방향전환
             //입력에 따라 flip결정
-            _isFlipped = _playerMoveVector.x < 0; //왼쪽입력 시 Flip
-            transform.localScale = playerScale;
+            bool currentPlayerFlipped = _playerMoveVector.x < 0;
+            if (currentPlayerFlipped != IsFlipped)
+            {
+               OnPlayerFlip?.Invoke(currentPlayerFlipped); //flip상태 변경
+            }
+            IsFlipped = currentPlayerFlipped;
+            playerSprite.transform.localScale = playerScale;
             OnPlayerMove?.Invoke(true);
          }
       }
@@ -402,7 +434,7 @@ namespace Player
             {
                if (ctx.started)
                {
-                  OnShootAction?.Invoke(_isFlipped, _shootAngle); //사격 이벤트
+                  OnShootAction?.Invoke(IsFlipped, ShootAngle); //사격 이벤트
                }
                break;
             }
@@ -418,7 +450,7 @@ namespace Player
                
                if (ctx.started)
                {
-                  OnBurstShootAction?.Invoke(burstCount, _isFlipped, _shootAngle); //점사 이벤트(발사모드 따라)
+                  OnBurstShootAction?.Invoke(burstCount, IsFlipped, ShootAngle); //점사 이벤트(발사모드 따라)
                }
                break;
             }
@@ -444,7 +476,7 @@ namespace Player
          if(CurrentFireMode != FireMode.FullAuto) return;  //단발인 경우 return
          if(!_canShoot) return; //사격 불가 시 return
          if(!InShooting) return; //사격 중 인지 check
-         OnShootAction?.Invoke(_isFlipped, _shootAngle);
+         OnShootAction?.Invoke(IsFlipped, ShootAngle);
       }
    
       private void OnJump(InputAction.CallbackContext ctx) //점프입력 Space키
