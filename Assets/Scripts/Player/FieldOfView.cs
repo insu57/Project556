@@ -30,8 +30,6 @@ public class FieldOfView : MonoBehaviour
         float angleOffset = _playerControl.IsFlipped ? -1 * fov / 2f : fov / 2f;
         float angle = _playerControl.ShootAngle + angleOffset; //사격 각도를 중심으로
         
-        
-        Debug.Log("Angle: " + angle);
         float angleIncrease = fov / rayCount; //Ray간의 각도 차이(증분)
         if (_playerControl.IsFlipped) angleIncrease *= -1;
 

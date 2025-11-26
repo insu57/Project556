@@ -177,7 +177,7 @@ namespace Player
          mousePos.z = 0;
          Vector2 direction; //방향 계산
          
-         if(IsUnarmed) //수정중
+         if(IsUnarmed)
          {
             direction = mousePos - eyesPos.position;
             angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;

@@ -21,9 +21,9 @@ TagManager:
   - Climbing
   - Bullet
   - Interactable
-  - 
-  - 
-  - 
+  - FOV
+  - Enemy
+  - FogOfWar
   - 
   - 
   - 
@@ -73,6 +73,9 @@ TagManager:
     locked: 0
   - name: Effect
     uniqueID: 2584171807
+    locked: 0
+  - name: Darkness
+    uniqueID: 3282969439
     locked: 0
   - name: UI
     uniqueID: 122633459
