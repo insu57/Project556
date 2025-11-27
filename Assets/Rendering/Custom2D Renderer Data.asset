@@ -1,47 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-5683151491962182801
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: RenderObjects
-  m_EditorClassIdentifier: 
-  m_Active: 0
-  settings:
-    passTag: RenderObjects
-    Event: 1000
-    filterSettings:
-      RenderQueueType: 1
-      LayerMask:
-        serializedVersion: 2
-        m_Bits: 4096
-      PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: d56f0fb440cf764468bb21d685fc9c9a, type: 2}
-    overrideMaterialPassIndex: 0
-    overrideShader: {fileID: 0}
-    overrideShaderPassIndex: 0
-    overrideMode: 1
-    overrideDepthState: 1
-    depthCompareFunction: 8
-    enableWrite: 0
-    stencilSettings:
-      overrideStencilState: 0
-      stencilReference: 0
-      stencilCompareFunction: 8
-      passOperation: 0
-      failOperation: 0
-      zFailOperation: 0
-    cameraSettings:
-      overrideCamera: 1
-      restoreCamera: 0
-      offset: {x: 0, y: 0, z: 0, w: 0}
-      cameraFieldOfView: 60
 --- !u!114 &-1447081167519089498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,7 +22,7 @@ MonoBehaviour:
         serializedVersion: 2
         m_Bits: 4096
       PassNames: []
-    overrideMaterial: {fileID: 2100000, guid: 9132bc44cc283b742a21939179270782, type: 2}
+    overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0
     overrideShader: {fileID: 0}
     overrideShaderPassIndex: 0
@@ -112,8 +70,7 @@ MonoBehaviour:
   - {fileID: 3193596767035260851}
   - {fileID: 3025015240891304508}
   - {fileID: -1447081167519089498}
-  - {fileID: -5683151491962182801}
-  m_RendererFeatureMap: b3fff8d656ef512c3c0a78995503fb29a6fcdd5858efeaeb6fe3dc24d46321b1
+  m_RendererFeatureMap: b3fff8d656ef512c3c0a78995503fb29a6fcdd5858efeaeb
   m_UseNativeRenderPass: 0
   m_LayerMask:
     serializedVersion: 2
@@ -154,12 +111,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
-  m_Name: Draw Enemies
+  m_Name: Draw Enemies and Items
   m_EditorClassIdentifier: 
   m_Active: 0
   settings:
-    passTag: Draw Enemies
-    Event: 1000
+    passTag: Draw Enemies and Items
+    Event: 500
     filterSettings:
       RenderQueueType: 1
       LayerMask:
@@ -198,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: Write Stencil FOV
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: Write Stencil FOV
     Event: 500
@@ -206,7 +163,7 @@ MonoBehaviour:
       RenderQueueType: 1
       LayerMask:
         serializedVersion: 2
-        m_Bits: 1536
+        m_Bits: 1024
       PassNames: []
     overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0

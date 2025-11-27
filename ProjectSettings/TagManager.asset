@@ -59,6 +59,9 @@ TagManager:
   - name: Crate
     uniqueID: 483321899
     locked: 0
+  - name: FOV
+    uniqueID: 1940932349
+    locked: 0
   - name: Character
     uniqueID: 3624751437
     locked: 0
@@ -67,9 +70,6 @@ TagManager:
     locked: 0
   - name: Item
     uniqueID: 665260857
-    locked: 0
-  - name: FOV
-    uniqueID: 1940932349
     locked: 0
   - name: Effect
     uniqueID: 2584171807
