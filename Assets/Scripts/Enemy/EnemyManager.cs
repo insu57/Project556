@@ -1,12 +1,14 @@
 using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. 구현예정
 {
     [SerializeField] private EnemyData enemyData; 
     [ShowInInspector] private float _currentHealth;
     private SpriteRenderer _spriteRenderer;
+    [SerializeField] private Material stencilHideMaterial;
     
     private EnemyState _currentState;
     
@@ -24,6 +26,13 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
         _currentHealth = enemyData.HealthAmount;
 
         _currentState = EnemyState.Idle;
+        
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>();
+
+        foreach (SpriteRenderer render in renderers)
+        {
+            render.material = stencilHideMaterial; //StencilHide Material로 교체(FOV 안에서만 Render)
+        }
     }
     
     //적 캐릭터 구현
