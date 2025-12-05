@@ -5448,6 +5448,7 @@ GameObject:
   - component: {fileID: 7938411964199958187}
   - component: {fileID: 2982781479168885572}
   - component: {fileID: 1537661837767053156}
+  - component: {fileID: 1714600084225206498}
   m_Layer: 12
   m_Name: Fog
   m_TagString: Untagged
@@ -5537,6 +5538,18 @@ SortingGroup:
   m_SortingLayer: 10
   m_SortingOrder: 0
   m_SortAtRoot: 0
+--- !u!114 &1714600084225206498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7426178113472641330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66bde896b62f9524097933261d80455a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7465807752408237268
 GameObject:
   m_ObjectHideFlags: 0

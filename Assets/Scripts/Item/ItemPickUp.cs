@@ -8,6 +8,7 @@ public class ItemPickUp : MonoBehaviour, IFieldInteractable //오브젝트 풀�
     private ItemInstance _itemInstance;
     private SpriteRenderer _spriteRenderer;
     private BoxCollider2D _collider;
+    [SerializeField] private Material stencilHideMaterial;
 
     public void Init(ItemInstance item) //StageManager(맵 초기화), 아이템 드랍 등 -> Init)
     {
@@ -19,6 +20,7 @@ public class ItemPickUp : MonoBehaviour, IFieldInteractable //오브젝트 풀�
     private void Awake()
     {
         TryGetComponent(out _spriteRenderer);
+        _spriteRenderer.material = stencilHideMaterial;
         TryGetComponent(out _collider);
     }
     private void Start()
