@@ -16,6 +16,11 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
     [SerializeField] private LayerMask playerLayerMask;
     [SerializeField] private LayerMask obstacleLayerMask;
     
+    private bool _isFlipped = false;
+    private bool _playerDetected = false;
+    private bool _playerInSight = false;
+    private Transform _target;
+    
     private EnemyState _currentState;
 
     private enum EnemyState
@@ -82,27 +87,46 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
     private void TargetFind()
     {
         //
+        _playerDetected = false;
+        _playerInSight = false;
+        _target = null;
         
-        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, detectRadius, playerLayerMask);
+        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, viewDistance, playerLayerMask);
+        //시야 범위 만큼
         
-        //Target(Player)
-        if (targetInRadius)
+        if (targetInRadius) //감지 시
         {
             Transform target = targetInRadius.transform;
-            Vector3 dirToTarget = (target.position - transform.position).normalized;
-            float distanceToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
+            Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
+            float distToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
             //
-            if (distanceToTarget < detectRadius)
+            if (distToTarget < detectRadius) //감지 범위 이내
             {
                 //감지 범위 내부 -> 소리 감지로 수정 예정
+                //State 변경
+                _playerDetected = true;
+                _target = target;
             }
-            
+
+            Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
+
+            if (Vector2.Angle(facingDir, dirToTarget) < viewAngle / 2) //각도 이내
+            {
+                if (!Physics2D.Raycast(transform.position, dirToTarget, 
+                        distToTarget, obstacleLayerMask))
+                {
+                    Debug.Log("Detected");
+                    _playerInSight = true;
+                    _target = target;
+                }
+            }
+
             //감지 시야 -> Flip여부 확인 필요...
         }
         
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmos() //감지범위, 시야 표시
     {
         //감지 거리 -> 소리감지??(플레이어 걷기, 달리기, 사격 등 소음 발생, 소음마다 거리가 다름. 그 소리가 감지 범위 내라면 경계? 위치로 이동)
         //시야 감지 -> 사격
@@ -113,7 +137,32 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
         //공격(발견)
         
         //현재 감지 범위 ( 추후 소리 감지 범위로)
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, detectRadius);
+        
+        //시야 범위
+        Gizmos.color = Color.yellow;
+        Vector3 viewAngleVectorMin = AngleToDirection(-viewAngle / 2);
+        Vector3 viewAngleVectorMax = AngleToDirection(viewAngle / 2);
+        Vector3 viewAngleVectorMid = (viewAngleVectorMin + viewAngleVectorMax).normalized;
+        
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMax * viewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMin * viewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMid * viewDistance);
+
+        if (_playerDetected || _playerInSight)
+        {
+            Gizmos.color = Color.red;
+            if (_target)
+            {
+                Gizmos.DrawLine(transform.position, _target.position);
+            }
+        }
+    }
+
+    private Vector3 AngleToDirection(float angle)
+    {
+        //
+        return new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle *  Mathf.Deg2Rad));
     }
 }

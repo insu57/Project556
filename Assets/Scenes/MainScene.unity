@@ -6133,6 +6133,7 @@ MonoBehaviour:
   enemyData: {fileID: 11400000, guid: f84792134c3e1974a95a9f80774db5ae, type: 2}
   stencilHideMaterial: {fileID: 2100000, guid: 7c5851c0833761d48b2c5ee3ec935533, type: 2}
   detectRadius: 2
+  viewDistance: 4
   viewAngle: 90
   playerLayerMask:
     serializedVersion: 2
@@ -8243,6 +8244,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1081139435986190978, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
+      propertyPath: playerLayerMask.m_Bits
+      value: 8192
+      objectReference: {fileID: 0}
+    - target: {fileID: 1081139435986190978, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
+      propertyPath: obstacleLayerMask.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
     - target: {fileID: 4061260090561290789, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
       propertyPath: m_Mass
       value: 1000
