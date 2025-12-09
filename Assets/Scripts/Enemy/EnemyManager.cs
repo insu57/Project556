@@ -21,8 +21,11 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
     private bool _playerInSight = false;
     private Transform _target;
     
-    private EnemyState _currentState;
-
+    //private EnemyState _currentState;
+    private EnemyBaseState _currentState;
+    private EnemyIdleState _idleState;
+    private EnemyChaseState _chaseState;
+    
     private enum EnemyState
     {
         Idle,
@@ -39,15 +42,22 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
         {
             render.material = stencilHideMaterial; //StencilHide Material로 교체(FOV 안에서만 Render)
         }
+
+        _idleState = new EnemyIdleState(this);
+        _chaseState = new EnemyChaseState(this);
     }
 
     private void Start()
     {
         _currentHealth = enemyData.HealthAmount;
 
-        _currentState = EnemyState.Idle;
+        ChangeState(_idleState);
     }
 
+    private void Update()
+    {
+        _currentState.UpdateState();   
+    }
 
     private void FixedUpdate()
     {
@@ -60,18 +70,14 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
     //3. 맵 배치, 적 시체 아이템 루팅
     
     //적-플레이어 충돌 시...? 개선필요
-    private void EnterState(EnemyState newState)
-    {
-        ExitState();
-        _currentState = newState;
-        //현재 State 변경
-    }
-    
-    //현재 State 처리..?
 
-    private void ExitState()
+    private void ChangeState(EnemyBaseState newState)
     {
-        //현재 State를 벗어 날 때
+        _currentState?.ExitState();
+        
+        _currentState = newState;
+        
+        _currentState?.EnterState();
     }
     
     
@@ -115,7 +121,7 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
                 if (!Physics2D.Raycast(transform.position, dirToTarget, 
                         distToTarget, obstacleLayerMask))
                 {
-                    Debug.Log("Detected");
+                    //Debug.Log("Detected");
                     _playerInSight = true;
                     _target = target;
                 }
