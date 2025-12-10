@@ -1,13 +1,15 @@
+using Player;
 using UnityEngine;
 
 public class EnemyChaseState : EnemyBaseState
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public EnemyChaseState(EnemyManager enemyManager) : base(enemyManager) { }
+    public EnemyChaseState(EnemyManager enemyManager, HumanAnimation animation) : base(enemyManager, animation) { }
 
+    //타겟으로 이동...
+    
     public override void EnterState()
     {
-        
+        Debug.Log("Entering ChaseState");
     }
 
     public override void ExitState()

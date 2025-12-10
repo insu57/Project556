@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a45b0ce3f01a934b9ddbebf8ea6757e, type: 3}
-  m_Name: 12Gauge Buckshot
+  m_Name: 556NATO M855
   m_EditorClassIdentifier: 
-  ammoCaliber: 11
-  ammoCategory: 2
-  itemID: ammo_12g_01
-  itemName: Buckshot 12Gauge
-  itemSprite: {fileID: 5708895028770762888, guid: 7af738695de31224eab760d4a7972662, type: 3}
+  ammoCaliber: 0
+  ammoCategory: 1
+  itemID: ammo_556x45_01
+  itemName: 'M855 5.56x45mm '
+  itemSprite: {fileID: -8238214526966065350, guid: b722f89953a25d54aa1f0b9cce48199b, type: 3}
   itemWidth: 1
   itemHeight: 1
   itemWeight: 0
-  maxStackAmount: 40
-  ammoDamage: 5
-  ammoPiercing: 5
-  projectileSpeed: 10
-  isBuckshot: 1
-  pelletCount: 8
+  maxStackAmount: 60
+  ammoDamage: 20
+  ammoPiercing: 30
+  projectileSpeed: 15
+  isBuckshot: 0
+  pelletCount: 1

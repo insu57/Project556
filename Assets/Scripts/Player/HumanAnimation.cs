@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public static class PlayerAnimatorHash //애니메이션 Hash
+    public static class HumanAnimatorHash //애니메이션 Hash
     {
         public static readonly int Idle = Animator.StringToHash("IDLE");
         public static readonly int IsMove = Animator.StringToHash("isMove");
@@ -14,7 +14,7 @@ namespace Player
         public static readonly int Reload  = Animator.StringToHash("Reload");
     }
 
-    public class PlayerAnimation : MonoBehaviour
+    public class HumanAnimation : MonoBehaviour
     {
         [SerializeField] private Animator upperAnimator;
         [SerializeField] private Animator lowerAnimator; 
@@ -36,26 +36,26 @@ namespace Player
         
         public void ChangeAnimationMove(bool isMove) //move animation transition
         {
-            upperAnimator.SetBool(PlayerAnimatorHash.IsMove, isMove);
-            lowerAnimator.SetBool(PlayerAnimatorHash.IsMove, isMove);
+            upperAnimator.SetBool(HumanAnimatorHash.IsMove, isMove);
+            lowerAnimator.SetBool(HumanAnimatorHash.IsMove, isMove);
         }
 
         public void ChangeAnimationSprint(bool isSprint) //sprint animation transition 개선?
         {
-            upperAnimator.SetBool(PlayerAnimatorHash.IsSprint, isSprint);
-            lowerAnimator.SetBool(PlayerAnimatorHash.IsSprint, isSprint);
+            upperAnimator.SetBool(HumanAnimatorHash.IsSprint, isSprint);
+            lowerAnimator.SetBool(HumanAnimatorHash.IsSprint, isSprint);
         }
 
         public void ChangeAnimationReload() //Reload Trigger
         {
-            upperAnimator.SetTrigger(PlayerAnimatorHash.Reload);
+            upperAnimator.SetTrigger(HumanAnimatorHash.Reload);
         }
 
         public void ChangeAnimationLoadAmmo(WeaponActionType type) //LoadAmmo Trigger(차탄 공급)
         {
             int id;
-            if(type is WeaponActionType.PumpAction) id = PlayerAnimatorHash.Pump; //액션타입에 따라 다른 애니메이션
-            else if (type is WeaponActionType.BoltAction) id = PlayerAnimatorHash.Bolt;
+            if(type is WeaponActionType.PumpAction) id = HumanAnimatorHash.Pump; //액션타입에 따라 다른 애니메이션
+            else if (type is WeaponActionType.BoltAction) id = HumanAnimatorHash.Bolt;
             else return;
             upperAnimator.SetTrigger(id);
         }

@@ -1,4 +1,5 @@
 using System;
+using Player;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -20,11 +21,28 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
     private bool _playerDetected = false;
     private bool _playerInSight = false;
     private Transform _target;
+
+    private HumanAnimation _enemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속)
     
     //private EnemyState _currentState;
+    //적 무장(EnemyWeapon) - 기본 적으로 탄 소지는 무한.(장탄은 무기따라). 탄의 종류(무기 탄종에서)는 적의 등급에 따라.
+    //아이템 드랍은 무작위로?(소지 무기, 탄 + 장비 + 기타 아이템)
+    //공격 - 적 유형에 따라...
+    private EnemyWeapon _enemyWeapon;
+    [SerializeField] private SpriteRenderer oneHandWeaponSprite;
+    [SerializeField] private SpriteRenderer twoHandWeaponSprite;
+    [SerializeField] private Transform oneHandMuzzleTransform;
+    [SerializeField] private Transform twoHandMuzzleTransform;
+    
+    [SerializeField] private WeaponData _testWeapon;
+    [SerializeField] private AmmoData _testAmmo;
+    //아이템 장착(플레이어 처럼)
+    
     private EnemyBaseState _currentState;
     private EnemyIdleState _idleState;
     private EnemyChaseState _chaseState;
+    
+    //적 유형 별 State 구현 필요(공격적인 적 유형 등)
     
     private enum EnemyState
     {
@@ -43,8 +61,11 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
             render.material = stencilHideMaterial; //StencilHide Material로 교체(FOV 안에서만 Render)
         }
 
-        _idleState = new EnemyIdleState(this);
-        _chaseState = new EnemyChaseState(this);
+        _idleState = new EnemyIdleState(this, _enemyAnimation);
+        _chaseState = new EnemyChaseState(this, _enemyAnimation);
+
+        TryGetComponent(out _enemyAnimation);
+        TryGetComponent(out _enemyWeapon);
     }
 
     private void Start()
@@ -90,7 +111,7 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
         }
     }
 
-    private void TargetFind()
+    private void TargetFind() //코루틴 수정? 반응 속도는 어떤 방식으로? 코루틴 딜레이?
     {
         //
         _playerDetected = false;
@@ -112,6 +133,9 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
                 //State 변경
                 _playerDetected = true;
                 _target = target;
+                
+                //temp
+                ChangeState(_chaseState);
             }
 
             Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
@@ -121,9 +145,11 @@ public class EnemyManager : MonoBehaviour, IDamageable //적 관리 매니저. �
                 if (!Physics2D.Raycast(transform.position, dirToTarget, 
                         distToTarget, obstacleLayerMask))
                 {
-                    //Debug.Log("Detected");
                     _playerInSight = true;
                     _target = target;
+                    
+                    //temp
+                    ChangeState(_chaseState);
                 }
             }
 

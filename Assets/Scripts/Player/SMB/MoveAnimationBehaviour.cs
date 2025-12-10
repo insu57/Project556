@@ -19,7 +19,7 @@ public class MoveAnimationBehaviour : StateMachineBehaviour //이동 애니메�
 
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if(animator.GetBool(PlayerAnimatorHash.IsSprint))  //달리기 배수 할당
+        if(animator.GetBool(HumanAnimatorHash.IsSprint))  //달리기 배수 할당
             _sprintSpeedMultiplier = _playerData.SprintSpeedMultiplier;
         else _sprintSpeedMultiplier = 1;
     }

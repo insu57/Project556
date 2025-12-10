@@ -19,7 +19,7 @@ namespace Player
     
         private PlayerData _playerData;
         private PlayerWeapon _playerWeapon;
-        private PlayerAnimation _playerAnimation;
+        private HumanAnimation _humanAnimation;
         private PlayerControl _playerControl;
         private PlayerInteract _playerInteract;
         private InventoryManager _inventoryManager;
@@ -41,7 +41,7 @@ namespace Player
         private void Awake()
         {
             TryGetComponent(out _playerData);
-            TryGetComponent(out _playerAnimation);
+            TryGetComponent(out _humanAnimation);
             TryGetComponent(out _playerControl);
             TryGetComponent(out _playerWeapon);
             TryGetComponent(out _playerInteract);
@@ -53,15 +53,15 @@ namespace Player
             _playerControl.JumpForce = _playerData.JumpForce; //개선?
             
             //애니메이션별 SMB Init
-            var reloadAnimationBehaviour = _playerAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
+            var reloadAnimationBehaviour = _humanAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
             reloadAnimationBehaviour.Init(_playerControl, this);
             var sprintAnimationBehaviours =  
-                _playerAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
+                _humanAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
             foreach (var behaviour in sprintAnimationBehaviours)
             {
                 behaviour.Init(this, _playerData, stageManager);
             }
-            var loadAmmoAnimationBehaviours = _playerAnimation.UpperAnimator.GetBehaviours<LoadAmmoAnimationBehaviour>();
+            var loadAmmoAnimationBehaviours = _humanAnimation.UpperAnimator.GetBehaviours<LoadAmmoAnimationBehaviour>();
             foreach (var behaviour in loadAmmoAnimationBehaviours)
             {
                 behaviour.Init(this);
@@ -147,19 +147,19 @@ namespace Player
 
         private void HandleOnPlayerMoveAction(bool isMove) //이동 전환
         {
-            _playerAnimation.ChangeAnimationMove(isMove);
+            _humanAnimation.ChangeAnimationMove(isMove);
         }
 
         private void HandleOnPlayerSprintAction(bool isSprint) //달리기 전환
         {
             if (!_playerData.CanSprint) isSprint = false;
-            _playerAnimation.ChangeAnimationSprint(isSprint);
+            _humanAnimation.ChangeAnimationSprint(isSprint);
             _playerData.SprintStaminaSpend(isSprint);
         }
 
         private void HandleOnStaminaEmpty() //스태미나가 없을 때
         {
-            _playerAnimation.ChangeAnimationSprint(false);
+            _humanAnimation.ChangeAnimationSprint(false);
         }
         
         private void HandleOnPlayerReloadAction() //장전 시 애니메이션 재생
@@ -167,7 +167,7 @@ namespace Player
             if (_currentWeaponItem.IsFullyLoaded()) return;//탄창이 가득이면 장전하지않음
             if (!CheckHaveAmmo()) return; 
             //장탄이 있으면
-            _playerAnimation.ChangeAnimationReload();//장전 애니메이션 전환
+            _humanAnimation.ChangeAnimationReload();//장전 애니메이션 전환
             _playerControl.SetReloadState(true); //장전시 조작제한
         }
 
@@ -242,7 +242,7 @@ namespace Player
 
         private void HandleOnEndWeaponAction(WeaponActionType weaponActionType)
         {
-            _playerAnimation.ChangeAnimationLoadAmmo(weaponActionType);
+            _humanAnimation.ChangeAnimationLoadAmmo(weaponActionType);
         }
 
         private bool CheckHaveAmmo()
@@ -280,7 +280,7 @@ namespace Player
                 var needAmmo = _currentWeaponItem.NeedAmmo();
                 if (needAmmo > 0) //총알이 더 필요하다면 계속 장전
                 {
-                    _playerAnimation.ChangeAnimationReload();
+                    _humanAnimation.ChangeAnimationReload();
                 }
                 else
                 {
@@ -337,7 +337,7 @@ namespace Player
             if (weaponItem == null)
             {
                 _playerControl.IsUnarmed = true;
-                _playerAnimation.ChangeWeapon(WeaponType.Unarmed);
+                _humanAnimation.ChangeWeapon(WeaponType.Unarmed);
                 oneHandSprite.enabled = false;
                 twoHandSprite.enabled = false;
                 OnShowAmmoIndicator?.Invoke(false);
@@ -375,7 +375,7 @@ namespace Player
             muzzleFlashVFX.transform.localPosition = newWeaponData.MuzzleFlashOffset;
 
             _playerWeapon.ChangeWeaponData(newWeaponData, weaponItem.CurrentAmmoData); //변경
-            _playerAnimation.ChangeWeapon(weaponType); //애니메이션 변경
+            _humanAnimation.ChangeWeapon(weaponType); //애니메이션 변경
             OnShowAmmoIndicator?.Invoke(true);
             OnUpdateMagazineCountUI?.Invoke(_currentWeaponItem.IsFullyLoaded(), GetCurrentWeaponMagazineCount());
             OnToggleFireMode?.Invoke(_currentWeaponItem.AmmoCategory, _currentWeaponItem.CurrentFireMode);
