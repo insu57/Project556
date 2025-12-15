@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyChaseState : EnemyBaseState
 {
-    public EnemyChaseState(EnemyManager enemyManager, HumanAnimation animation) : base(enemyManager, animation) { }
+    public EnemyChaseState(EnemyBase enemy, HumanAnimation animation) : base(enemy, animation) { }
 
     //타겟으로 이동...
     

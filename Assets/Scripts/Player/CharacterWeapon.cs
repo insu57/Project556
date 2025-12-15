@@ -5,7 +5,7 @@ using UI;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class PlayerWeapon : MonoBehaviour
+public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 처리하지 않음)
 {
     private WeaponData _currentWeaponData;
     private Transform _muzzleTransform;
@@ -17,7 +17,7 @@ public class PlayerWeapon : MonoBehaviour
     private float _lastShotTime;
     
     public event Action OnShowMuzzleFlash;
-    public event Action<WeaponActionType> OnEndWeaponAction;
+    public event Action<WeaponActionType> OnEndWeaponLoadAction;
     
     public void ChangeWeaponData(WeaponData weaponData, AmmoData ammoData)
     {
@@ -73,7 +73,7 @@ public class PlayerWeapon : MonoBehaviour
 
         if (_currentWeaponData.WeaponActionType == WeaponActionType.PumpAction)
         {
-            OnEndWeaponAction?.Invoke(WeaponActionType.PumpAction);
+            OnEndWeaponLoadAction?.Invoke(WeaponActionType.PumpAction);
         }
         
         return true;

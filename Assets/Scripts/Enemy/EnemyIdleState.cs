@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyIdleState : EnemyBaseState
 {
-    public EnemyIdleState(EnemyManager enemyManager, HumanAnimation animation) : base(enemyManager, animation) { }
+    public EnemyIdleState(EnemyBase enemy, HumanAnimation animation) : base(enemy, animation) { }
 
     //기본 상태
     //추적 -> 기본은..?

@@ -18,7 +18,7 @@ namespace Player
         [SerializeField] private GameObject muzzleFlashVFX; //총구화염VFX
     
         private PlayerData _playerData;
-        private PlayerWeapon _playerWeapon;
+        private CharacterWeapon _playerWeapon;
         private HumanAnimation _humanAnimation;
         private PlayerControl _playerControl;
         private PlayerInteract _playerInteract;
@@ -90,7 +90,7 @@ namespace Player
                 
             //무기
             _playerWeapon.OnShowMuzzleFlash += HandleOnShowMuzzleFlash;
-            _playerWeapon.OnEndWeaponAction += HandleOnEndWeaponAction;
+            _playerWeapon.OnEndWeaponLoadAction += HandleOnEndWeaponLoadAction;
             
             //데이터
             _playerData.OnStaminaEmpty += HandleOnStaminaEmpty;
@@ -117,7 +117,7 @@ namespace Player
             _playerControl.OnToggleFireModeAction -= HandleOnToggleFireMode;
             
             _playerWeapon.OnShowMuzzleFlash -= HandleOnShowMuzzleFlash;
-            _playerWeapon.OnEndWeaponAction -= HandleOnEndWeaponAction;
+            _playerWeapon.OnEndWeaponLoadAction -= HandleOnEndWeaponLoadAction;
 
             _playerData.OnStaminaEmpty -= HandleOnStaminaEmpty;
             
@@ -240,7 +240,7 @@ namespace Player
             return -1;
         }
 
-        private void HandleOnEndWeaponAction(WeaponActionType weaponActionType)
+        private void HandleOnEndWeaponLoadAction(WeaponActionType weaponActionType)
         {
             _humanAnimation.ChangeAnimationLoadAmmo(weaponActionType);
         }

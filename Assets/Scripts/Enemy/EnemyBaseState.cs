@@ -3,13 +3,13 @@ using UnityEngine;
 
 public abstract class EnemyBaseState
 {
-   protected EnemyManager _enemyManager;
-   protected HumanAnimation _humanAnimation;//임시 -> Base로 수정예정
+   protected EnemyBase Enemy;
+   protected HumanAnimation HumanAnimation;//임시 -> Base로 수정예정
 
-   public EnemyBaseState(EnemyManager enemyManager, HumanAnimation animation)
+   protected EnemyBaseState(EnemyBase enemy, HumanAnimation animation)
    {
-      _enemyManager = enemyManager;
-      _humanAnimation = animation;
+      Enemy = enemy;
+      HumanAnimation = animation;
    }
    
    public virtual void EnterState(){}
