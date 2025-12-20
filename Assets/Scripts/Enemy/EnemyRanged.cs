@@ -16,6 +16,7 @@ public class EnemyRanged : EnemyBase
     //공격 - 적 유형에 따라...
     private CharacterWeapon _enemyWeapon;
     
+    [Header("WeaponSprite")] [Space]
     [SerializeField] private SpriteRenderer oneHandWeaponSprite;
     [SerializeField] private SpriteRenderer twoHandWeaponSprite;
     [SerializeField] private Transform oneHandMuzzleTransform;
@@ -44,9 +45,11 @@ public class EnemyRanged : EnemyBase
     private void SetWeapon()
     {
         _enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
-
+        
         var weaponData = _testWeapon;
         var weaponType = _testWeapon.WeaponType;
+        
+        EnemyAnimation.ChangeWeapon(weaponType);
 
         if (weaponType is WeaponType.Pistol) //한손
         {

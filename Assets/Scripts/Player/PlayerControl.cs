@@ -273,7 +273,7 @@ namespace Player
          return isGrounded;
       }
       
-      private void PlayerMovement() //플레이어 이동
+      private void PlayerMovement() //플레이어 이동 -> RigidBody기반이 아닌 다른 방식으로?(유니티 물리가 아닌 움직임)
       {
          var isGrounded = ColliderCheck();
          

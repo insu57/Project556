@@ -22,12 +22,12 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     //Enemy Move?
     protected bool _isFlipped = false; //
     
-    private HumanAnimation _enemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속)
+    protected HumanAnimation EnemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속)
     
     //State
-    protected EnemyBaseState _currentState;
-    protected EnemyIdleState _idleState;
-    protected EnemyChaseState _chaseState;
+    protected EnemyBaseState CurrentState;
+    protected EnemyIdleState IdleState;
+    protected EnemyChaseState ChaseState;
     //적 유형에 따라 다른 타겟 감지 시 반응
     //(근접 -> 타겟 추적, 원거리 -> 사정거리 안 까지 이동 후 타겟사격)
     //타겟을 놓치거나 방해 받으면?(수류탄 등으로) 
@@ -45,22 +45,22 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
             render.material = stencilHideMat; //StencilHide Material로 교체(FOV 안에서만 Render)
         }
 
-        _idleState = new EnemyIdleState(this, _enemyAnimation);
-        _chaseState = new EnemyChaseState(this, _enemyAnimation);
+        IdleState = new EnemyIdleState(this, EnemyAnimation);
+        ChaseState = new EnemyChaseState(this, EnemyAnimation);
 
-        TryGetComponent(out _enemyAnimation);
+        TryGetComponent(out EnemyAnimation);
     }
     
     protected virtual void Start()
     {
         currentHealth = enemyData.HealthAmount;
         
-        ChangeState(_idleState);
+        ChangeState(IdleState);
     }
 
     protected virtual void Update()
     {
-        _currentState.UpdateState();
+        CurrentState.UpdateState();
     }
     
     protected virtual void FixedUpdate()
@@ -70,11 +70,11 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     
     private void ChangeState(EnemyBaseState newState)
     {
-        _currentState?.ExitState();
+        CurrentState?.ExitState();
         
-        _currentState = newState;
+        CurrentState = newState;
         
-        _currentState?.EnterState();
+        CurrentState?.EnterState();
     }
 
     public void TakeDamage(float damage)
@@ -111,7 +111,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
                 _target = target;
                 
                 //temp
-                ChangeState(_chaseState);
+                ChangeState(ChaseState);
             }
 
             Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
@@ -125,7 +125,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
                     _target = target;
                     
                     //temp
-                    ChangeState(_chaseState);
+                    ChangeState(ChaseState);
                 }
             }
 
