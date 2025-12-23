@@ -11,7 +11,10 @@ public class EnemyIdleState : EnemyBaseState
     public override void EnterState()
     {
         //Animation Change...
-        //애니메이션 클래스 분리? 
+        //애니메이션 클래스 분리?
+        Debug.Log(Enemy.name);
+        
+        HumanAnimation.ChangeAnimationMove(false);//정지(Idle)
     }
 
     public override void ExitState()
@@ -19,7 +22,7 @@ public class EnemyIdleState : EnemyBaseState
         
     }
 
-    public override void UpdateState()
+    public override void UpdateState() //순찰(이동) or 경계(시야 움직임)
     {
         
     }

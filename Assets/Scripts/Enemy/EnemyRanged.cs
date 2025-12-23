@@ -74,6 +74,8 @@ public class EnemyRanged : EnemyBase
         muzzleFlashVFX.transform.localRotation = Quaternion.identity;
         muzzleFlashVFX.transform.localPosition = weaponData.MuzzleFlashOffset;
     }
+
+    
     
     //적 캐릭터 구현
     //1. FSM기반 AI (State, 그에 따른 애니메이션, 공격(근접, 총기))
