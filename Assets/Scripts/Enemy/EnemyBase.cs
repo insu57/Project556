@@ -12,11 +12,14 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     //Detect
     [SerializeField] protected LayerMask playerLayerMask;
     [SerializeField] protected LayerMask obstacleLayerMask;
-    [SerializeField] protected float detectRadius = 2f;
-    [SerializeField] protected float viewDistance = 4f;
-    [SerializeField] protected float viewAngle = 90f; //추후 Data에서
+    //[SerializeField] protected float detectRadius = 2f;
+    //[SerializeField] protected float viewDistance = 4f;
+    //[SerializeField] protected float viewAngle = 90f; //추후 Data에서
 
-    public float ViewDistance => viewDistance; //사정거리(시야)
+    public float DetectRadius { get; private set; }
+    public float ViewDistance { get; private set; }
+    public float ViewAngle { get; private set; }
+    public float ChaseRange { get; private set; }
 
     //감지거리, 시야거리, 사정거리 -> 구분 필요
     //이동과 사격은 별도...
@@ -28,7 +31,9 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     public bool TargetDetected => _playerDetected;
     public bool TargetInSight => _playerInSight;
     public Transform Target => _target;
+    public float TargetDist { private set; get; }
     //Enemy Move?
+    
     protected bool _isFlipped = false; //
     
     protected HumanAnimation EnemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속)
@@ -37,10 +42,13 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     protected EnemyBaseState CurrentState;
     protected EnemyIdleState IdleState;
     protected EnemyChaseState ChaseState;
-    protected EnemyAttackState AttackState;
+    //protected EnemyAttackState AttackState;
     //적 유형에 따라 다른 타겟 감지 시 반응
-    //(근접 -> 타겟 추적, 원거리 -> 사정거리 안 까지 이동 후 타겟사격)
-    //타겟을 놓치거나 방해 받으면?(수류탄 등으로) 
+    //(근접 -> 타겟 추적, 원거리 -> 추적거리 안 까지 이동 후 타겟사격) ChaseState(ChaseRange까지 이동) -> 사격(Attack)
+    //타겟을 놓치거나(시야 밖으로 이동, 방해물 가려지는 등 시야에서 사라질 시), 방해 받으면?(수류탄 등으로) 
+    
+    //감지 or 시야범위 이내 -> 추적(추적거리 이내까지 이동)이동하며 공격?(탄 전부 쓰면 장전) 이동/공격은 별도로! 
+    
     
     //Audio
     [SerializeField] protected AudioSource oneShotSource;
@@ -58,7 +66,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         TryGetComponent(out EnemyAnimation);
         IdleState = new EnemyIdleState(this, EnemyAnimation);
         ChaseState = new EnemyChaseState(this, EnemyAnimation);
-        AttackState = new EnemyAttackState(this, EnemyAnimation);
+        //AttackState = new EnemyAttackState(this, EnemyAnimation);
         
     }
     
@@ -67,6 +75,11 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         currentHealth = enemyData.HealthAmount;
         
         ChangeState(IdleState);
+
+        DetectRadius = enemyData.DetectRange;
+        ViewDistance = enemyData.ViewRange;
+        ViewAngle = enemyData.ViewAngle;
+        ChaseRange = enemyData.ChaseRange;
     }
 
     protected virtual void Update()
@@ -107,7 +120,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         _playerInSight = false;
         _target = null;
         
-        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, viewDistance, playerLayerMask);
+        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, ViewDistance, playerLayerMask);
         //시야 범위 만큼
         
         if (targetInRadius) //감지 시
@@ -116,7 +129,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
             Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
             float distToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
             //
-            if (distToTarget < detectRadius) //감지 범위 이내
+            if (distToTarget < DetectRadius) //감지 범위 이내
             {
                 //감지 범위 내부 -> 소리 감지로 수정 예정
                 //State 변경
@@ -129,7 +142,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
             Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
 
-            if (Vector2.Angle(facingDir, dirToTarget) < viewAngle / 2) //각도 이내
+            if (Vector2.Angle(facingDir, dirToTarget) < ViewAngle / 2) //각도 이내
             {
                 if (!Physics2D.Raycast(transform.position, dirToTarget, 
                         distToTarget, obstacleLayerMask))
@@ -141,8 +154,13 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
                     ChangeState(ChaseState);
                 }
             }
-
+    
             //감지 시야 -> Flip여부 확인 필요...
+
+            if (_playerDetected || _playerInSight)
+            {
+                TargetDist = Vector3.Distance(transform.position, target.position);
+            }
         }
         
     }
@@ -159,17 +177,17 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         
         //현재 감지 범위 ( 추후 소리 감지 범위로)
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, detectRadius);
+        Gizmos.DrawWireSphere(transform.position, DetectRadius);
         
         //시야 범위
         Gizmos.color = Color.yellow;
-        Vector3 viewAngleVectorMin = AngleToDirection(-viewAngle / 2);
-        Vector3 viewAngleVectorMax = AngleToDirection(viewAngle / 2);
+        Vector3 viewAngleVectorMin = AngleToDirection(-ViewAngle / 2);
+        Vector3 viewAngleVectorMax = AngleToDirection(ViewAngle / 2);
         Vector3 viewAngleVectorMid = (viewAngleVectorMin + viewAngleVectorMax).normalized;
         
-        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMax * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMin * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMid * viewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMax * ViewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMin * ViewDistance);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMid * ViewDistance);
 
         if (_playerDetected || _playerInSight)
         {
@@ -183,7 +201,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
     public void StartTargetAttack()
     {
-        ChangeState(AttackState);
+        //ChangeState(AttackState);
     }
     
     private Vector3 AngleToDirection(float angle)
