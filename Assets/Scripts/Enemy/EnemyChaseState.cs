@@ -10,8 +10,6 @@ public class EnemyChaseState : EnemyBaseState
     public override void EnterState()
     {
         Debug.Log("Entering ChaseState");
-
-        if (Enemy.TargetInSight) Enemy.StartTargetAttack();
     }
 
     public override void ExitState()
@@ -31,6 +29,14 @@ public class EnemyChaseState : EnemyBaseState
             //이동
             HumanAnimation.ChangeAnimationMove(true); //이동과 공격은 별도로 생각
             //MOVE 
+            
+            Enemy.StartChase(true);
+        }
+        else
+        {
+            //범위 이내
+            HumanAnimation.ChangeAnimationMove(false);
+            
         }
         
         

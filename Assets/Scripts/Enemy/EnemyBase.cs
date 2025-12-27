@@ -12,9 +12,6 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     //Detect
     [SerializeField] protected LayerMask playerLayerMask;
     [SerializeField] protected LayerMask obstacleLayerMask;
-    //[SerializeField] protected float detectRadius = 2f;
-    //[SerializeField] protected float viewDistance = 4f;
-    //[SerializeField] protected float viewAngle = 90f; //추후 Data에서
 
     public float DetectRadius { get; private set; }
     public float ViewDistance { get; private set; }
@@ -32,11 +29,13 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     public bool TargetInSight => _playerInSight;
     public Transform Target => _target;
     public float TargetDist { private set; get; }
+
+    protected EnemyMoveControl EnemyMoveControl;
     //Enemy Move?
     
     protected bool _isFlipped = false; //
     
-    protected HumanAnimation EnemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속)
+    protected HumanAnimation EnemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속) -> 공용으로 수정 필요.
     
     //State
     protected EnemyBaseState CurrentState;
@@ -67,7 +66,8 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         IdleState = new EnemyIdleState(this, EnemyAnimation);
         ChaseState = new EnemyChaseState(this, EnemyAnimation);
         //AttackState = new EnemyAttackState(this, EnemyAnimation);
-        
+
+        TryGetComponent(out EnemyMoveControl);
     }
     
     protected virtual void Start()
@@ -80,6 +80,8 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         ViewDistance = enemyData.ViewRange;
         ViewAngle = enemyData.ViewAngle;
         ChaseRange = enemyData.ChaseRange;
+
+        EnemyMoveControl.Init(enemyData.MoveSpeed);
     }
 
     protected virtual void Update()
@@ -199,9 +201,12 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         }
     }
 
-    public void StartTargetAttack()
+    public void StartChase(bool inChase)
     {
-        //ChangeState(AttackState);
+        float direction = Mathf.Sign(transform.position.x - _target.transform.position.x);
+            
+        
+        EnemyMoveControl.StartChase(inChase, direction);
     }
     
     private Vector3 AngleToDirection(float angle)

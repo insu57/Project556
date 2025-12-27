@@ -625,6 +625,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &352875649 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5655962136961108311, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
+  m_PrefabInstance: {fileID: 2709348082908635168}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &352875658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 352875649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc79b0080af904048bb0584a3ad74472, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &362328407
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6380,9 +6397,6 @@ MonoBehaviour:
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 2112
-  detectRadius: 2
-  viewDistance: 4
-  viewAngle: 90
   oneShotSource: {fileID: 0}
   loopSource: {fileID: 0}
 --- !u!1 &1391971668
@@ -7742,7 +7756,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4486083072825107886, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.257
+      value: -2.78
       objectReference: {fileID: 0}
     - target: {fileID: 4486083072825107886, guid: 005bb4c9cc3fa3042af9bf16f79a5b5a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -8217,7 +8231,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: a30e312e367d8174ba3e8dcd45195bca, type: 2}
     - target: {fileID: 4439949036778217235, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.83
+      value: 1.99
       objectReference: {fileID: 0}
     - target: {fileID: 4439949036778217235, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
       propertyPath: m_LocalPosition.y
@@ -8262,7 +8276,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5655962136961108311, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 352875658}
   m_SourcePrefab: {fileID: 100100000, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
 --- !u!1001 &7488213623800390835
 PrefabInstance:
@@ -8274,7 +8291,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 652634773148298, guid: a526c2553f1ba6b4a97f66256b510f12, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.951
+      value: -4.086
       objectReference: {fileID: 0}
     - target: {fileID: 1025073807919430028, guid: a526c2553f1ba6b4a97f66256b510f12, type: 3}
       propertyPath: m_Name
@@ -8286,7 +8303,7 @@ PrefabInstance:
       objectReference: {fileID: 1673622820}
     - target: {fileID: 2290890806576803790, guid: a526c2553f1ba6b4a97f66256b510f12, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.951
+      value: -4.086
       objectReference: {fileID: 0}
     - target: {fileID: 2860604810666965819, guid: a526c2553f1ba6b4a97f66256b510f12, type: 3}
       propertyPath: m_RendererIndex
