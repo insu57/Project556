@@ -4,9 +4,10 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class EnemyRanged : EnemyBase
+public class EnemyHumanRanged : EnemyBase
 {
     //적 - 원거리(기본 : 인간형 사격, 무한잔탄) / 근접(인간형, 괴물형)
+    //인간형, 적 -> 근거리, 원거리로?
     //공통 : FOV Hide 처리, 체력
     //분리필요 : 무기관련(사격)
     

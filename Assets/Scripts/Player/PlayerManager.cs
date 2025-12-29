@@ -9,7 +9,7 @@ using Object = System.Object;
 
 namespace Player
 {
-    public class PlayerManager : MonoBehaviour //개선필요(
+    public class PlayerManager : MonoBehaviour, IHumanType //개선필요(
     {
         [SerializeField] private SpriteRenderer oneHandSprite; //한손무기 Sprite
         [SerializeField] private Transform oneHandMuzzleTransform; //한손무기 Muzzle Transform
@@ -54,12 +54,12 @@ namespace Player
             
             //애니메이션별 SMB Init
             var reloadAnimationBehaviour = _humanAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
-            reloadAnimationBehaviour.Init(_playerControl, this);
+            reloadAnimationBehaviour.Init(this);
             var sprintAnimationBehaviours =  
                 _humanAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
             foreach (var behaviour in sprintAnimationBehaviours)
             {
-                behaviour.Init(this, _playerData, stageManager);
+                behaviour.Init(this, stageManager);
             }
             var loadAmmoAnimationBehaviours = _humanAnimation.UpperAnimator.GetBehaviours<LoadAmmoAnimationBehaviour>();
             foreach (var behaviour in loadAmmoAnimationBehaviours)
@@ -471,6 +471,24 @@ namespace Player
             return _playerControl.IsFlipped;
         }
 
-       
+        public void OnReloadOneRoundEnd()
+        {
+            _playerControl.OnReloadOneRoundEnd();
+        }
+
+        public void OnReloadEnd()
+        {
+            _playerControl.OnReloadEnd();
+        }
+
+        public float GetSprintSpeedMultiplier()
+        {
+            return _playerData.SprintSpeedMultiplier;
+        }
+
+        public Vector3 GetPosition()
+        {
+            return transform.position;
+        }
     }
 }
