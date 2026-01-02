@@ -4,7 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class EnemyHumanRanged : EnemyBase
+public class EnemyHumanRanged : EnemyBase, IHumanType
 {
     //적 - 원거리(기본 : 인간형 사격, 무한잔탄) / 근접(인간형, 괴물형)
     //인간형, 적 -> 근거리, 원거리로?
@@ -16,6 +16,7 @@ public class EnemyHumanRanged : EnemyBase
     //아이템 드랍은 무작위로?(소지 무기, 탄 + 장비 + 기타 아이템)
     //공격 - 적 유형에 따라...
     private CharacterWeapon _enemyWeapon;
+    private EnemyRangedWeaponControl _rangedWeaponControl;
     
     [Header("WeaponSprite")] [Space]
     [SerializeField] private SpriteRenderer oneHandWeaponSprite;
@@ -24,16 +25,22 @@ public class EnemyHumanRanged : EnemyBase
     [SerializeField] private Transform twoHandMuzzleTransform;
     
     [SerializeField] private GameObject muzzleFlashVFX; //총구화염VFX -> 무기(+파츠)마다 다르게?
+    //[SerializeField] private AudioSource oneShotSource;
+    public AudioSource OneShotSource => oneShotSource;
+    public float LastFootstepTime { set; get;}
+
+    private WeaponData _currentWeaponData;
     
+    //임시
     [SerializeField] private WeaponData _testWeapon;
     [SerializeField] private AmmoData _testAmmo;
-    //아이템 장착(플레이어 처럼)
 
     protected override void Awake()
     {
         base.Awake();
 
         TryGetComponent(out _enemyWeapon);
+        TryGetComponent(out _rangedWeaponControl);
     }
 
     protected override void Start()
@@ -45,9 +52,12 @@ public class EnemyHumanRanged : EnemyBase
 
     private void SetWeapon()
     {
+        //수정 필요(EnemyData 무기 리스트에서 무작위로 뽑기)
         _enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
+        _rangedWeaponControl.Init(enemyData);
         
         var weaponData = _testWeapon;
+        _currentWeaponData = _testWeapon;
         var weaponType = _testWeapon.WeaponType;
         
         EnemyAnimation.ChangeWeapon(weaponType);
@@ -76,8 +86,43 @@ public class EnemyHumanRanged : EnemyBase
         muzzleFlashVFX.transform.localPosition = weaponData.MuzzleFlashOffset;
     }
 
-    
-    
+    public float PlayReloadSFX()
+    {
+        AudioManager.Instance.PlaySFX(oneShotSource,SFXType.Weapon, _currentWeaponData.ReloadSFX);
+        return _currentWeaponData.ReloadTime;
+    }
+
+    public bool CheckWeaponHasNotDetachMag()
+    {
+        return !_currentWeaponData.HasDetachableMagazine;
+    }
+
+    public void OnReloadOneRoundEnd()
+    {
+        //적 장전, 공격(무기)제어 추가 필요
+    }
+
+    public void OnReloadEnd()
+    {
+        
+    }
+
+    public float GetSprintSpeedMultiplier()
+    {
+        return 1.2f; //임시 EnemyData에서
+    }
+
+    public Vector3 GetPosition()
+    {
+        return transform.position;
+    }
+
+    public float PlayLoadAmmoSFX()
+    {
+        AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponData.LoadAmmoSFX);
+        return _currentWeaponData.FireRate;
+    }
+
     //적 캐릭터 구현
     //1. FSM기반 AI (State, 그에 따른 애니메이션, 공격(근접, 총기))
     //2. 적 장비(무장) 설정

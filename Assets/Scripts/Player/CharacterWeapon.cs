@@ -32,6 +32,11 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
     {
         _currentAmmoData = ammoData;
     }
+
+    public void SetCharacterMultiplier(float accuracyMultiplier, float fireRateMultiplier)
+    {
+        //적 사격 보정치
+    }
     
     public bool Shoot(bool isFlipped, float shootAngle)
     {

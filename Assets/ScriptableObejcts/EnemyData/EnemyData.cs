@@ -16,6 +16,10 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float viewAngle = 90; //시야각도
     [SerializeField] private float chaseRange = 2f; //추격범위?
     [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float accuracyMultiplier = 1f;
+    [SerializeField] private float fireRateMultiplier = 1f;
+    [SerializeField] private float reloadMultiplier = 1f;
+    
     public string EnemyName => enemyName;
     public float HealthAmount => healthAmount;
     public bool IsHuman => isHuman;
@@ -26,4 +30,7 @@ public class EnemyData : ScriptableObject
     public float ViewAngle => viewAngle;
     public float ChaseRange => chaseRange;
     public float MoveSpeed => moveSpeed;
+    public float AccuracyMultiplier => accuracyMultiplier;
+    public float FireRateMultiplier => fireRateMultiplier;
+    public float ReloadMultiplier => reloadMultiplier;
 }
