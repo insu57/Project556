@@ -12,7 +12,7 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
     private AmmoData _currentAmmoData;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
     private float _normalizedAccuracy; //정규화 정확도
-    private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도
+    private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도 -> 무기(종류)별로 설정?
     private float _maxDeviationAngle; //최대 각도 편차(탄퍼짐 편차)
     private float _lastShotTime;
     
@@ -33,9 +33,11 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
         _currentAmmoData = ammoData;
     }
 
-    public void SetCharacterMultiplier(float accuracyMultiplier, float fireRateMultiplier)
+    public void SetCharacterMultiplier(float accuracyMultiplier)
     {
         //적 사격 보정치
+        _normalizedAccuracy *= accuracyMultiplier; //명중 보정치(1에 가까울수록 높은 명중률)
+        _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy);
     }
     
     public bool Shoot(bool isFlipped, float shootAngle)

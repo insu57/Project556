@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyMelee : EnemyBase
+public class EnemyManagerMelee : EnemyManagerBase
 {
     private CharacterWeapon _weapon;
     
@@ -9,5 +9,6 @@ public class EnemyMelee : EnemyBase
         base.Start();
         
         //melee...
+        
     }
 }

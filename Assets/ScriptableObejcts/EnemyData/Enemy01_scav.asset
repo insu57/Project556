@@ -16,3 +16,18 @@ MonoBehaviour:
   healthAmount: 150
   isHuman: 1
   armorAmount: 0
+  detectRange: 2
+  viewRange: 4
+  viewAngle: 90
+  chaseRange: 2
+  moveSpeed: 2
+  accuracyMultiplier: 0.7
+  fireRateMultiplier: 0.7
+  reloadMultiplier: 0.7
+  weapons:
+  - weaponData: {fileID: 11400000, guid: 4edd6477f6f6ec343beb8a5c1db1d5ed, type: 2}
+    ammoData:
+    - {fileID: 11400000, guid: e3b98162e3fe7df44b8b5009e3d56a35, type: 2}
+  - weaponData: {fileID: 11400000, guid: 53960c62b9c69a14f8c913e94fe1e107, type: 2}
+    ammoData:
+    - {fileID: 11400000, guid: 5b70e39c2e2bf2c458c4a7d1c911b520, type: 2}

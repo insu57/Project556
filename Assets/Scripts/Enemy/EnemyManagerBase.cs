@@ -1,7 +1,7 @@
 using Player;
 using UnityEngine;
 
-public abstract class EnemyBase : MonoBehaviour, IDamageable
+public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyContext
 {
     //PlayerManager와 공통부문 추출?(CharacterBase?)
     [SerializeField] protected EnemyData enemyData;
@@ -201,7 +201,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         }
     }
 
-    public void StartChase(bool inChase)
+    public void StartChase(bool inChase) //추적 - 추적알고리즘 구현 필요
     {
         float direction = Mathf.Sign(transform.position.x - _target.transform.position.x);
             
@@ -211,7 +211,6 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     
     private Vector3 AngleToDirection(float angle)
     {
-        //
         return new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle *  Mathf.Deg2Rad));
     }
 }

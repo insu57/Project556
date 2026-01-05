@@ -1,9 +1,17 @@
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Scriptable Objects/EnemyData")]
 public class EnemyData : ScriptableObject
 {
+    [Serializable]
+    private struct WeaponSet
+    {
+        public WeaponData weaponData;
+        public AmmoData[] ammoData;
+    }
+    
     [SerializeField] private string enemyName;
     [SerializeField] private float healthAmount; //체력량
     [SerializeField] private bool isHuman; //인간형 인지
@@ -19,6 +27,8 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float accuracyMultiplier = 1f;
     [SerializeField] private float fireRateMultiplier = 1f;
     [SerializeField] private float reloadMultiplier = 1f;
+
+    [SerializeField, Space] private WeaponSet[] weapons;
     
     public string EnemyName => enemyName;
     public float HealthAmount => healthAmount;

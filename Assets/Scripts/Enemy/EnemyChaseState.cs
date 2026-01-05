@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyChaseState : EnemyBaseState
 {
-    public EnemyChaseState(EnemyBase enemy, HumanAnimation animation) : base(enemy, animation) { }
+    public EnemyChaseState(EnemyManagerBase enemyManager, HumanAnimation animation) : base(enemyManager, animation) { }
 
     //타겟으로 이동...
     
@@ -24,13 +24,13 @@ public class EnemyChaseState : EnemyBaseState
         
         //감지 범위 이탈 혹은 방해(수류탄 등) 처리 필요
 
-        if (Enemy.ChaseRange > Enemy.TargetDist)
+        if (EnemyManager.ChaseRange > EnemyManager.TargetDist)
         {
             //이동
             HumanAnimation.ChangeAnimationMove(true); //이동과 공격은 별도로 생각
             //MOVE 
             
-            Enemy.StartChase(true);
+            EnemyManager.StartChase(true);
         }
         else
         {

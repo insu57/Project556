@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyAttackState : EnemyBaseState
 {
-    public EnemyAttackState(EnemyBase enemy, HumanAnimation animation) : base(enemy, animation) { }
+    public EnemyAttackState(EnemyManagerBase enemyManager, HumanAnimation animation) : base(enemyManager, animation) { }
     
     
 }

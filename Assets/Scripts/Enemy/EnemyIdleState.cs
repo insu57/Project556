@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyIdleState : EnemyBaseState
 {
-    public EnemyIdleState(EnemyBase enemy, HumanAnimation animation) : base(enemy, animation) { }
+    public EnemyIdleState(EnemyManagerBase enemyManager, HumanAnimation animation) : base(enemyManager, animation) { }
 
     //기본 상태
     //추적 -> 기본은..?
@@ -12,7 +12,7 @@ public class EnemyIdleState : EnemyBaseState
     {
         //Animation Change...
         //애니메이션 클래스 분리?
-        Debug.Log(Enemy.name);
+        Debug.Log(EnemyManager.name);
         
         HumanAnimation.ChangeAnimationMove(false);//정지(Idle)
     }

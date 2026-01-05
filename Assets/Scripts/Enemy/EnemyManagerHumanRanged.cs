@@ -4,7 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class EnemyHumanRanged : EnemyBase, IHumanType
+public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType
 {
     //적 - 원거리(기본 : 인간형 사격, 무한잔탄) / 근접(인간형, 괴물형)
     //인간형, 적 -> 근거리, 원거리로?
@@ -50,11 +50,22 @@ public class EnemyHumanRanged : EnemyBase, IHumanType
         SetWeapon();
     }
 
+    private void OnEnable()
+    {
+        _rangedWeaponControl.EnemyShoot += Shoot;
+    }
+
+    private void OnDisable()
+    {
+        _rangedWeaponControl.EnemyShoot -= Shoot;
+    }
+
     private void SetWeapon()
     {
         //수정 필요(EnemyData 무기 리스트에서 무작위로 뽑기)
         _enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
-        _rangedWeaponControl.Init(enemyData);
+        _enemyWeapon.SetCharacterMultiplier(enemyData.AccuracyMultiplier);
+        _rangedWeaponControl.Init(this , enemyData, _testWeapon);
         
         var weaponData = _testWeapon;
         _currentWeaponData = _testWeapon;
@@ -86,6 +97,12 @@ public class EnemyHumanRanged : EnemyBase, IHumanType
         muzzleFlashVFX.transform.localPosition = weaponData.MuzzleFlashOffset;
     }
 
+    private void Shoot()
+    {
+        //CharacterWeapon
+        //_enemyWeapon.Shoot();
+    }
+    
     public float PlayReloadSFX()
     {
         AudioManager.Instance.PlaySFX(oneShotSource,SFXType.Weapon, _currentWeaponData.ReloadSFX);
