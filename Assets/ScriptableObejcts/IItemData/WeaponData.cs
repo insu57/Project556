@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "WeaponData", menuName = "Scriptable Objects/WeaponData")]
 public class WeaponData : BaseItemDataSO
@@ -14,7 +15,7 @@ public class WeaponData : BaseItemDataSO
     
     [SerializeField,Space] private bool isOneHanded; //한손무기인지
     [SerializeField] private bool isOpenBolt; //오픈볼트인지(장전시 약실에 탄이 없음)
-    [SerializeField] private float fireRate; //발사속도(차탄 발사까지 걸리는 시간)
+    [SerializeField] private float timeBetweenShot; //발사속도(차탄 발사까지 걸리는 시간)
     [SerializeField] private float accuracy; //정확도
     [SerializeField] private float bulletSpeed; //Bullet(탄속) -> 수정(탄환의 탄속 * 총구 속도)
     [SerializeField] private float muzzleVelocityMultiplier = 1; //탄속 배수
@@ -54,7 +55,7 @@ public class WeaponData : BaseItemDataSO
     public bool IsOneHanded => isOneHanded;
     public bool IsOpenBolt => isOpenBolt;
     
-    public float FireRate => fireRate;
+    public float TimeBetweenShot => timeBetweenShot;
     public float Accuracy => accuracy;
     public float BulletSpeed => bulletSpeed;//x
     public float MuzzleVelocityMultiplier => muzzleVelocityMultiplier;
@@ -64,7 +65,7 @@ public class WeaponData : BaseItemDataSO
     //탄속 : 탄환 탄속 * 무기 탄속 배수
     //방어관통 : 탄환만
     //기타: 소음, 무게
-    [ShowInInspector] public float RPM => 1 / FireRate * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
+    [ShowInInspector] public float RPM => 1 / TimeBetweenShot * 60; //Rounds Per Minute (FireRate = 0.1 => 600 RPM)
 
     public override Sprite ItemSprite => itemSprite;
     public override int ItemWidth => itemWidth;

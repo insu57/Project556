@@ -4,7 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType
+public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRangedContext
 {
     //적 - 원거리(기본 : 인간형 사격, 무한잔탄) / 근접(인간형, 괴물형)
     //인간형, 적 -> 근거리, 원거리로?
@@ -23,6 +23,8 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType
     [SerializeField] private SpriteRenderer twoHandWeaponSprite;
     [SerializeField] private Transform oneHandMuzzleTransform;
     [SerializeField] private Transform twoHandMuzzleTransform;
+    public Transform OneHandedMuzzle => oneHandMuzzleTransform;
+    public Transform TwoHandedMuzzle => twoHandMuzzleTransform;
     
     [SerializeField] private GameObject muzzleFlashVFX; //총구화염VFX -> 무기(+파츠)마다 다르게?
     //[SerializeField] private AudioSource oneShotSource;
@@ -64,7 +66,7 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType
     {
         //수정 필요(EnemyData 무기 리스트에서 무작위로 뽑기)
         _enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
-        _enemyWeapon.SetCharacterMultiplier(enemyData.AccuracyMultiplier);
+        _enemyWeapon.SetCharacterMultiplier(enemyData.AccuracyMultiplier, enemyData.FireRateMultiplier);
         _rangedWeaponControl.Init(this , enemyData, _testWeapon);
         
         var weaponData = _testWeapon;
@@ -114,7 +116,7 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType
         return !_currentWeaponData.HasDetachableMagazine;
     }
 
-    public void OnReloadOneRoundEnd()
+    public void OnReloadOneRoundEnd() //관형탄창 장전(한발 씩 장전)
     {
         //적 장전, 공격(무기)제어 추가 필요
     }
@@ -137,7 +139,7 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType
     public float PlayLoadAmmoSFX()
     {
         AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponData.LoadAmmoSFX);
-        return _currentWeaponData.FireRate;
+        return _currentWeaponData.TimeBetweenShot;
     }
 
     //적 캐릭터 구현

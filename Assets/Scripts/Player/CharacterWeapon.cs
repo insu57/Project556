@@ -10,6 +10,7 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
     private WeaponData _currentWeaponData;
     private Transform _muzzleTransform;
     private AmmoData _currentAmmoData;
+    private float _timeBetweenShot;
     private const float MaxAccuracy = 100f; //최대 정획도.(탄퍼짐 0)
     private float _normalizedAccuracy; //정규화 정확도
     private const float MaxSpreadAngle = 30f; //최대 탄퍼짐 각도 -> 무기(종류)별로 설정?
@@ -26,6 +27,8 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
         
         _normalizedAccuracy = Mathf.Clamp01(weaponData.Accuracy / MaxAccuracy); //정확도 정규화
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy); //탄퍼짐 각도 편차
+
+        _timeBetweenShot = _currentWeaponData.TimeBetweenShot;
     }
 
     public void SetAmmoData(AmmoData ammoData)
@@ -33,16 +36,19 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
         _currentAmmoData = ammoData;
     }
 
-    public void SetCharacterMultiplier(float accuracyMultiplier)
+    public void SetCharacterMultiplier(float accuracyMultiplier, float fireRateMultiplier)
     {
         //적 사격 보정치
         _normalizedAccuracy *= accuracyMultiplier; //명중 보정치(1에 가까울수록 높은 명중률)
         _maxDeviationAngle = MaxSpreadAngle * (1 - _normalizedAccuracy);
+
+        fireRateMultiplier = Mathf.Max(fireRateMultiplier, 0.01f); //최소치 0.01
+        _timeBetweenShot /= fireRateMultiplier; //발사속도 계수(0에 가까울 수 록 느리게) 만큼 발사속도를 낮춤(발사 간 시간을 늘림)
     }
     
     public bool Shoot(bool isFlipped, float shootAngle)
     {
-        if(Time.time - _lastShotTime < _currentWeaponData.FireRate) return false; //FireRate제한
+        if(Time.time - _lastShotTime < _timeBetweenShot) return false; //FireRate제한
         _lastShotTime = Time.time;
         
         OnShowMuzzleFlash?.Invoke(); //show flash

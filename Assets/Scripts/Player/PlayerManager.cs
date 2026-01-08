@@ -196,7 +196,7 @@ namespace Player
         public float PlayLoadAmmoSFX()
         {
             AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponItem.WeaponData.LoadAmmoSFX);
-            return _currentWeaponItem.WeaponData.FireRate;
+            return _currentWeaponItem.WeaponData.TimeBetweenShot;
         }
         
         private void Shoot(bool isFlipped, float shootAngle) //사격
@@ -226,7 +226,7 @@ namespace Player
             for (int i = 0; i < burstCount; i++)
             {
                 Shoot(isFlipped, shootAngle);
-                yield return new WaitForSeconds(_currentWeaponItem.WeaponData.FireRate);
+                yield return new WaitForSeconds(_currentWeaponItem.WeaponData.TimeBetweenShot);
             }
             _playerControl.InShooting = false;
         }
