@@ -6,6 +6,7 @@ public class EnemyMoveControl : MonoBehaviour
     private float _enemySpeed;
     private float _currentSpeed;
     
+    //임시. 구현필요.
     public void Init(float speed)
     {
         _enemySpeed = speed;

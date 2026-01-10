@@ -21,7 +21,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3d2628c673806a14382694b1c6bbccbd, type: 2}
   isOneHanded: 0
   isOpenBolt: 0
-  fireRate: 1
+  timeBetweenShot: 1
   accuracy: 90
   bulletSpeed: 25
   muzzleVelocityMultiplier: 1.2

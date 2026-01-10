@@ -625,23 +625,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &352875649 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5655962136961108311, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
-  m_PrefabInstance: {fileID: 2709348082908635168}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &352875658
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 352875649}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc79b0080af904048bb0584a3ad74472, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &362328407
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6390,6 +6373,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: f84792134c3e1974a95a9f80774db5ae, type: 2}
   currentHealth: 0
+  enemySprite: {fileID: 0}
   stencilHideMat: {fileID: 2100000, guid: 7c5851c0833761d48b2c5ee3ec935533, type: 2}
   playerLayerMask:
     serializedVersion: 2
@@ -8225,10 +8209,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1081139435986190978, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
-      propertyPath: enemyData
-      value: 
-      objectReference: {fileID: 11400000, guid: a30e312e367d8174ba3e8dcd45195bca, type: 2}
     - target: {fileID: 4439949036778217235, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.99
@@ -8276,10 +8256,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5655962136961108311, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 352875658}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0ac060c8f3efcd94e8bcf3ca69efceef, type: 3}
 --- !u!1001 &7488213623800390835
 PrefabInstance:

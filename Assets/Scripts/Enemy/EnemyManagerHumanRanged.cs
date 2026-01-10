@@ -50,6 +50,22 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
         base.Start();
         //적 기본무기(EnemyData에서 가져오도록 수정 예정)
         SetWeapon();
+        
+        //HumanAnimation
+        var stageManager = FindAnyObjectByType<StageManager>(); //개선필요
+        var reloadAnimationBehaviour = EnemyAnimation.UpperAnimator.GetBehaviour<ReloadAnimationBehaviour>();
+        reloadAnimationBehaviour.Init(this);
+        var sprintAnimationBehaviours =  
+            EnemyAnimation.LowerAnimator.GetBehaviours<MoveAnimationBehaviour>();
+        foreach (var behaviour in sprintAnimationBehaviours)
+        {
+            behaviour.Init(this, stageManager);
+        }
+        var loadAmmoAnimationBehaviours = EnemyAnimation.UpperAnimator.GetBehaviours<LoadAmmoAnimationBehaviour>();
+        foreach (var behaviour in loadAmmoAnimationBehaviours)
+        {
+            behaviour.Init(this);
+        }
     }
 
     private void OnEnable()

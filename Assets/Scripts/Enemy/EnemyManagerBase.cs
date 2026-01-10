@@ -3,9 +3,9 @@ using UnityEngine;
 
 public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyContext
 {
-    //PlayerManager와 공통부문 추출?(CharacterBase?)
     [SerializeField] protected EnemyData enemyData;
     [SerializeField] protected float currentHealth;
+    [SerializeField] protected GameObject enemySprite;
     
     //FOV Hide
     [SerializeField] protected Material stencilHideMat;
@@ -115,7 +115,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         }
     }
     
-    private void TargetFind() //코루틴 수정? 반응 속도는 어떤 방식으로? 코루틴 딜레이? 개선점?
+    private void TargetFind() //코루틴 수정? 반응 속도는 어떤 방식으로? 코루틴 딜레이? 개선 필요.
     {
         //
         _playerDetected = false;
@@ -143,6 +143,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
             }
 
             Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
+            if(_isFlipped) facingDir = -facingDir;
 
             if (Vector2.Angle(facingDir, dirToTarget) < ViewAngle / 2) //각도 이내
             {
@@ -162,6 +163,10 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
             if (_playerDetected || _playerInSight)
             {
                 TargetDist = Vector3.Distance(transform.position, target.position);
+
+                _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
+
+                enemySprite.transform.localScale = !_isFlipped ? new Vector3(1, 1, 1) : new Vector3(-1, 1, 1);//Sprite...
             }
         }
         
@@ -183,13 +188,16 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         
         //시야 범위
         Gizmos.color = Color.yellow;
-        Vector3 viewAngleVectorMin = AngleToDirection(-ViewAngle / 2);
-        Vector3 viewAngleVectorMax = AngleToDirection(ViewAngle / 2);
+        float angle = ViewAngle;
+        if(_isFlipped) angle = 180 - ViewAngle;
+        Vector3 viewAngleVectorMin = AngleToDirection(-angle / 2);
+        Vector3 viewAngleVectorMax = AngleToDirection(angle / 2);
         Vector3 viewAngleVectorMid = (viewAngleVectorMin + viewAngleVectorMax).normalized;
-        
-        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMax * ViewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMin * ViewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMid * ViewDistance);
+        float dist = ViewDistance;
+        if(_isFlipped) dist = -ViewDistance;
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMax * dist);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMin * dist);
+        Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMid * dist);
 
         if (_playerDetected || _playerInSight)
         {
@@ -203,6 +211,8 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
 
     public void StartChase(bool inChase) //추적 - 추적알고리즘 구현 필요
     {
+        if(!_target) return;
+        
         float direction = Mathf.Sign(transform.position.x - _target.transform.position.x);
             
         

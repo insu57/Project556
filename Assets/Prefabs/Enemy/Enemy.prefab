@@ -3689,6 +3689,8 @@ GameObject:
   - component: {fileID: 1081139435986190978}
   - component: {fileID: 1035595951017514181}
   - component: {fileID: 8218937195607305069}
+  - component: {fileID: 8033559436880273676}
+  - component: {fileID: 3530159713224838412}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Enemy
@@ -3882,8 +3884,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a326ce2fd6da6c44b9b70f79a26f2300, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: f84792134c3e1974a95a9f80774db5ae, type: 2}
+  enemyData: {fileID: 11400000, guid: a30e312e367d8174ba3e8dcd45195bca, type: 2}
   currentHealth: 0
+  enemySprite: {fileID: 7640783540300603198}
   stencilHideMat: {fileID: 2100000, guid: 7c5851c0833761d48b2c5ee3ec935533, type: 2}
   playerLayerMask:
     serializedVersion: 2
@@ -3891,11 +3894,8 @@ MonoBehaviour:
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  detectRadius: 2
-  viewDistance: 4
-  viewAngle: 90
-  oneShotSource: {fileID: 0}
-  loopSource: {fileID: 0}
+  oneShotSource: {fileID: 572805033475315619}
+  loopSource: {fileID: 8450424505048434860}
   oneHandWeaponSprite: {fileID: 2618033397748027438}
   twoHandWeaponSprite: {fileID: 6411534915951603942}
   oneHandMuzzleTransform: {fileID: 7651578952495895503}
@@ -3936,6 +3936,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f332f4ef26128494fa17d64bc0d0171f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8033559436880273676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5655962136961108311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc79b0080af904048bb0584a3ad74472, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3530159713224838412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5655962136961108311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 008f2b60bc1e2b743b58af2e67b730d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5658831167836687330
@@ -4977,7 +5001,7 @@ GameObject:
   - component: {fileID: 2676208025853578160}
   - component: {fileID: 5282977710000018030}
   m_Layer: 11
-  m_Name: UnitRoot
+  m_Name: EnemySprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
