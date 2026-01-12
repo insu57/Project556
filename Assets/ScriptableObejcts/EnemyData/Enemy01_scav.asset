@@ -16,10 +16,10 @@ MonoBehaviour:
   healthAmount: 150
   isHuman: 1
   armorAmount: 0
-  detectRange: 2
+  detectRange: 5
   viewRange: 4
   viewAngle: 90
-  chaseRange: 2
+  chaseRange: 3
   moveSpeed: 2
   accuracyMultiplier: 0.7
   fireRateMultiplier: 0.7

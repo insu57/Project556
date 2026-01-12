@@ -1,3 +1,4 @@
+using System;
 using Player;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     //Detect
     [SerializeField] protected LayerMask playerLayerMask;
     [SerializeField] protected LayerMask obstacleLayerMask;
+    [SerializeField] protected LayerMask groundLayerMask;
 
     public float DetectRadius { get; private set; }
     public float ViewDistance { get; private set; }
@@ -34,6 +36,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     //Enemy Move?
     
     protected bool _isFlipped = false; //
+    public bool IsFlipped => _isFlipped;
     
     protected HumanAnimation EnemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속) -> 공용으로 수정 필요.
     
@@ -81,7 +84,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         ViewAngle = enemyData.ViewAngle;
         ChaseRange = enemyData.ChaseRange;
 
-        EnemyMoveControl.Init(enemyData.MoveSpeed);
+        EnemyMoveControl.Init(enemyData.MoveSpeed, this, groundLayerMask);
     }
 
     protected virtual void Update()
@@ -122,7 +125,9 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         _playerInSight = false;
         _target = null;
         
-        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, ViewDistance, playerLayerMask);
+        float maxDist = MathF.Max(ViewDistance, DetectRadius);
+        
+        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, maxDist, playerLayerMask);
         //시야 범위 만큼
         
         if (targetInRadius) //감지 시

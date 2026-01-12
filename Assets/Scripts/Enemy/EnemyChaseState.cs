@@ -24,7 +24,7 @@ public class EnemyChaseState : EnemyBaseState
         
         //감지 범위 이탈 혹은 방해(수류탄 등) 처리 필요
 
-        if (EnemyManager.ChaseRange > EnemyManager.TargetDist)
+        if (EnemyManager.ChaseRange < EnemyManager.TargetDist)
         {
             //이동
             HumanAnimation.ChangeAnimationMove(true); //이동과 공격은 별도로 생각
@@ -36,7 +36,7 @@ public class EnemyChaseState : EnemyBaseState
         {
             //범위 이내
             HumanAnimation.ChangeAnimationMove(false);
-            
+            EnemyManager.StartChase(false);
         }
         
         
