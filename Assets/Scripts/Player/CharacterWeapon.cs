@@ -54,6 +54,7 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
         OnShowMuzzleFlash?.Invoke(); //show flash
 
         var palletCount = _currentAmmoData.IsBuckshot ? _currentAmmoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
+        //사격 버그...? 원인 미확인
         
         for (var i = 0; i < palletCount; i++)
         {

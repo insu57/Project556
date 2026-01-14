@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy01_scav
   m_EditorClassIdentifier: 
   enemyName: Scav
-  healthAmount: 150
+  healthAmount: 1500
   isHuman: 1
   armorAmount: 0
   detectRange: 5

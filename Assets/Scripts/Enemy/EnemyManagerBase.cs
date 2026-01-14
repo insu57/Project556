@@ -35,7 +35,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     protected EnemyMoveControl EnemyMoveControl;
     //Enemy Move?
     
-    protected bool _isFlipped = false; //
+    protected bool _isFlipped; //
     public bool IsFlipped => _isFlipped;
     
     protected HumanAnimation EnemyAnimation; //Animation 클래스 변경 예정(BaseAnimation를 상속) -> 공용으로 수정 필요.
@@ -110,11 +110,13 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
 
     public void TakeDamage(float damage)
     {
+        Debug.Log("TakeDamage");
+        
         currentHealth -= damage;
 
         if (currentHealth <= 0)
         {
-            gameObject.SetActive(false); //임시
+            //gameObject.SetActive(false); //임시
         }
     }
     
@@ -218,10 +220,10 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     {
         if(!_target) return;
         
-        float direction = Mathf.Sign(transform.position.x - _target.transform.position.x);
+        //float direction = Mathf.Sign(transform.position.x - _target.transform.position.x);
             
         
-        EnemyMoveControl.StartChase(inChase, direction);
+        EnemyMoveControl.StartChase(inChase);
     }
     
     private Vector3 AngleToDirection(float angle)

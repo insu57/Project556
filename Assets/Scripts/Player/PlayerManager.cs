@@ -198,7 +198,8 @@ namespace Player
             AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon, _currentWeaponItem.WeaponData.LoadAmmoSFX);
             return _currentWeaponItem.WeaponData.TimeBetweenShot;
         }
-        
+        //플레이어 사격 버그!!! - 장전 문제?
+        //피격 판정 문제 - 총알이 무시됨. 속도문제?
         private void Shoot(bool isFlipped, float shootAngle) //사격
         {
             //총알 데이터..?
