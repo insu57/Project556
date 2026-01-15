@@ -172,8 +172,11 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
                 TargetDist = Vector3.Distance(transform.position, target.position);
 
                 _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
-
-                enemySprite.transform.localScale = !_isFlipped ? new Vector3(1, 1, 1) : new Vector3(-1, 1, 1);//Sprite...
+                float xScale = enemySprite.transform.localScale.x;
+                if (_isFlipped) xScale = Mathf.Abs(xScale) * -1;
+                else xScale =  Mathf.Abs(xScale) * 1;
+                enemySprite.transform.localScale = new Vector3(xScale, 
+                    enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
             }
         }
         

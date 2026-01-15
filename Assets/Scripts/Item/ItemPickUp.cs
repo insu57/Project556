@@ -19,7 +19,7 @@ public class ItemPickUp : MonoBehaviour, IFieldInteractable //오브젝트 풀�
     
     private void Awake()
     {
-        TryGetComponent(out _spriteRenderer);
+        _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _spriteRenderer.material = stencilHideMaterial;
         TryGetComponent(out _collider);
     }

@@ -51,9 +51,11 @@ public class Bullet : MonoBehaviour
         {
             ObjectPoolingManager.Instance.ReleaseBullet(ammoCategory, this);
         }
-        else if (collision.TryGetComponent(out IDamageable damageable))
+        else if (collision.TryGetComponent(out IDamageable damageable)) //관통탄(추후 개선) - damageable로 구분
         {
             damageable.TakeDamage(_damage);
+            //중복 데미지 개선 필요(damageable 체크)
+            ObjectPoolingManager.Instance.ReleaseBullet(ammoCategory, this);
         }
     }
 }
