@@ -24,7 +24,7 @@ public class MoveAnimationBehaviour : StateMachineBehaviour //이동 애니메�
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        var playerTilePos = _humanType.GetPosition() + new Vector3(0, -0.25f, 0);
+        var playerTilePos = _humanType.GetPosition() + new Vector3(0, -0.5f, 0);
         var sfx = _stageManager.GetTileFootstepSFX(playerTilePos); //위치(타일)에 따른 발소리 SFX
         if(sfx == SFX.None) return; //공중 등 발소리가 없으면 return
         

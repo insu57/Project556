@@ -10,7 +10,10 @@ public class EnemyMoveControl : MonoBehaviour
     private  LayerMask _groundMask;
     private bool _inChase;
     private bool _isGrounded;
-    [SerializeField] private float tileCheckDist = 1f;
+    [SerializeField] private float tileCheckDist = 1.5f;
+    [SerializeField] private float wallCheckYOffset = 0.5f;
+    [SerializeField] private float jumpVerticalForce = 6f;
+    [SerializeField] private float jumpHorizontalForce = 3f;
     
     private void Awake()
     {
@@ -42,7 +45,7 @@ public class EnemyMoveControl : MonoBehaviour
 
     private void GroundCheck() //플레이어 Ground 체크
     {
-        const float groundCheckDistance = 0.25f;
+        const float groundCheckDistance = 0.5f;
         bool isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, _groundMask);
         //LayerMask 체크
 
@@ -65,16 +68,39 @@ public class EnemyMoveControl : MonoBehaviour
         Vector2 facingDir = Vector2.right;
         if(_enemy.IsFlipped) facingDir = -facingDir;
         
-        bool wallCheck = Physics2D.Raycast(transform.position, facingDir, tileCheckDist, _groundMask);
+        Vector2 raycastOrigin = (Vector2)transform.position + new Vector2(0, wallCheckYOffset);
+        bool wallCheck = Physics2D.Raycast(raycastOrigin, facingDir, tileCheckDist, _groundMask);
+        if (wallCheck)
+        {
+            Jump(facingDir);
+        }
+    }
+
+    private void Jump(Vector2 facingDir)
+    {
+        Debug.Log("Jump");
+        _rb.linearVelocity = Vector2.zero;
+        
+        Vector2 jumpForce = new Vector2(facingDir.x * jumpHorizontalForce, jumpVerticalForce);
+        _rb.AddForce(jumpForce, ForceMode2D.Impulse);
     }
     
     private void FixedUpdate()
     {
         //움직임... 단순 좌우 움직임이 아니라 추적은? 추가 작업 필요(이동AI)
         GroundCheck();
-        
-        TileCheck();
-        
         EnemyMove();
+        TileCheck();
+    }
+
+    private void OnDrawGizmos()
+    {
+        //WallCheck
+        if(_enemy == null) return;
+        Vector3 facingDir = Vector2.right;
+        if(_enemy.IsFlipped) facingDir = -facingDir;
+        Gizmos.color = Color.green;
+        Vector3 raycastOrigin = transform.position + new Vector3(0, wallCheckYOffset, 0);
+        Gizmos.DrawLine(raycastOrigin, raycastOrigin + facingDir * tileCheckDist);
     }
 }

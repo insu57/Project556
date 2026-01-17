@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour, IDamageable
 {
-    //SO에서 기본 수치 데이터 관리로 수정?
+    //외부(json 등) -> SO로 수정 필요. 
     [SerializeField] private float moveSpeed = 3f; //이동 속도
     [SerializeField] private float sprintSpeedMultiplier = 1.5f; //달리기 배수
     [SerializeField] private float jumpForce = 4f; //점프 운동량

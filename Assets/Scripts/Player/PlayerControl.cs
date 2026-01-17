@@ -261,7 +261,7 @@ namespace Player
    
       private bool ColliderCheck() //플레이어 Ground 체크
       {
-         const float groundCheckDistance = 0.25f;
+         const float groundCheckDistance = 0.5f;
          bool isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckDistance, _groundMask);
          //LayerMask 체크
          
@@ -481,6 +481,7 @@ namespace Player
    
       private void OnJump(InputAction.CallbackContext ctx) //점프입력 Space키
       {
+         //점프 개선 필요 -> 어떤 방식으로?
          if (ctx.performed && _isGrounded) //땅에 있을 때
          {
             _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse); //Rigidbody기반
