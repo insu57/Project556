@@ -10,6 +10,7 @@ public class EnemyMoveControl : MonoBehaviour
     private  LayerMask _groundMask;
     private bool _inChase;
     private bool _isGrounded;
+    private bool _isJumping;
     [SerializeField] private float tileCheckDist = 1.5f;
     [SerializeField] private float wallCheckYOffset = 0.5f;
     [SerializeField] private float jumpVerticalForce = 6f;
@@ -54,8 +55,9 @@ public class EnemyMoveControl : MonoBehaviour
     
     private void EnemyMove()
     {
-        //벽, 바닥 체크(점프, 낙하) 너무 높으면 불가 -> 추적에서 경계로
-        if(!_isGrounded) return;
+        //벽, 바닥 체크(점프, 낙하) 너무 높으면 불가 -> 추적에서 경계(Idle?)
+        //낙하관련 구현 필요(낙하 데미지(공통), 너무 높은 위치라면 우회 혹은 경계(Idle)
+        if(!_isGrounded || _isJumping) return;
         
         int dir = _enemy.IsFlipped ? -1 : 1;
         _rb.linearVelocityX = dir * _currentSpeed;
@@ -63,14 +65,14 @@ public class EnemyMoveControl : MonoBehaviour
 
     private void TileCheck()
     {
-        if(!_isGrounded) return;
+        if(!_isGrounded || _isJumping) return;
         
         Vector2 facingDir = Vector2.right;
         if(_enemy.IsFlipped) facingDir = -facingDir;
         
         Vector2 raycastOrigin = (Vector2)transform.position + new Vector2(0, wallCheckYOffset);
         bool wallCheck = Physics2D.Raycast(raycastOrigin, facingDir, tileCheckDist, _groundMask);
-        if (wallCheck)
+        if (wallCheck) //벽이 있다면...
         {
             Jump(facingDir);
         }
@@ -78,19 +80,30 @@ public class EnemyMoveControl : MonoBehaviour
 
     private void Jump(Vector2 facingDir)
     {
-        Debug.Log("Jump");
-        _rb.linearVelocity = Vector2.zero;
-        
-        Vector2 jumpForce = new Vector2(facingDir.x * jumpHorizontalForce, jumpVerticalForce);
-        _rb.AddForce(jumpForce, ForceMode2D.Impulse);
+        _isJumping = true;
+        Vector2 jumpVelocity = new Vector2(facingDir.x * jumpHorizontalForce, jumpVerticalForce);
+        _rb.linearVelocity = jumpVelocity; 
     }
     
     private void FixedUpdate()
     {
-        //움직임... 단순 좌우 움직임이 아니라 추적은? 추가 작업 필요(이동AI)
         GroundCheck();
-        EnemyMove();
-        TileCheck();
+
+        if (_isJumping)
+        {
+            // y축 속도가 0 이하이고 땅에 닿아있으면 착지한 것으로 간주
+            if (_isGrounded && _rb.linearVelocity.y <= 0.01f)
+            {
+                _isJumping = false;
+                _rb.linearVelocity = Vector2.zero;
+            }
+        }
+        else
+        {
+            // 지상에 있거나 자유 낙하 중인 상태.
+            EnemyMove();
+            TileCheck(); //점프 조건이 맞으면 _isJumping이 true
+        }
     }
 
     private void OnDrawGizmos()

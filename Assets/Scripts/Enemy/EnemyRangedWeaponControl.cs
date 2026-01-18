@@ -55,7 +55,7 @@ public class EnemyRangedWeaponControl : MonoBehaviour
         
         //연사 점사 단발 처리??
         if(_currentMagazine <= 0) return;
-        EnemyShoot?.Invoke();
+        //EnemyShoot?.Invoke();
         
         
     }
