@@ -14,10 +14,11 @@ public class EnemyRangedWeaponControl : MonoBehaviour
     private float _accuracyMultiplier;
     private float _fireRateMultiplier;
     private float _reloadMultiplier;
+    private float _viewRange;
     private FireMode _fireMode;
     private int _currentMagazine;
     
-    public event Action EnemyShoot;
+    public event Action<float> EnemyShoot;
 
     public void Init(IEnemyRangedContext enemy, EnemyData enemyData, WeaponData enemyWeaponData)
     {
@@ -26,7 +27,8 @@ public class EnemyRangedWeaponControl : MonoBehaviour
         _accuracyMultiplier = enemyData.AccuracyMultiplier;
         _fireRateMultiplier = enemyData.FireRateMultiplier;
         _reloadMultiplier = enemyData.ReloadMultiplier;
-
+        _viewRange = enemyData.ViewRange;
+        
         _weaponData = enemyWeaponData;
 
         _fireMode = FireMode.SemiAuto;
@@ -50,15 +52,41 @@ public class EnemyRangedWeaponControl : MonoBehaviour
     
     private void Attack()
     {
+        if(_currentMagazine <= 0) return; //장탄 체크
+        
+        Vector2 dir = _enemy.Target.position - _muzzleTransform.position;
+        float shootAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        
+        switch (_fireMode)
+        {
+            case FireMode.SemiAuto:
+                break;
+            case FireMode._2Burst:
+                break;
+            case FireMode._3Burst:
+                break;
+            case FireMode.FullAuto:
+            {
+                //
+                
+                
+                
+                break;
+            }
+        }
+        
         //무기에 따라...연사-(점사?)-단발(가능한 경우 앞부터)
         //발사 시 이벤트 -> EnemyManager(HumanRanged)
         
         //연사 점사 단발 처리??
-        if(_currentMagazine <= 0) return;
+        //if(_currentMagazine <= 0) return;
         //EnemyShoot?.Invoke();
         
         
     }
-    
-    
+
+    private void RotateArm()
+    {
+        //팔 회전 추가 필요(기존 코드 이용)
+    }
 }

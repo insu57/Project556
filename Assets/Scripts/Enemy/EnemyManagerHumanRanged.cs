@@ -115,10 +115,11 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
         muzzleFlashVFX.transform.localPosition = weaponData.MuzzleFlashOffset;
     }
 
-    private void Shoot()
+    private void Shoot(float angle)
     {
         //CharacterWeapon
-        //_enemyWeapon.Shoot();
+        
+        _enemyWeapon.Shoot(_isFlipped, angle);
     }
     
     public float PlayReloadSFX()
@@ -139,7 +140,7 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
 
     public void OnReloadEnd()
     {
-        
+        //
     }
 
     public float GetSprintSpeedMultiplier()

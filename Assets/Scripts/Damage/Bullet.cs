@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
@@ -11,6 +12,8 @@ public class Bullet : MonoBehaviour
 
     private const float BulletLifeTime = 2f;
     private float _timer;
+
+    private readonly List<IDamageable> _targets = new();
     
     private void Awake()
     {
@@ -36,6 +39,8 @@ public class Bullet : MonoBehaviour
         _speed = speed;
         _damage = damage;
         _armorPiercing = armorPiercing;
+        
+        _targets.Clear();
     }
     
     public void ShootBullet(float angle, Vector2 direction, Transform muzzleTransform)
@@ -51,11 +56,15 @@ public class Bullet : MonoBehaviour
         {
             ObjectPoolingManager.Instance.ReleaseBullet(ammoCategory, this);
         }
-        else if (collision.TryGetComponent(out IDamageable damageable)) //관통탄(추후 개선) - damageable로 구분
+        else if (collision.TryGetComponent(out IDamageable damageable))
         {
+            if(_targets.Contains(damageable)) return; //리스트에 있으면 처리안함. 캐릭터 당 한번만 처리해야함.
+            
+            _targets.Add(damageable);
+
             damageable.TakeDamage(_damage);
-            //중복 데미지 개선 필요(damageable 체크)
-            ObjectPoolingManager.Instance.ReleaseBullet(ammoCategory, this);
+            
+            ObjectPoolingManager.Instance.ReleaseBullet(ammoCategory, this);//적중 시 비활성화(풀링), 관통력 관련 추가 필요.
         }
     }
 }

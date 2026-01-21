@@ -122,7 +122,6 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     
     private void TargetFind() //코루틴 수정? 반응 속도는 어떤 방식으로? 코루틴 딜레이? 개선 필요.
     {
-        //
         _playerDetected = false;
         _playerInSight = false;
         _target = null;
@@ -222,9 +221,6 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     public void StartChase(bool inChase) //추적 - 추적알고리즘 구현 필요
     {
         if(!_target) return;
-        
-        //float direction = Mathf.Sign(transform.position.x - _target.transform.position.x);
-            
         
         EnemyMoveControl.StartChase(inChase);
     }

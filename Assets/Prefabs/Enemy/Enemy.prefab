@@ -3728,7 +3728,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1000
+  m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 1
@@ -3777,8 +3777,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.0788455, y: 1.2989322}
-  m_Size: {x: 0.82734346, y: 0.9012153}
+  m_Offset: {x: 0.02101612, y: 0.9369891}
+  m_Size: {x: 0.9430022, y: 1.8092712}
   m_Direction: 0
 --- !u!61 &7373770183783531343
 BoxCollider2D:
@@ -3814,7 +3814,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.03397262, y: 0.059804454}
+  m_Offset: {x: -0.03686154, y: 0.04551372}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -3824,7 +3824,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.7713039, y: 0.08605716}
+  m_Size: {x: 0.76552606, y: 0.11463863}
   m_EdgeRadius: 0
 --- !u!61 &5241064430589060110
 BoxCollider2D:
@@ -3860,7 +3860,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.00566411, y: 0.5066244}
+  m_Offset: {x: -0.009446859, y: 0.8195263}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -3870,7 +3870,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.6278343, y: 0.8620305}
+  m_Size: {x: 0.68566275, y: 1.4878342}
   m_EdgeRadius: 0
 --- !u!114 &1081139435986190978
 MonoBehaviour:
@@ -3953,7 +3953,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc79b0080af904048bb0584a3ad74472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileCheckDist: 1
+  tileCheckDist: 2
   wallCheckYOffset: 0.5
   jumpVerticalForce: 6
   jumpHorizontalForce: 3
