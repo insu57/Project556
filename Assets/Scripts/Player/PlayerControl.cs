@@ -255,7 +255,7 @@ namespace Player
          
             rightArm.transform.localRotation = Quaternion.Euler(0, 0, targetAngle); //팔 각도 회전
             leftArm.transform.localRotation = Quaternion.Euler(0, 0, -angle - 85f);   
-            //캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준(SPUM 에셋 이슈)
+            //캐릭터 좌우가 캐릭터 기준이 아닌 사용자/제작자 시점이 기준(SPUM 에셋)
          }
       }
    

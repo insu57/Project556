@@ -19,7 +19,7 @@ MonoBehaviour:
   detectRange: 7
   viewRange: 6
   viewAngle: 90
-  chaseRange: 3
+  chaseRange: 5
   moveSpeed: 4
   accuracyMultiplier: 0.7
   fireRateMultiplier: 0.7
