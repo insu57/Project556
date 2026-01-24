@@ -15,19 +15,7 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
     //적 무장(EnemyWeapon) - 기본 적으로 탄 소지는 무한.(장탄은 무기따라). 탄의 종류(무기 탄종에서)는 적의 등급에 따라.
     //아이템 드랍은 무작위로?(소지 무기, 탄 + 장비 + 기타 아이템)
     //공격 - 적 유형에 따라...
-    private CharacterWeapon _enemyWeapon;
     private EnemyRangedWeaponControl _rangedWeaponControl;
-    
-    [Header("WeaponSprite")] [Space]
-    [SerializeField] private SpriteRenderer oneHandWeaponSprite;
-    [SerializeField] private SpriteRenderer twoHandWeaponSprite;
-    [SerializeField] private Transform oneHandMuzzleTransform;
-    [SerializeField] private Transform twoHandMuzzleTransform;
-    public Transform OneHandedMuzzle => oneHandMuzzleTransform;
-    public Transform TwoHandedMuzzle => twoHandMuzzleTransform;
-    
-    [SerializeField] private GameObject muzzleFlashVFX; //총구화염VFX -> 무기(+파츠)마다 다르게?
-    //[SerializeField] private AudioSource oneShotSource;
     public AudioSource OneShotSource => oneShotSource;
     public float LastFootstepTime { set; get;}
 
@@ -41,7 +29,7 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
     {
         base.Awake();
 
-        TryGetComponent(out _enemyWeapon);
+        //TryGetComponent(out _enemyWeapon);
         TryGetComponent(out _rangedWeaponControl);
     }
 
@@ -81,9 +69,9 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
     private void SetWeapon()
     {
         //수정 필요(EnemyData 무기 리스트에서 무작위로 뽑기)
-        _enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
-        _enemyWeapon.SetCharacterMultiplier(enemyData.AccuracyMultiplier, enemyData.FireRateMultiplier);
-        _rangedWeaponControl.Init(this , enemyData, _testWeapon);
+        //_enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
+        //_enemyWeapon.SetCharacterMultiplier(enemyData.AccuracyMultiplier, enemyData.FireRateMultiplier);
+        _rangedWeaponControl.Init(this , enemyData, _testWeapon, _testAmmo);
         
         var weaponData = _testWeapon;
         _currentWeaponData = _testWeapon;
@@ -91,35 +79,14 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
         
         EnemyAnimation.ChangeWeapon(weaponType);
 
-        if (weaponType is WeaponType.Pistol) //한손
-        {
-            oneHandWeaponSprite.sprite = weaponData.ItemSprite; //스프라이트 위치
-            oneHandWeaponSprite.enabled = true;
-            twoHandWeaponSprite.enabled = false;
-            oneHandMuzzleTransform.localPosition = weaponData.MuzzlePosition;
-            _enemyWeapon.SetMuzzleTransform(oneHandMuzzleTransform); //총구위치 설정
-            
-            muzzleFlashVFX.transform.SetParent(oneHandMuzzleTransform);
-        }
-        else //양손무기
-        {
-            twoHandWeaponSprite.sprite = weaponData.ItemSprite;
-            twoHandWeaponSprite.enabled = true;
-            oneHandWeaponSprite.enabled = false;
-            twoHandMuzzleTransform.localPosition = weaponData.MuzzlePosition;
-            _enemyWeapon.SetMuzzleTransform(twoHandMuzzleTransform);
-            
-            muzzleFlashVFX.transform.SetParent(twoHandMuzzleTransform);
-        }
-        muzzleFlashVFX.transform.localRotation = Quaternion.identity;
-        muzzleFlashVFX.transform.localPosition = weaponData.MuzzleFlashOffset;
+      
     }
 
-    private void Shoot(float angle)
+    private void Shoot()
     {
         //CharacterWeapon
-        
-        _enemyWeapon.Shoot(_isFlipped, angle);
+        AudioManager.Instance.PlaySFX(oneShotSource, SFXType.Weapon ,_currentWeaponData.ShootSFX);
+         
     }
     
     public float PlayReloadSFX()

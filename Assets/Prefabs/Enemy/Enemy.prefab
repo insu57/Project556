@@ -3969,6 +3969,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 008f2b60bc1e2b743b58af2e67b730d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyCenter: {fileID: 4631503866468436199}
+  leftArm: {fileID: 4667196176521444197}
+  rightArm: {fileID: 4109681157249926834}
+  oneHandWeaponSprite: {fileID: 2618033397748027438}
+  twoHandWeaponSprite: {fileID: 6411534915951603942}
+  oneHandMuzzleTransform: {fileID: 7651578952495895503}
+  twoHandMuzzleTransform: {fileID: 8873148635797782743}
+  muzzleFlashVFX: {fileID: 660302335001869140}
+  semiAutoFireRateMultiplier: 0.7
 --- !u!1 &5658831167836687330
 GameObject:
   m_ObjectHideFlags: 0

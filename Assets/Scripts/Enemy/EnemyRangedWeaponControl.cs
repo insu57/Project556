@@ -8,6 +8,7 @@ public class EnemyRangedWeaponControl : MonoBehaviour
     //적 유형별 명중률 보정 필요.
     //적 유형별 사격속도(약한적은 감소 보정)
     private IEnemyRangedContext _enemy; //EnemyBase의 데이터 접근용
+    private CharacterWeapon _enemyWeapon;
     private EnemyData _enemyData;
     private WeaponData _weaponData;
     private Transform _muzzleTransform;
@@ -19,14 +20,22 @@ public class EnemyRangedWeaponControl : MonoBehaviour
     private int _currentMagazine;
     private float _shootAngle;
     //Sprite Transform
+    [Header("Sprite")]
     [SerializeField] private Transform enemyCenter;
     [SerializeField] private Transform leftArm;
     [SerializeField] private Transform rightArm;
     private Vector3 _baseRArmPosition;
+    [SerializeField, Space] private SpriteRenderer oneHandWeaponSprite;
+    [SerializeField] private SpriteRenderer twoHandWeaponSprite;
+    [SerializeField] private Transform oneHandMuzzleTransform;
+    [SerializeField] private Transform twoHandMuzzleTransform;
+    [SerializeField] private GameObject muzzleFlashVFX;
     
-    public event Action<float> EnemyShoot;
+    [SerializeField, Space] private float semiAutoFireRateMultiplier = 0.7f;
+    
+    public event Action EnemyShoot; //angle
 
-    public void Init(IEnemyRangedContext enemy, EnemyData enemyData, WeaponData enemyWeaponData)
+    public void Init(IEnemyRangedContext enemy, EnemyData enemyData, WeaponData enemyWeaponData, AmmoData ammoData)
     {
         _enemy = enemy;
         _enemyData = enemyData;
@@ -37,6 +46,9 @@ public class EnemyRangedWeaponControl : MonoBehaviour
         
         _weaponData = enemyWeaponData;
 
+        TryGetComponent(out _enemyWeapon);
+        _enemyWeapon.ChangeWeaponData(enemyWeaponData, ammoData);
+        
         _fireMode = FireMode.SemiAuto;
 
         foreach (var fireMode in _weaponData.FireModes) //연사에 가까운 FireMode로
@@ -46,8 +58,14 @@ public class EnemyRangedWeaponControl : MonoBehaviour
                 _fireMode = fireMode;
             }
         }
+
+        if (_fireMode == FireMode.SemiAuto)//반자동이면 사격속도 감소
+        {
+            _fireRateMultiplier *= semiAutoFireRateMultiplier;
+        }
+        _enemyWeapon.SetCharacterMultiplier(_accuracyMultiplier, _fireRateMultiplier);
         
-        _muzzleTransform = _weaponData.IsOneHanded ? enemy.OneHandedMuzzle : enemy.TwoHandedMuzzle; //총구 위치 초기화
+        SetWeaponTransform(_weaponData);
         _currentMagazine = _weaponData.DefaultMagazineSize;
     }
 
@@ -56,53 +74,78 @@ public class EnemyRangedWeaponControl : MonoBehaviour
         _baseRArmPosition = rightArm.transform.localPosition;
     }
 
+    private void OnEnable()
+    {
+        
+    }
+
+    private void OnDisable()
+    {
+        
+    }
+
     private void Update()
     {
-        Attack();
+        
         //RotateArm();
     }
 
     private void LateUpdate()
     {
        RotateArm();
+       Attack();
+    }
+
+    private void SetWeaponTransform(WeaponData weaponData)
+    {
+        var weaponType = weaponData.WeaponType;
+        
+        if (weaponType is WeaponType.Pistol) //한손
+        {
+            oneHandWeaponSprite.sprite = weaponData.ItemSprite; //스프라이트 위치
+            oneHandWeaponSprite.enabled = true;
+            twoHandWeaponSprite.enabled = false;
+            oneHandMuzzleTransform.localPosition = weaponData.MuzzlePosition;
+            _enemyWeapon.SetMuzzleTransform(oneHandMuzzleTransform); //총구위치 설정
+            
+            muzzleFlashVFX.transform.SetParent(oneHandMuzzleTransform);
+        }
+        else //양손무기
+        {
+            twoHandWeaponSprite.sprite = weaponData.ItemSprite;
+            twoHandWeaponSprite.enabled = true;
+            oneHandWeaponSprite.enabled = false;
+            twoHandMuzzleTransform.localPosition = weaponData.MuzzlePosition;
+            _enemyWeapon.SetMuzzleTransform(twoHandMuzzleTransform);
+            
+            muzzleFlashVFX.transform.SetParent(twoHandMuzzleTransform);
+        }
+        muzzleFlashVFX.transform.localRotation = Quaternion.identity;
+        muzzleFlashVFX.transform.localPosition = weaponData.MuzzleFlashOffset;
     }
 
     private void Attack()
     {
         if(_currentMagazine <= 0) return; //장탄 체크
-        Vector2 dir;
-        if (_enemy.Target)
-        {
-            dir = _enemy.Target.position + new Vector3(0, 1, 0) - enemyCenter.position;
-        }
-        else dir = Vector2.zero;
-        
-        
-        //RotateArm();
-        
-        float shootAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        Debug.DrawRay(enemyCenter.position, dir, Color.red);
-        //shootAngle = Mathf.Clamp(shootAngle, -60f, 60f);
-        _shootAngle = shootAngle;
-        
-        Debug.Log(_shootAngle);
         
         switch (_fireMode)
         {
             case FireMode.SemiAuto:
+            case FireMode.FullAuto:
+            {
+                //EnemyShoot?.Invoke(_shootAngle);
+                bool isShoot =  _enemyWeapon.Shoot(_enemy.IsFlipped, _shootAngle);
+                if(!isShoot) break;
+                _currentMagazine--;
+                EnemyShoot?.Invoke();
+                
                 break;
+            }
             case FireMode._2Burst:
                 break;
             case FireMode._3Burst:
                 break;
-            case FireMode.FullAuto:
-            {
-                //
-                
-                
-                
-                break;
-            }
+            
         }
         
         //무기에 따라...연사-(점사?)-단발(가능한 경우 앞부터)
@@ -117,6 +160,17 @@ public class EnemyRangedWeaponControl : MonoBehaviour
 
     private void RotateArm()
     {
+        Vector2 dir;
+        if (_enemy.Target)
+        {
+            dir = _enemy.Target.position + new Vector3(0, 1, 0) - enemyCenter.position;
+        }
+        else dir = Vector2.zero;
+        
+        float shootAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        Debug.DrawRay(enemyCenter.position, dir, Color.red);
+        _shootAngle = shootAngle;
+        
         //팔 회전 추가 필요(기존 코드 이용)
         float angle = _shootAngle;
         
@@ -138,7 +192,6 @@ public class EnemyRangedWeaponControl : MonoBehaviour
         
         if (_weaponData.IsOneHanded)
         {
-            //angle = Mathf.Clamp(angle, -60f, 60f);
             rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);//팔 각도 할당
         }
         else
