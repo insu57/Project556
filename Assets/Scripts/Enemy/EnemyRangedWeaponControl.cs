@@ -127,14 +127,15 @@ public class EnemyRangedWeaponControl : MonoBehaviour
     private void Attack()
     {
         if(_currentMagazine <= 0) return; //장탄 체크
+        if(!_enemy.TargetInSight) return;
         
         switch (_fireMode)
         {
             case FireMode.SemiAuto:
             case FireMode.FullAuto:
             {
-                //EnemyShoot?.Invoke(_shootAngle);
                 bool isShoot =  _enemyWeapon.Shoot(_enemy.IsFlipped, _shootAngle);
+                //이상한 각도 이슈?
                 if(!isShoot) break;
                 _currentMagazine--;
                 EnemyShoot?.Invoke();
@@ -148,14 +149,6 @@ public class EnemyRangedWeaponControl : MonoBehaviour
             
         }
         
-        //무기에 따라...연사-(점사?)-단발(가능한 경우 앞부터)
-        //발사 시 이벤트 -> EnemyManager(HumanRanged)
-        
-        //연사 점사 단발 처리??
-        //if(_currentMagazine <= 0) return;
-        //EnemyShoot?.Invoke();
-        
-        
     }
 
     private void RotateArm()
@@ -166,14 +159,10 @@ public class EnemyRangedWeaponControl : MonoBehaviour
             dir = _enemy.Target.position + new Vector3(0, 1, 0) - enemyCenter.position;
         }
         else dir = Vector2.zero;
-        
-        float shootAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        Debug.DrawRay(enemyCenter.position, dir, Color.red);
-        _shootAngle = shootAngle;
-        
+   
         //팔 회전 추가 필요(기존 코드 이용)
-        float angle = _shootAngle;
-        
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        Debug.DrawRay(enemyCenter.position, dir, Color.red);
         
         if (_enemy.IsFlipped)
         {
@@ -187,15 +176,17 @@ public class EnemyRangedWeaponControl : MonoBehaviour
             }
             
         }
-        _shootAngle = Mathf.Clamp(_shootAngle, -60f, 60f);
-        
         
         if (_weaponData.IsOneHanded)
         {
+            _shootAngle = Mathf.Clamp(_shootAngle, -60f, 60f);
+            _shootAngle = angle;
             rightArm.transform.localRotation = Quaternion.Euler(0, 0, -angle);//팔 각도 할당
         }
         else
         {
+            _shootAngle = Mathf.Clamp(_shootAngle, -40f, 40f);
+            _shootAngle = angle;
             float t = Mathf.InverseLerp(-40f, 40f, -angle); //현재 조준각도의 보간치 
             float targetAngle = Mathf.Lerp(-90, 70, t); //조준각도의 보간치에 맞추어 RightArm 회전보간
 

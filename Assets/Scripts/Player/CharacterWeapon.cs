@@ -56,6 +56,7 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
         var palletCount = _currentAmmoData.IsBuckshot ? _currentAmmoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
         //사격 버그? 원인 미확인
         
+        //명중률 관련 버그 해결
         for (var i = 0; i < palletCount; i++)
         {
             float bulletAngle;

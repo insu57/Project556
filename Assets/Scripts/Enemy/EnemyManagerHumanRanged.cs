@@ -69,8 +69,6 @@ public class EnemyManagerHumanRanged : EnemyManagerBase, IHumanType, IEnemyRange
     private void SetWeapon()
     {
         //수정 필요(EnemyData 무기 리스트에서 무작위로 뽑기)
-        //_enemyWeapon.ChangeWeaponData(_testWeapon, _testAmmo);
-        //_enemyWeapon.SetCharacterMultiplier(enemyData.AccuracyMultiplier, enemyData.FireRateMultiplier);
         _rangedWeaponControl.Init(this , enemyData, _testWeapon, _testAmmo);
         
         var weaponData = _testWeapon;

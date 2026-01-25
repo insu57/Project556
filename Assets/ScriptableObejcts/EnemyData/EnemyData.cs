@@ -27,7 +27,7 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float accuracyMultiplier = 1f;
     [SerializeField] private float fireRateMultiplier = 1f;
     [SerializeField] private float reloadMultiplier = 1f;
-
+    [SerializeField] private float detectionDelay = 1f;
     [SerializeField, Space] private WeaponSet[] weapons;
     
     public string EnemyName => enemyName;
@@ -43,4 +43,5 @@ public class EnemyData : ScriptableObject
     public float AccuracyMultiplier => accuracyMultiplier;
     public float FireRateMultiplier => fireRateMultiplier;
     public float ReloadMultiplier => reloadMultiplier;
+    public float DetectionDelay => detectionDelay;
 }

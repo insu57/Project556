@@ -19,6 +19,10 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     public float ViewDistance { get; private set; }
     public float ViewAngle { get; private set; }
     public float ChaseRange { get; private set; }
+    
+    //[SerializeField] private float _detectionDelay = 0.5f;
+    private float _detectionDelay;
+    private float _detectionTimer = 0f;
 
     //감지거리, 시야거리, 사정거리 -> 구분 필요
     //이동과 사격은 별도...
@@ -83,6 +87,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         ViewDistance = enemyData.ViewRange;
         ViewAngle = enemyData.ViewAngle;
         ChaseRange = enemyData.ChaseRange;
+        _detectionDelay = enemyData.DetectionDelay;
 
         EnemyMoveControl.Init(enemyData.MoveSpeed, this, groundLayerMask);
     }
@@ -120,19 +125,22 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         }
     }
     
-    private void TargetFind() //코루틴 수정? 반응 속도는 어떤 방식으로? 코루틴 딜레이? 개선 필요.
+    private void TargetFind()
     {
-        _playerDetected = false;
-        _playerInSight = false;
-        _target = null;
+        //감지 방식 개선 필요.
         
         float maxDist = MathF.Max(ViewDistance, DetectRadius);
         
         Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, maxDist, playerLayerMask);
         //시야 범위 만큼
         
-        if (targetInRadius) //감지 시
+        if (targetInRadius) //최대 감지 범위 안
         {
+            _detectionTimer += Time.fixedDeltaTime;
+
+            if (!(_detectionTimer > _detectionDelay)) return;
+            
+            
             Transform target = targetInRadius.transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
             float distToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
@@ -178,7 +186,14 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
                     enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
             }
         }
-        
+        else
+        {
+            _detectionTimer = 0f;
+            _playerDetected = false;
+            _playerInSight = false;
+            
+            _target = null;
+        }
     }
 
     private void OnDrawGizmos() //감지범위, 시야 표시
