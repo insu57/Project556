@@ -21,9 +21,10 @@ MonoBehaviour:
   viewAngle: 90
   chaseRange: 5
   moveSpeed: 4
-  accuracyMultiplier: 0.7
-  fireRateMultiplier: 0.7
+  accuracyMultiplier: 0.5
+  fireRateMultiplier: 0.5
   reloadMultiplier: 0.7
+  detectionDelay: 0.7
   weapons:
   - weaponData: {fileID: 11400000, guid: 4edd6477f6f6ec343beb8a5c1db1d5ed, type: 2}
     ammoData:

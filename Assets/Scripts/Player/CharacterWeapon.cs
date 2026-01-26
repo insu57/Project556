@@ -52,38 +52,42 @@ public class CharacterWeapon : MonoBehaviour //무기 사격(장탄 관련은 �
         _lastShotTime = Time.time;
         
         OnShowMuzzleFlash?.Invoke(); //show flash
-
-        var palletCount = _currentAmmoData.IsBuckshot ? _currentAmmoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
         //사격 버그? 원인 미확인
+        var palletCount = _currentAmmoData.IsBuckshot ? _currentAmmoData.PelletCount : 1; //벅샷이라면 해당 탄의 펠릿 수 만큼 발사
+        var damage = _currentAmmoData.AmmoDamage * _currentWeaponData.DamageMultiplier; //탄환 데미지 * 무기 피해량 배수
+        var speed = _currentAmmoData.ProjectileSpeed * _currentWeaponData.MuzzleVelocityMultiplier; //탄환 속도 * 무기 총구 속도 배수
+        var piercing = _currentAmmoData.AmmoPiercing;
+        var ammoCategory = _currentAmmoData.AmmoCategory;
+        
+        var poolManager = ObjectPoolingManager.Instance;
         
         //명중률 관련 버그 해결
         for (var i = 0; i < palletCount; i++)
         {
-            float bulletAngle;
+            float finalAngle;
             Vector2 direction;
         
             float offsetAngle = Random.Range(-_maxDeviationAngle, _maxDeviationAngle); //랜덤 탄퍼짐 각도
-        
-            shootAngle += offsetAngle;
+            float currentAngle = shootAngle + offsetAngle;
+            //shootAngle += offsetAngle;
             if (isFlipped)
             {
                 //Flip이면 x반대방향으로
                 //발사 각도 연산
-                direction = 
-                    new Vector2(-Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
-                bulletAngle = 180 - shootAngle;
+                float rad = currentAngle * Mathf.Deg2Rad;
+                direction = new Vector2(-Mathf.Cos(rad), Mathf.Sin(rad));
+                finalAngle = 180 - currentAngle;
             }
             else
             {
-                direction = 
-                    new Vector2(Mathf.Cos(shootAngle*Mathf.Deg2Rad), Mathf.Sin(shootAngle*Mathf.Deg2Rad));
-                bulletAngle = shootAngle;
+                float rad =  currentAngle * Mathf.Deg2Rad;
+                direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+                finalAngle = currentAngle;
             }
-            Bullet bullet = ObjectPoolingManager.Instance.GetBullet(_currentAmmoData.AmmoCategory);//Pool에서 Get(탄종에 따라)
-            var finalDamage = _currentAmmoData.AmmoDamage * _currentWeaponData.DamageMultiplier; //탄환 데미지 * 무기 피해량 배수
-            var finalSpeed = _currentAmmoData.ProjectileSpeed * _currentWeaponData.MuzzleVelocityMultiplier; //탄환 속도 * 무기 총구 속도 배수
-            bullet.Init(finalSpeed, finalDamage, _currentAmmoData.AmmoPiercing);
-            bullet.ShootBullet(bulletAngle, direction, _muzzleTransform);
+            var bullet = poolManager.GetBullet(ammoCategory);//Pool에서 Get(탄종에 따라)
+            
+            bullet.Init(speed, damage, piercing);
+            bullet.ShootBullet(finalAngle, direction, _muzzleTransform);
         }
 
         if (_currentWeaponData.WeaponActionType == WeaponActionType.PumpAction)

@@ -48,9 +48,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     protected EnemyBaseState CurrentState;
     protected EnemyIdleState IdleState;
     protected EnemyChaseState ChaseState;
-    //protected EnemyAttackState AttackState;
-    //적 유형에 따라 다른 타겟 감지 시 반응
-    //(근접 -> 타겟 추적, 원거리 -> 추적거리 안 까지 이동 후 타겟사격) ChaseState(ChaseRange까지 이동) -> 사격(Attack)
+   
     //타겟을 놓치거나(시야 밖으로 이동, 방해물 가려지는 등 시야에서 사라질 시), 방해 받으면?(수류탄 등으로) 
     
     //감지 or 시야범위 이내 -> 추적(추적거리 이내까지 이동)이동하며 공격?(탄 전부 쓰면 장전) 이동/공격은 별도로! 
@@ -133,69 +131,75 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         
         Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, maxDist, playerLayerMask);
         //시야 범위 만큼
-        
-        if (targetInRadius) //최대 감지 범위 안
+
+        if (!targetInRadius)
         {
-            _detectionTimer += Time.fixedDeltaTime;
+            ResetDetection();
+            return;
+        }
+        
+        _detectionTimer += Time.fixedDeltaTime;
 
-            if (!(_detectionTimer > _detectionDelay)) return;
+        if (!(_detectionTimer > _detectionDelay)) return;
             
             
-            Transform target = targetInRadius.transform;
-            Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
-            float distToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
-            //
-            if (distToTarget < DetectRadius) //감지 범위 이내
-            {
-                //감지 범위 내부 -> 소리 감지로 수정 예정
-                //State 변경
-                _playerDetected = true;
-                _target = target;
+        Transform target = targetInRadius.transform;
+        Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
+        float distToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
+            
+        if (distToTarget < DetectRadius) //감지 범위 이내
+        {
+            //감지 범위 내부 -> 소리 감지로 수정 예정
+            //State 변경
+            _playerDetected = true;
+            _target = target;
                 
-                //temp
-                ChangeState(ChaseState);
-            }
+            //ChangeState(ChaseState);
+        }
 
-            Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
-            if(_isFlipped) facingDir = -facingDir;
+        Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
+        if(_isFlipped) facingDir = -facingDir;
 
-            if (Vector2.Angle(facingDir, dirToTarget) < ViewAngle / 2) //각도 이내
+        if (Vector2.Angle(facingDir, dirToTarget) < ViewAngle / 2) //각도 이내
+        {
+            if (!Physics2D.Raycast(transform.position, dirToTarget, 
+                    distToTarget, obstacleLayerMask))
             {
-                if (!Physics2D.Raycast(transform.position, dirToTarget, 
-                        distToTarget, obstacleLayerMask))
-                {
-                    _playerInSight = true;
-                    _target = target;
+                _playerInSight = true;
+                _target = target;
                     
-                    //temp
-                    ChangeState(ChaseState);
-                }
-            }
-    
-            //감지 시야 -> Flip여부 확인 필요...
-
-            if (_playerDetected || _playerInSight)
-            {
-                TargetDist = Vector3.Distance(transform.position, target.position);
-
-                _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
-                float xScale = enemySprite.transform.localScale.x;
-                if (_isFlipped) xScale = Mathf.Abs(xScale) * -1;
-                else xScale =  Mathf.Abs(xScale) * 1;
-                enemySprite.transform.localScale = new Vector3(xScale, 
-                    enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
+                //ChangeState(ChaseState);
             }
         }
-        else
+
+        if (_playerDetected || _playerInSight)
         {
-            _detectionTimer = 0f;
-            _playerDetected = false;
-            _playerInSight = false;
-            
-            _target = null;
+            _detectionTimer += Time.fixedDeltaTime;
+         
+            if(_detectionTimer < _detectionDelay) return;
+            ChangeState(ChaseState);
+            TargetDist = Vector3.Distance(transform.position, target.position);
+
+            _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
+            float xScale = enemySprite.transform.localScale.x;
+            if (_isFlipped) xScale = Mathf.Abs(xScale) * -1;
+            else xScale =  Mathf.Abs(xScale) * 1;
+            enemySprite.transform.localScale = new Vector3(xScale, 
+                enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
         }
     }
 
+    private void ResetDetection()
+    {
+        // _detectionTimer = 0f;
+        _detectionTimer -= Time.fixedDeltaTime;
+        if (_detectionTimer <= 0f) _detectionTimer = 0f;
+        _playerDetected = false;
+        _playerInSight = false;
+            
+        _target = null;
+    }
+    
     private void OnDrawGizmos() //감지범위, 시야 표시
     {
         //감지 거리 -> 소리감지??(플레이어 걷기, 달리기, 사격 등 소음 발생, 소음마다 거리가 다름. 그 소리가 감지 범위 내라면 경계? 위치로 이동)
