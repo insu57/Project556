@@ -141,7 +141,10 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         _detectionTimer += Time.fixedDeltaTime;
 
         if (!(_detectionTimer > _detectionDelay)) return;
-            
+        //수정 필요...
+        //시야거리 >= 감지범위 제한 
+        //감지 먼저 -> 시야 회전(반대이므로)
+        //시야 감지 -> 감지시간시작...
             
         Transform target = targetInRadius.transform;
         Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
@@ -150,11 +153,15 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         if (distToTarget < DetectRadius) //감지 범위 이내
         {
             //감지 범위 내부 -> 소리 감지로 수정 예정
-            //State 변경
             _playerDetected = true;
             _target = target;
                 
-            //ChangeState(ChaseState);
+            _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
+            float xScale = enemySprite.transform.localScale.x;
+            if (_isFlipped) xScale = Mathf.Abs(xScale) * -1;
+            else xScale =  Mathf.Abs(xScale) * 1;
+            enemySprite.transform.localScale = new Vector3(xScale, 
+                enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
         }
 
         Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
@@ -180,12 +187,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
             ChangeState(ChaseState);
             TargetDist = Vector3.Distance(transform.position, target.position);
 
-            _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
-            float xScale = enemySprite.transform.localScale.x;
-            if (_isFlipped) xScale = Mathf.Abs(xScale) * -1;
-            else xScale =  Mathf.Abs(xScale) * 1;
-            enemySprite.transform.localScale = new Vector3(xScale, 
-                enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
+            
         }
     }
 

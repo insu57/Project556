@@ -18,7 +18,7 @@ public class EnemyData : ScriptableObject
     [SerializeField] private int armorAmount; //방어도
     //방어도 - 체력
     //무기 - 피해량, 방어관통력, 치명확률
-    
+    [Tooltip("시야 범위보다 클 수 없음")]
     [SerializeField] private float detectRange = 2f; //감지범위
     [SerializeField] private float viewRange = 4f; //시야범위
     [SerializeField] private float viewAngle = 90; //시야각도
@@ -34,9 +34,10 @@ public class EnemyData : ScriptableObject
     public float HealthAmount => healthAmount;
     public bool IsHuman => isHuman;
     public int ArmorAmount => armorAmount;
-    
-    public float DetectRange => detectRange;
-    public float ViewRange => viewRange;
+
+    public float DetectRange => detectRange; 
+
+    public float ViewRange => viewRange; 
     public float ViewAngle => viewAngle;
     public float ChaseRange => chaseRange;
     public float MoveSpeed => moveSpeed;
@@ -44,4 +45,12 @@ public class EnemyData : ScriptableObject
     public float FireRateMultiplier => fireRateMultiplier;
     public float ReloadMultiplier => reloadMultiplier;
     public float DetectionDelay => detectionDelay;
+
+    private void OnValidate()
+    {
+        if (detectRange > viewRange)//감지 범위 제한(감지범위 <= 시야범위)
+        {
+            detectRange = viewRange;
+        }
+    }
 }
