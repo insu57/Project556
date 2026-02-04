@@ -127,7 +127,7 @@ public class EnemyRangedWeaponControl : MonoBehaviour
     private void Attack()
     {
         if(_currentMagazine <= 0) return; //장탄 체크
-        if(!_enemy.TargetInSight) return;
+        if(!_enemy.TargetDetected) return;
         
         switch (_fireMode)
         {

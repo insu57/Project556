@@ -6,4 +6,5 @@ public interface IEnemyRangedContext
     public float TargetDist { get; }
     public bool IsFlipped { get; }
     public bool TargetInSight { get; }
+    public bool TargetDetected { get; }
 }

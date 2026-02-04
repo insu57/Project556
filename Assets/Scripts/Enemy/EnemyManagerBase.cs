@@ -27,12 +27,12 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     //감지거리, 시야거리, 사정거리 -> 구분 필요
     //이동과 사격은 별도...
     
-    protected bool _playerDetected = false;
-    protected bool _playerInSight = false;
+    protected bool _targetDetected = false;
+    protected bool _targetInSight = false;
     protected Transform _target;
 
-    public bool TargetDetected => _playerDetected;
-    public bool TargetInSight => _playerInSight;
+    public bool TargetDetected => _targetDetected;
+    public bool TargetInSight => _targetInSight;
     public Transform Target => _target;
     public float TargetDist { private set; get; }
 
@@ -126,11 +126,10 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
     private void TargetFind()
     {
         //감지 방식 개선 필요.
+
+        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, ViewDistance, playerLayerMask);
         
-        float maxDist = MathF.Max(ViewDistance, DetectRadius);
-        
-        Collider2D targetInRadius = Physics2D.OverlapCircle(transform.position, maxDist, playerLayerMask);
-        //시야 범위 만큼
+        //if(!_targetInSight) ResetDetection();
 
         if (!targetInRadius)
         {
@@ -138,22 +137,16 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
             return;
         }
         
-        _detectionTimer += Time.fixedDeltaTime;
-
-        if (!(_detectionTimer > _detectionDelay)) return;
-        //수정 필요...
-        //시야거리 >= 감지범위 제한 
-        //감지 먼저 -> 시야 회전(반대이므로)
-        //시야 감지 -> 감지시간시작...
-            
         Transform target = targetInRadius.transform;
         Vector3 dirToTarget = (target.position - transform.position).normalized; //방향
         float distToTarget = Vector3.Distance(transform.position, target.position); //타겟과의 거라
-            
-        if (distToTarget < DetectRadius) //감지 범위 이내
+        
+        if (!_targetInSight)
         {
+            if (!(distToTarget < DetectRadius)) return; 
+            //감지 범위 이내
             //감지 범위 내부 -> 소리 감지로 수정 예정
-            _playerDetected = true;
+            //_playerDetected = true;
             _target = target;
                 
             _isFlipped = target.position.x < transform.position.x;//기본 방향(오른쪽)이 아니라 왼쪽이라면 Flip
@@ -163,7 +156,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
             enemySprite.transform.localScale = new Vector3(xScale, 
                 enemySprite.transform.localScale.y, enemySprite.transform.localScale.z);
         }
-
+        
         Vector2 facingDir = transform.right; //Flip에 따라 변경 필요
         if(_isFlipped) facingDir = -facingDir;
 
@@ -172,23 +165,29 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
             if (!Physics2D.Raycast(transform.position, dirToTarget, 
                     distToTarget, obstacleLayerMask))
             {
-                _playerInSight = true;
+                _targetInSight = true;
                 _target = target;
-                    
+                
+                _detectionTimer += Time.fixedDeltaTime;
+                ChangeState(ChaseState);
+                
+                if(_detectionTimer < _detectionDelay) return;
+
+                _targetDetected = true;
+                TargetDist = Vector3.Distance(transform.position, target.position);
+                
+                
                 //ChangeState(ChaseState);
             }
         }
-
-        if (_playerDetected || _playerInSight)
-        {
-            _detectionTimer += Time.fixedDeltaTime;
-         
-            if(_detectionTimer < _detectionDelay) return;
-            ChangeState(ChaseState);
-            TargetDist = Vector3.Distance(transform.position, target.position);
-
-            
-        }
+        
+        
+        //수정 필요...
+        //시야거리 >= 감지범위 제한 
+        //감지 먼저 -> 시야 회전(반대이므로)
+        //시야 감지 -> 감지시간시작...
+        //1.시야 방향에 바로 감지시간으로
+        //2.반대 -> 회전 후 감지시간
     }
 
     private void ResetDetection()
@@ -196,8 +195,8 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         // _detectionTimer = 0f;
         _detectionTimer -= Time.fixedDeltaTime;
         if (_detectionTimer <= 0f) _detectionTimer = 0f;
-        _playerDetected = false;
-        _playerInSight = false;
+        _targetDetected = false;
+        _targetInSight = false;
             
         _target = null;
     }
@@ -229,7 +228,7 @@ public abstract class EnemyManagerBase : MonoBehaviour, IDamageable, IEnemyConte
         Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMin * dist);
         Gizmos.DrawLine(transform.position, transform.position + viewAngleVectorMid * dist);
 
-        if (_playerDetected || _playerInSight)
+        if (_targetDetected || _targetInSight)
         {
             Gizmos.color = Color.red;
             if (_target)
